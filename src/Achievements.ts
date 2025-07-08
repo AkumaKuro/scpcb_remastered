@@ -73,7 +73,7 @@ for (let i of range(MAXACHIEVEMENTS)) {
 var AchvLocked = LoadImage_Strict("GFX/menu/achievements/achvlocked.jpg")
 AchvLocked = ResizeImage2(AchvLocked,ImageWidth(AchvLocked)*GraphicHeight/768.0,ImageHeight(AchvLocked)*GraphicHeight/768.0)
 
-function GiveAchievement(achvname: int, showMessage: boolean = true) {
+export function GiveAchievement(achvname: int, showMessage: boolean = true) {
 	if (Achievements[achvname] != true) {
 		Achievements[achvname] = true
 		if (AchvMSGenabled && showMessage) {
@@ -84,7 +84,7 @@ function GiveAchievement(achvname: int, showMessage: boolean = true) {
 	}
 }
 
-function AchievementTooltip(achvno: int) {
+export function AchievementTooltip(achvno: int) {
     let scale: float = GraphicHeight/768.0
     
     AASetFont(Font3)
@@ -171,7 +171,7 @@ function UpdateAchievementMsg() {
 			DrawFrame(x,y,width,height)
 			Color(0,0,0)
 			Rect(x+10*scale,y+10*scale,64*scale,64*scale,true)
-			DrawImage(AchvIMG(amsg.achvID),x+10*scale,y+10*scale)
+			DrawImage(AchvIMG[amsg.achvID],x+10*scale,y+10*scale)
 			Color(50,50,50)
 			Rect(x+10*scale,y+10*scale,64*scale,64*scale,false)
 			Color(255,255,255)

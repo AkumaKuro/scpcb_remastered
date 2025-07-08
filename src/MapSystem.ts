@@ -134,31 +134,31 @@ function LoadWorld(file: string, rt: RoomTemplates) {
 				z = EntityZ(node)*RoomScale
 				
 				if (x != 0 || y != 0 || z != 0) {
-					range = Float(KeyValue(node,"range","1"))/2000.0
-					lcolor = KeyValue(node,"color","255 255 255")
-					intensity = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
-					r=Int(Piece(lcolor,1," "))*intensity
-					g=Int(Piece(lcolor,2," "))*intensity
-					b=Int(Piece(lcolor,3," "))*intensity
+					let trange = Float(KeyValue(node,"range","1"))/2000.0
+					let lcolor = KeyValue(node,"color","255 255 255")
+					let intensity = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
+					let r=Int(Piece(lcolor,1," "))*intensity
+					let g=Int(Piece(lcolor,2," "))*intensity
+					let b=Int(Piece(lcolor,3," "))*intensity
 					
-					AddTempLight(rt, x,y,z, 2, range, r,g,b)
+					AddTempLight(rt, x,y,z, 2, trange, r,g,b)
 				}
 			case "spotlight":
 				x = EntityX(node)*RoomScale
 				y = EntityY(node)*RoomScale
 				z = EntityZ(node)*RoomScale
 				if (x != 0 || y != 0 || z != 0) {
-					range = Float(KeyValue(node,"range","1"))/700.0
-					lcolor = KeyValue(node,"color","255 255 255")
-					intensity = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
-					r = Int(Piece(lcolor,1," "))*intensity
-					g = Int(Piece(lcolor,2," "))*intensity
-					b = Int(Piece(lcolor,3," "))*intensity
+					let trange = Float(KeyValue(node,"range","1"))/700.0
+					let lcolor = KeyValue(node,"color","255 255 255")
+					let intensity = Min(Float(KeyValue(node,"intensity","1.0"))*0.8,1.0)
+					let r = Int(Piece(lcolor,1," "))*intensity
+					let g = Int(Piece(lcolor,2," "))*intensity
+					let b = Int(Piece(lcolor,3," "))*intensity
 					
-					let lt: LightTemplates = AddTempLight(rt, x,y,z, 3, range, r,g,b)
-					angles = KeyValue(node,"angles","0 0 0")
-					pitch = Piece(angles,1," ")
-					yaw = Piece(angles,2," ")
+					let lt: LightTemplates = AddTempLight(rt, x,y,z, 3, trange, r,g,b)
+					let angles = KeyValue(node,"angles","0 0 0")
+					let pitch = Piece(angles,1," ")
+					let yaw = Piece(angles,2," ")
 					lt.pitch = pitch
 					lt.yaw = yaw
 					
@@ -237,22 +237,22 @@ function GetTextureFromCache(name: string): int {
 }
 
 function GetBumpFromCache(name: string): int {
-	for (tc of Materials.each) {
+	for (let tc of Materials.each) {
 		if (tc.name == name) {return tc.Bump}
 	}
 	return 0
 }
 
-function GetCache(name: string): Materials {
-	for (tc of Materials.each) {
+function GetCache(name: string): Materials | null {
+	for (let tc of Materials.each) {
 		if (tc.name == name) {return tc}
 }
-	return Null
+	return null
 }
 
 function AddTextureToCache(texture: int) {
 	let tc: Materials = GetCache(StripPath(TextureName(texture)))
-	if (tc == Null) {
+	if (!tc) {
 		tc = new Materials()
 		tc.name=StripPath(TextureName(texture))
 		if (BumpEnabled) {
@@ -323,11 +323,22 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 	
 	//read the file
 	let f: int=ReadFile(file)
-	let i: int,j: int,k: int,x: float,y: float,z: float,yaw: float
+	let i: int
+	let j: int
+	let k: int
+	let x: float
+	let y: float
+	let z: float
+	let yaw: float
 	let vertex: int
-	let temp1i: int,temp2i: int,temp3i: int
-	let temp1: float,temp2: float,temp3: float
-	let temp1s$, temp2s$
+	let temp1i: int
+	let temp2i: int
+	let temp3i: int
+	let temp1: float
+	let temp2: float
+	let temp3: float
+	let temp1s: string
+	let temp2s: string
 	
 	let collisionMeshes: int = CreatePivot()
 	
@@ -343,32 +354,37 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 	if (f == 0) {
 		RuntimeError ("Error reading file "+Chr(34)+file+Chr(34))
 	}
-	let isRMesh$ = ReadString(f)
+	let isRMesh: string = ReadString(f)
 	if (isRMesh == "RoomMesh") {
 		
 	} else if (isRMesh == "RoomMesh.HasTriggerBox") {
-		hasTriggerBox = True
+		hasTriggerBox = true
 	} else {
 		RuntimeError (Chr(34)+file+Chr(34)+" is !RMESH ("+isRMesh+")")
 	}
 	
 	file=StripFilename(file)
 	
-	let count: int,count2: int
+	let count: int
+	let count2: int
 	
 	//drawn meshes
-	let Opaque: int,Alpha: int
+	let Opaque: int
+	let Alpha: int
 	
 	Opaque=CreateMesh()
 	Alpha=CreateMesh()
 	
 	count = ReadInt(f)
 	let childMesh: int
-	let surf: int,tex: int[2],brush: int
+	let surf: int
+	let tex: int[] = new Array(2)
+	let brush: int
 	
 	let isAlpha: int
 	
-	let u: float,v: float
+	let u: float
+	let v: float
 	
 	for (i of range(1, count + 1)) { //drawn mesh
 		childMesh=CreateMesh()
@@ -1098,7 +1114,7 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 	}
 	
 	fr.Forest_Pivot=CreatePivot()
-	PositionEntity (fr.Forest_Pivot,x,y,z,True)
+	PositionEntity (fr.Forest_Pivot,x,y,z,true)
 	
 	//load assets
 	
@@ -1222,7 +1238,7 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 					//2, 5, 8
 					let it: Items = Null
 					if ((ty % 3) == 2 && itemPlaced[Floor(ty/3)] == False) {
-						itemPlaced[Floor(ty/3)]=True
+						itemPlaced[Floor(ty/3)]=true
 						it.Items = CreateItem("Log #"+Int(Floor(ty/3)+1), "paper", 0,0.5,0)
 						EntityType(it.collider, HIT_ITEM)
 						EntityParent(it.collider, tile_entity)
@@ -1252,26 +1268,26 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 											EntityFX(d, 1)
 										}
 										
-										ScaleEntity(detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True)
-										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True)
+										ScaleEntity(detail_entity,tempf2*1.1,tempf2,tempf2*1.1,true)
+										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),true)
 										
-										RotateEntity(detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True)
+										RotateEntity(detail_entity,Rnd(-5,5),Rnd(360.0),0.0,true)
 										
 									case 7: //add a rock
 										detail_entity=CopyEntity(fr.DetailMesh[2])
 										tempf2=Rnd(0.01,0.012)
 										
-										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True)
+										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),true)
 										
 										EntityFX(detail_entity, 1)
 										
-										RotateEntity(detail_entity,0.0,Rnd(360.0),0.0,True)
+										RotateEntity(detail_entity,0.0,Rnd(360.0),0.0,true)
 									case 6: //add a stump
 										detail_entity=CopyEntity(fr.DetailMesh[4])
 										tempf2=Rnd(0.1,0.12)
-										ScaleEntity(detail_entity,tempf2,tempf2,tempf2,True)
+										ScaleEntity(detail_entity,tempf2,tempf2,tempf2,true)
 										
-										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True)
+										PositionEntity(detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),true)
 								}
 								
 								EntityFX(detail_entity, 1)
@@ -1283,7 +1299,7 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 					
 					TurnEntity(tile_entity, 0, angle, 0)
 					
-					PositionEntity(tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),True)
+					PositionEntity(tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),true)
 					
 					ScaleEntity(tile_entity,tempf1,tempf1,tempf1)
 					EntityType(tile_entity,HIT_MAP)
@@ -1313,20 +1329,20 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 				ScaleEntity(fr.DetailEntities[i],RoomScale,RoomScale,RoomScale)
 				
 				fr.Door[i] = CopyEntity(r.Objects[3])
-				PositionEntity(fr.Door[i],72*RoomScale,32.0*RoomScale,0,True)
+				PositionEntity(fr.Door[i],72*RoomScale,32.0*RoomScale,0,true)
 				RotateEntity(fr.Door[i], 0,180,0)
-				ScaleEntity(fr.Door[i],48*RoomScale,45*RoomScale,48*RoomScale,True)
+				ScaleEntity(fr.Door[i],48*RoomScale,45*RoomScale,48*RoomScale,true)
 				EntityParent(fr.Door[i],fr.DetailEntities[i])
 				
 				frame = CopyEntity(r.Objects[2],fr.Door[i])
-				PositionEntity(frame,0,32.0*RoomScale,0,True)
-				ScaleEntity(frame,48*RoomScale,45*RoomScale,48*RoomScale,True)
+				PositionEntity(frame,0,32.0*RoomScale,0,true)
+				ScaleEntity(frame,48*RoomScale,45*RoomScale,48*RoomScale,true)
 				EntityParent(frame,fr.DetailEntities[i])
 				
 				EntityType(fr.DetailEntities[i],HIT_MAP)
 				EntityPickMode(fr.DetailEntities[i],2)
 				
-				PositionEntity(fr.DetailEntities[i],x+(tx*tile_size),y,z+(ty*tile_size)+(tile_size/2)-(tile_size*i),True)
+				PositionEntity(fr.DetailEntities[i],x+(tx*tile_size),y,z+(ty*tile_size)+(tile_size/2)-(tile_size*i),true)
 				RotateEntity(fr.DetailEntities[i],0,180*i,0)
 				
 				EntityParent(fr.DetailEntities[i],fr.Forest_Pivot)
@@ -1372,7 +1388,7 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 	}
 	
 	fr.Forest_Pivot=CreatePivot()
-	PositionEntity (fr.Forest_Pivot,x,y,z,True)
+	PositionEntity (fr.Forest_Pivot,x,y,z,true)
 	
 	//load assets
 	
@@ -1442,7 +1458,7 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 					//2, 5, 8
 					let it: Items = Null
 					if ((ty % 3) == 2 && itemPlaced[Floor(ty/3)] == False) {
-						itemPlaced[Floor(ty/3)]=True
+						itemPlaced[Floor(ty/3)]=true
 						it.Items = CreateItem("Log : float"+Int(Floor(ty/3)+1), "paper", 0,0.5,0)
 						EntityType(it.collider, HIT_ITEM)
 						EntityParent(it.collider, tile_entity)
@@ -1472,26 +1488,26 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 											EntityFX (d, 1)
 										}
 										
-										ScaleEntity (detail_entity,tempf2*1.1,tempf2,tempf2*1.1,True)
-										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),True)
+										ScaleEntity (detail_entity,tempf2*1.1,tempf2,tempf2*1.1,true)
+										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-Rnd(3.0,3.2),ly*tempf4-(tempf3/2.0),true)
 										
-										RotateEntity (detail_entity,Rnd(-5,5),Rnd(360.0),0.0,True)
+										RotateEntity (detail_entity,Rnd(-5,5),Rnd(360.0),0.0,true)
 										
 									case 7: //add a rock
 										detail_entity=CopyEntity(fr.DetailMesh[2])
 										tempf2=Rnd(0.01,0.012)
 										
-										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True)
+										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),true)
 										
 										EntityFX (detail_entity, 1)
 										
-										RotateEntity (detail_entity,0.0,Rnd(360.0),0.0,True)
+										RotateEntity (detail_entity,0.0,Rnd(360.0),0.0,true)
 									case 6: //add a stump
 										detail_entity=CopyEntity(fr.DetailMesh[4])
 										tempf2=Rnd(0.1,0.12)
-										ScaleEntity (detail_entity,tempf2,tempf2,tempf2,True)
+										ScaleEntity (detail_entity,tempf2,tempf2,tempf2,true)
 										
-										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),True)
+										PositionEntity (detail_entity,lx*tempf4-(tempf3/2.0),ColorRed()*0.03-1.3,ly*tempf4-(tempf3/2.0),true)
 								}
 								
 								if (detail_entity != 0) {
@@ -1505,7 +1521,7 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 					
 					TurnEntity (tile_entity, 0, angle, 0)
 					
-					PositionEntity (tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),True)
+					PositionEntity (tile_entity,x+(tx*tile_size),y,z+(ty*tile_size),true)
 					
 					DebugLog ("tile_entity: "+(x+(tx*tile_size))+"|"+(y)+"|"+(z+(ty*tile_size)))
 					
@@ -1531,20 +1547,20 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 							ScaleEntity(fr.DetailEntities[i],RoomScale,RoomScale,RoomScale)
 							
 							fr.Door[i] = CopyEntity(r.Objects[3])
-							PositionEntity(fr.Door[i],72*RoomScale,32.0*RoomScale,0,True)
+							PositionEntity(fr.Door[i],72*RoomScale,32.0*RoomScale,0,true)
 							RotateEntity(fr.Door[i], 0,180,0)
-							ScaleEntity(fr.Door[i],48*RoomScale,45*RoomScale,48*RoomScale,True)
+							ScaleEntity(fr.Door[i],48*RoomScale,45*RoomScale,48*RoomScale,true)
 							EntityParent(fr.Door[i],fr.DetailEntities[i])
 							
 							let frame = CopyEntity(r.Objects[2],fr.Door[i])
-							PositionEntity(frame,0,32.0*RoomScale,0,True)
-							ScaleEntity(frame,48*RoomScale,45*RoomScale,48*RoomScale,True)
+							PositionEntity(frame,0,32.0*RoomScale,0,true)
+							ScaleEntity(frame,48*RoomScale,45*RoomScale,48*RoomScale,true)
 							EntityParent(frame,fr.DetailEntities[i])
 							
 							EntityType(fr.DetailEntities[i],HIT_MAP)
 							EntityPickMode(fr.DetailEntities[i],2)
 							
-							PositionEntity(fr.DetailEntities[i],x+(tx*tile_size),y,z+(ty*tile_size),True)
+							PositionEntity(fr.DetailEntities[i],x+(tx*tile_size),y,z+(ty*tile_size),true)
 							RotateEntity(fr.DetailEntities[i],0,angle+180,0)
 							MoveEntity(fr.DetailEntities[i],0,0,-6)
 							
@@ -1626,12 +1642,12 @@ function UpdateForest(fr: Forest,ent: int) {
 	//local variables
 	let tx: int
 	let ty: int
-	if (Abs(EntityY(ent,True)-EntityY(fr.Forest_Pivot,True))<12.0) {
+	if (Abs(EntityY(ent,true)-EntityY(fr.Forest_Pivot,true))<12.0) {
 		for (tx of range(gridsize)) {
 			for (ty of range(gridsize)) {
 				if (fr.TileEntities[tx+(ty*gridsize)] != 0) {
-					if (Abs(EntityX(ent,True)-EntityX(fr.TileEntities[tx+(ty*gridsize)],True))<20.0) {
-						if (Abs(EntityZ(ent,True)-EntityZ(fr.TileEntities[tx+(ty*gridsize)],True))<20.0) {
+					if (Abs(EntityX(ent,true)-EntityX(fr.TileEntities[tx+(ty*gridsize)],true))<20.0) {
+						if (Abs(EntityZ(ent,true)-EntityZ(fr.TileEntities[tx+(ty*gridsize)],true))<20.0) {
 							ShowEntity(fr.TileEntities[tx+(ty*gridsize)])
 						} else {
 							HideEntity(fr.TileEntities[tx+(ty*gridsize)])
@@ -1683,7 +1699,7 @@ class RoomTemplates {
 	
 	UseLightCones: int
 	
-	DisableOverlapCheck: int = True
+	DisableOverlapCheck: int = true
 	
 	MinX: float
 	MinY: float
@@ -1831,9 +1847,9 @@ export var Sky
 
 export var HideDistance: float = 15.0
 
-export var SecondaryLightOn: float = True
-export var PrevSecondaryLightOn: float = True
-export var RemoteDoorOn = True
+export var SecondaryLightOn: float = true
+export var PrevSecondaryLightOn: float = true
+export var RemoteDoorOn = true
 export var Contained106 = False
 
 export class Rooms {
@@ -1917,9 +1933,9 @@ function UpdateGrid(grid: Grids) {
 	for (tx of range(gridsz)) {
 		for (ty of range(gridsz)) {
 			if (grid.Entities[tx+(ty*gridsz)] != 0) {
-				if (Abs(EntityY(Collider,True)-EntityY(grid.Entities[tx+(ty*gridsz)],True))>4.0) {Exit()}
-				if (Abs(EntityX(Collider,True)-EntityX(grid.Entities[tx+(ty*gridsz)],True))<HideDistance) {
-					if (Abs(EntityZ(Collider,True)-EntityZ(grid.Entities[tx+(ty*gridsz)],True))<HideDistance) {
+				if (Abs(EntityY(Collider,true)-EntityY(grid.Entities[tx+(ty*gridsz)],true))>4.0) {Exit()}
+				if (Abs(EntityX(Collider,true)-EntityX(grid.Entities[tx+(ty*gridsz)],true))<HideDistance) {
+					if (Abs(EntityZ(Collider,true)-EntityZ(grid.Entities[tx+(ty*gridsz)],true))<HideDistance) {
 						ShowEntity(grid.Entities[tx+(ty*gridsz)])
 					} else {
 						HideEntity(grid.Entities[tx+(ty*gridsz)])
@@ -1955,8 +1971,8 @@ function PlaceGrid_MapCreator(r: Rooms) {
 				
 				let tile_entity = CopyEntity(Meshes[tile_type-1])
 				RotateEntity(tile_entity,0,angle,0)
-				ScaleEntity(tile_entity,RoomScale,RoomScale,RoomScale,True)
-				PositionEntit(tile_entity,r.x+x*2.0,8.0,r.z+y*2.0,True)
+				ScaleEntity(tile_entity,RoomScale,RoomScale,RoomScale,true)
+				PositionEntit(tile_entity,r.x+x*2.0,8.0,r.z+y*2.0,true)
 				
 				switch (r.grid.grid[x+(y*gridsz)]) {
 					case ROOM1:
@@ -1968,31 +1984,31 @@ function PlaceGrid_MapCreator(r: Rooms) {
 					case ROOM3,ROOM4:
 						AddLight(Null,r.x+x*2.0, 8.0+(412.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					case ROOM4+1:
-						dr=CreateDoor(r.zone,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*240.0*RoomScale),8.0,r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*240.0*RoomScale),EntityYaw(tile_entity,True)+90.0,Null,False,3,False,"")
-						PositionEntity(dr.buttons[0],EntityX(dr.buttons[0],True)+(Cos(EntityYaw(tile_entity,True))*0.05),EntityY(dr.buttons[0],True)+0.0,EntityZ(dr.buttons[0],True)+(Sin(EntityYaw(tile_entity,True))*0.05),True)
+						dr=CreateDoor(r.zone,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,true))*240.0*RoomScale),8.0,r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,true))*240.0*RoomScale),EntityYaw(tile_entity,true)+90.0,Null,False,3,False,"")
+						PositionEntity(dr.buttons[0],EntityX(dr.buttons[0],true)+(Cos(EntityYaw(tile_entity,true))*0.05),EntityY(dr.buttons[0],true)+0.0,EntityZ(dr.buttons[0],true)+(Sin(EntityYaw(tile_entity,true))*0.05),true)
 						
-						AddLight(Null, r.x+x*2.0+(Cos(EntityYaw(tile_entity,True))*555.0*RoomScale), 8.0+(469.0*RoomScale), r.z+y*2.0+(Sin(EntityYaw(tile_entity,True))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
+						AddLight(Null, r.x+x*2.0+(Cos(EntityYaw(tile_entity,true))*555.0*RoomScale), 8.0+(469.0*RoomScale), r.z+y*2.0+(Sin(EntityYaw(tile_entity,true))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
 						
 						let tempInt2=CreatePivot()
-						RotateEntity (tempInt2,0,EntityYaw(tile_entity,True)+180.0,0,True)
-						PositionEntity (tempInt2,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,True))*552.0*RoomScale),8.0+(240.0*RoomScale),r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,True))*552.0*RoomScale))
+						RotateEntity (tempInt2,0,EntityYaw(tile_entity,true)+180.0,0,true)
+						PositionEntity (tempInt2,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,true))*552.0*RoomScale),8.0+(240.0*RoomScale),r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,true))*552.0*RoomScale))
 						if (r.RoomDoors[1] == Null) {
 							r.RoomDoors[1]=dr
 							r.Objects[3]=tempInt2
-							PositionEntity (r.Objects[0],r.x+x*2.0,8.0,r.z+y*2.0,True)
+							PositionEntity (r.Objects[0],r.x+x*2.0,8.0,r.z+y*2.0,true)
 							DebugLog ("Created door 1 successfully!")
 						} else if (r.RoomDoors[1] != Null && r.RoomDoors[3] == Null) {
 							r.RoomDoors[3]=dr
 							r.Objects[5]=tempInt2
-							PositionEntity (r.Objects[1],r.x+x*2.0,8.0,r.z+y*2.0,True)
+							PositionEntity (r.Objects[1],r.x+x*2.0,8.0,r.z+y*2.0,true)
 							DebugLog ("Created door 2 successfully!")
 						}
 					case ROOM4+2:
-						AddLight(Null, r.x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), 8.0+(396.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
-						it = CreateItem("SCP-500-01","scp500",r.x+x*2.0+(Cos(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)-(Sin(EntityYaw(tile_entity,True))*1226.0*RoomScale),8.0+(80.0*RoomScale),r.z+y*2.0+(Sin(EntityYaw(tile_entity,True))*(-208.0)*RoomScale)+(Cos(EntityYaw(tile_entity,True))*1226.0*RoomScale))
+						AddLight(Null, r.x+x*2.0-(Sin(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,true))*16.0*RoomScale), 8.0+(396.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,true))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
+						it = CreateItem("SCP-500-01","scp500",r.x+x*2.0+(Cos(EntityYaw(tile_entity,true))*(-208.0)*RoomScale)-(Sin(EntityYaw(tile_entity,true))*1226.0*RoomScale),8.0+(80.0*RoomScale),r.z+y*2.0+(Sin(EntityYaw(tile_entity,true))*(-208.0)*RoomScale)+(Cos(EntityYaw(tile_entity,true))*1226.0*RoomScale))
 						EntityType (it.collider, HIT_ITEM)
 						
-						it = CreateItem("Night Vision Goggles", "nvgoggles",r.x+x*2.0-(Sin(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,True))*16.0*RoomScale), 8.0+(80.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,True))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,True))*16.0*RoomScale))
+						it = CreateItem("Night Vision Goggles", "nvgoggles",r.x+x*2.0-(Sin(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,true))*16.0*RoomScale), 8.0+(80.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,true))*16.0*RoomScale))
 						EntityType (it.collider, HIT_ITEM)
 				}
 				
@@ -2209,26 +2225,26 @@ function FillRoom(r: Rooms) {
 			//[Block]
 			//the wooden door
 			r.Objects[2] = LoadMesh_Strict("GFX/map/forest/door_frame.b3d")
-			PositionEntity(r.Objects[2],r.x + 184.0 * RoomScale,0,r.z,True)
-			ScaleEntity(r.Objects[2],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,True)
+			PositionEntity(r.Objects[2],r.x + 184.0 * RoomScale,0,r.z,true)
+			ScaleEntity(r.Objects[2],45.0*RoomScale,45.0*RoomScale,80.0*RoomScale,true)
 			EntityParent(r.Objects[2],r.obj)
 			
 			r.Objects[3] =  LoadMesh_Strict("GFX/map/forest/door.b3d")
-			PositionEntity(r.Objects[3],r.x + 112.0 * RoomScale,0,r.z+0.05,True)
+			PositionEntity(r.Objects[3],r.x + 112.0 * RoomScale,0,r.z+0.05,true)
 			EntityType(r.Objects[3], HIT_MAP)
 			
-			ScaleEntity(r.Objects[3],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True)
+			ScaleEntity(r.Objects[3],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,true)
 			EntityParent(r.Objects[3],r.obj)
 			
 			r.Objects[4] = CopyEntity(r.Objects[3])
-			PositionEntity(r.Objects[4],r.x + 256.0 * RoomScale,0,r.z-0.05,True)
+			PositionEntity(r.Objects[4],r.x + 256.0 * RoomScale,0,r.z-0.05,true)
 			RotateEntity(r.Objects[4], 0,180,0)
-			ScaleEntity(r.Objects[4],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,True)
+			ScaleEntity(r.Objects[4],46.0*RoomScale,45.0*RoomScale,46.0*RoomScale,true)
 			EntityParent(r.Objects[4],r.obj)
 			
 			//doors to observation booth
 			d = CreateDoor(r.zone, r.x + 928.0 * RoomScale,0,r.z + 640.0 * RoomScale,0,r,False,False,False,"ABCD")
-			d = CreateDoor(r.zone, r.x + 928.0 * RoomScale,0,r.z - 640.0 * RoomScale,0,r,True,False,False,"ABCD")
+			d = CreateDoor(r.zone, r.x + 928.0 * RoomScale,0,r.z - 640.0 * RoomScale,0,r,true,False,False,"ABCD")
 			d.AutoClose = False
 			
 			//doors to the room itself
@@ -2254,7 +2270,7 @@ function FillRoom(r: Rooms) {
 			//[End Block]
 		case "lockroom":
 			//[Block]
-			d = CreateDoor(r.zone, r.x - 736.0 * RoomScale, 0, r.z - 104.0 * RoomScale, 0, r, True)
+			d = CreateDoor(r.zone, r.x - 736.0 * RoomScale, 0, r.z - 104.0 * RoomScale, 0, r, true)
 			d.timer = 70 * 5
 			d.AutoClose = False
 			d.open = False
@@ -2266,7 +2282,7 @@ function FillRoom(r: Rooms) {
 			FreeEntity(d.buttons[1])
 			d.buttons[1] = 0
 			
-			d2 = CreateDoor(r.zone, r.x + 104.0 * RoomScale, 0, r.z + 736.0 * RoomScale, 270, r, True)
+			d2 = CreateDoor(r.zone, r.x + 104.0 * RoomScale, 0, r.z + 736.0 * RoomScale, 270, r, true)
 			d2.timer = 70 * 5
 			d2.AutoClose = False
 			d2.open = False
@@ -2281,7 +2297,7 @@ function FillRoom(r: Rooms) {
 			d.LinkedDoor = d2
 			d2.LinkedDoor = d
 			
-			sc.SecurityCams = CreateSecurityCam(r.x - 688.0 * RoomScale, r.y + 384 * RoomScale, r.z + 688.0 * RoomScale, r, True)
+			sc.SecurityCams = CreateSecurityCam(r.x - 688.0 * RoomScale, r.y + 384 * RoomScale, r.z + 688.0 * RoomScale, r, true)
 			sc.angle = 45 + 180
 			sc.turn = 45
 			sc.ScrTexture = 1
@@ -2294,7 +2310,7 @@ function FillRoom(r: Rooms) {
 			TurnEntity(sc.ScrObj, 0, 90, 0)
 			EntityParent(sc.ScrObj, r.obj)
 			
-			sc.SecurityCams = CreateSecurityCam(r.x - 112.0 * RoomScale, r.y + 384 * RoomScale, r.z + 112.0 * RoomScale, r, True)
+			sc.SecurityCams = CreateSecurityCam(r.x - 112.0 * RoomScale, r.y + 384 * RoomScale, r.z + 112.0 * RoomScale, r, true)
 			sc.angle = 45
 			sc.turn = 45
 			sc.ScrTexture = 1
@@ -2307,7 +2323,7 @@ function FillRoom(r: Rooms) {
 			EntityParent(sc.ScrObj, r.obj)
 			
 			let em: Emitters = CreateEmitter(r.x - 175.0 * RoomScale, 370.0 * RoomScale, r.z + 656.0 * RoomScale, 0)
-			TurnEntity(em.Obj, 90, 0, 0, True)
+			TurnEntity(em.Obj, 90, 0, 0, true)
 			EntityParent(em.Obj, r.obj)
 			em.RandAngle = 20
 			em.Speed = 0.05
@@ -2316,7 +2332,7 @@ function FillRoom(r: Rooms) {
 			em.Gravity = -0.24
 			
 			em.Emitters = CreateEmitter(r.x - 655.0 * RoomScale, 370.0 * RoomScale, r.z + 240.0 * RoomScale, 0)
-			TurnEntity(em.Obj, 90, 0, 0, True)
+			TurnEntity(em.Obj, 90, 0, 0, true)
 			EntityParent(em.Obj, r.obj)
 			em.RandAngle = 20
 			em.Speed = 0.05
@@ -2339,7 +2355,7 @@ function FillRoom(r: Rooms) {
 				ScaleSprite(de.obj, de.Size,de.Size)
 			}
 			
-			sc.SecurityCams = CreateSecurityCam(r.x + 512.0 * RoomScale, r.y + 384 * RoomScale, r.z + 384.0 * RoomScale, r, True)
+			sc.SecurityCams = CreateSecurityCam(r.x + 512.0 * RoomScale, r.y + 384 * RoomScale, r.z + 384.0 * RoomScale, r, true)
 			sc.angle = 45 + 90
 			sc.turn = 45
 			TurnEntity(sc.CameraObj, 40, 0, 0)
@@ -2349,7 +2365,7 @@ function FillRoom(r: Rooms) {
 			TurnEntity(sc.ScrObj, 0, 90, 0)
 			EntityParent(sc.ScrObj, r.obj)
 			
-			sc.SecurityCams = CreateSecurityCam(r.x - 384.0 * RoomScale, r.y + 384 * RoomScale, r.z - 512.0 * RoomScale, r, True)
+			sc.SecurityCams = CreateSecurityCam(r.x - 384.0 * RoomScale, r.y + 384 * RoomScale, r.z - 512.0 * RoomScale, r, true)
 			sc.angle = 45 + 90 + 180
 			sc.turn = 45
 			
@@ -2368,36 +2384,36 @@ function FillRoom(r: Rooms) {
 			d2 = CreateDoor(r.zone, r.x, r.y, r.z - 1024.0 * RoomScale, 0, r, False)
 			d2.AutoClose = False
 			d2.open = False
-			d2.locked = True
+			d2.locked = true
 			
 			d2 = CreateDoor(r.zone, r.x-1440*RoomScale, r.y-480.0*RoomScale, r.z + 2328.0 * RoomScale, 0, r, False, False, 2)
 			if (SelectedEnding == "A2") {
 				d2.AutoClose = False
-				d2.open = True
-				d2.locked = True	
+				d2.open = true
+				d2.locked = true	
 			} else {
 				d2.AutoClose = False
 				d2.open = False
 				d2.locked = False	
 			}	
-			PositionEntity(d2.buttons[0], r.x-1320.0*RoomScale, EntityY(d2.buttons[0],True), r.z + 2288.0*RoomScale, True)
-			PositionEntity(d2.buttons[1], r.x-1584*RoomScale, EntityY(d2.buttons[0],True), r.z + 2488.0*RoomScale, True	)
-			RotateEntity (d2.buttons[1], 0, 90, 0, True)
+			PositionEntity(d2.buttons[0], r.x-1320.0*RoomScale, EntityY(d2.buttons[0],true), r.z + 2288.0*RoomScale, true)
+			PositionEntity(d2.buttons[1], r.x-1584*RoomScale, EntityY(d2.buttons[0],true), r.z + 2488.0*RoomScale, true	)
+			RotateEntity (d2.buttons[1], 0, 90, 0, true)
 			
 			d2 = CreateDoor(r.zone, r.x-1440*RoomScale, r.y-480.0*RoomScale, r.z + 4352.0 * RoomScale, 0, r, False, False, 2)
 			if (SelectedEnding == "A2") {
 				d2.AutoClose = False
-				d2.open = True
-				d2.locked = True	
+				d2.open = true
+				d2.locked = true	
 			} else {
 				d2.AutoClose = False
 				d2.open = False
 				d2.locked = False
 			}
-			PositionEntity (d2.buttons[0], r.x-1320.0*RoomScale, EntityY(d2.buttons[0],True), r.z + 4384.0*RoomScale, True)
-			RotateEntity (d2.buttons[0], 0, 180, 0, True	)
-			PositionEntity (d2.buttons[1], r.x-1584.0*RoomScale, EntityY(d2.buttons[0],True), r.z + 4232.0*RoomScale, True	)
-			RotateEntity( d2.buttons[1], 0, 90, 0, True	)
+			PositionEntity (d2.buttons[0], r.x-1320.0*RoomScale, EntityY(d2.buttons[0],true), r.z + 4384.0*RoomScale, true)
+			RotateEntity (d2.buttons[0], 0, 180, 0, true	)
+			PositionEntity (d2.buttons[1], r.x-1584.0*RoomScale, EntityY(d2.buttons[0],true), r.z + 4232.0*RoomScale, true	)
+			RotateEntity( d2.buttons[1], 0, 90, 0, true	)
 			
 			for (r2 of Rooms.each) {
 				if (r2.RoomTemplate.Name = "exit1") {
@@ -2408,67 +2424,67 @@ function FillRoom(r: Rooms) {
 					r.RoomDoors[1] = CreateDoor(0, r.x+1544.0*RoomScale, r.y, r.z-64.0*RoomScale, 90, r, False, 3)
 					r.RoomDoors[1].AutoClose = False
 					r.RoomDoors[1].open = False
-					PositionEntity(r.RoomDoors[1].buttons[0],r.x+1584*RoomScale, EntityY(r.RoomDoors[1].buttons[0],True), r.z+80*RoomScale, True)
-					PositionEntity(r.RoomDoors[1].buttons[1],r.x+1456*RoomScale, EntityY(r.RoomDoors[1].buttons[1],True), r.z-208*RoomScale, True)	
+					PositionEntity(r.RoomDoors[1].buttons[0],r.x+1584*RoomScale, EntityY(r.RoomDoors[1].buttons[0],true), r.z+80*RoomScale, true)
+					PositionEntity(r.RoomDoors[1].buttons[1],r.x+1456*RoomScale, EntityY(r.RoomDoors[1].buttons[1],true), r.z-208*RoomScale, true)	
 					r2.Objects[1] = CreatePivot()
-					PositionEntity(r2.Objects[1], r.x+1848.0*RoomScale, r.y+240.0*RoomScale, r.z-64.0*RoomScale, True)
+					PositionEntity(r2.Objects[1], r.x+1848.0*RoomScale, r.y+240.0*RoomScale, r.z-64.0*RoomScale, true)
 					EntityParent (r2.Objects[1], r.obj)
 				}
 			}
 			
 			//106:n spawnpoint
 			r.Objects[3]=CreatePivot()
-			PositionEntity(r.Objects[3], r.x+1216.0*RoomScale, r.y, r.z+2112.0*RoomScale, True)
+			PositionEntity(r.Objects[3], r.x+1216.0*RoomScale, r.y, r.z+2112.0*RoomScale, true)
 			EntityParent(r.Objects[3], r.obj)
 			
 			//sillan loppup��
 			r.Objects[4]=CreatePivot()
-			PositionEntity(r.Objects[4], r.x, r.y+96.0*RoomScale, r.z+6400.0*RoomScale, True)
+			PositionEntity(r.Objects[4], r.x, r.y+96.0*RoomScale, r.z+6400.0*RoomScale, true)
 			EntityParent(r.Objects[4], r.obj)
 			
 			//vartiotorni 1
 			r.Objects[5]=CreatePivot()
-			PositionEntity(r.Objects[5], r.x+1784.0*RoomScale, r.y+2124.0*RoomScale, r.z+4512.0*RoomScale, True)
+			PositionEntity(r.Objects[5], r.x+1784.0*RoomScale, r.y+2124.0*RoomScale, r.z+4512.0*RoomScale, true)
 			EntityParent(r.Objects[5], r.obj)
 			
 			//vartiotorni 2
 			r.Objects[6]=CreatePivot()
-			PositionEntity(r.Objects[6], r.x-5048.0*RoomScale, r.y+1912.0*RoomScale, r.z+4656.0*RoomScale, True)
+			PositionEntity(r.Objects[6], r.x-5048.0*RoomScale, r.y+1912.0*RoomScale, r.z+4656.0*RoomScale, true)
 			EntityParent(r.Objects[6], r.obj)
 			
 			//sillan takareuna
 			r.Objects[7]=CreatePivot()
-			PositionEntity(r.Objects[7], r.x+1824.0*RoomScale, r.y+224.0*RoomScale, r.z+7056.0*RoomScale, True)
+			PositionEntity(r.Objects[7], r.x+1824.0*RoomScale, r.y+224.0*RoomScale, r.z+7056.0*RoomScale, true)
 			EntityParent(r.Objects[7], r.obj)
 			
 			//sillan takareuna2
 			r.Objects[8]=CreatePivot()
-			PositionEntity(r.Objects[8], r.x-1824.0*RoomScale, r.y+224.0*RoomScale, r.z+7056.0*RoomScale, True)
+			PositionEntity(r.Objects[8], r.x-1824.0*RoomScale, r.y+224.0*RoomScale, r.z+7056.0*RoomScale, true)
 			EntityParent(r.Objects[8], r.obj)
 			
 			//"valopyssy"
 			r.Objects[9]=CreatePivot()
-			PositionEntity(r.Objects[9], r.x+2624.0*RoomScale, r.y+992.0*RoomScale, r.z+6157.0*RoomScale, True)
+			PositionEntity(r.Objects[9], r.x+2624.0*RoomScale, r.y+992.0*RoomScale, r.z+6157.0*RoomScale, true)
 			EntityParent(r.Objects[9], r.obj)
 			//objects[10] = valopyssyn yl�osa
 			
 			//tunnelin loppu
 			r.Objects[11]=CreatePivot()
-			PositionEntity(r.Objects[11], r.x-4064.0*RoomScale, r.y-1248.0*RoomScale, r.z-1696.0*RoomScale, True)
+			PositionEntity(r.Objects[11], r.x-4064.0*RoomScale, r.y-1248.0*RoomScale, r.z-1696.0*RoomScale, true)
 			EntityParent(r.Objects[11], r.obj)
 			
 			r.Objects[13]=LoadMesh_Strict("GFX/map/gateawall1.b3d",r.obj)
-			PositionEntity(r.Objects[13], r.x-4308.0*RoomScale, r.y-1045.0*RoomScale, r.z+544.0*RoomScale, True)
+			PositionEntity(r.Objects[13], r.x-4308.0*RoomScale, r.y-1045.0*RoomScale, r.z+544.0*RoomScale, true)
 			EntityColor(r.Objects[13], 25,25,25)
 			EntityType(r.Objects[13],HIT_MAP)
 			
 			r.Objects[14]=LoadMesh_Strict("GFX/map/gateawall2.b3d",r.obj)
-			PositionEntity(r.Objects[14], r.x-3820.0*RoomScale, r.y-1045.0*RoomScale, r.z+544.0*RoomScale, True)	
+			PositionEntity(r.Objects[14], r.x-3820.0*RoomScale, r.y-1045.0*RoomScale, r.z+544.0*RoomScale, true)	
 			EntityColor(r.Objects[14], 25,25,25)
 			EntityType(r.Objects[14],HIT_MAP)
 			
 			r.Objects[15]=CreatePivot(r.obj)
-			PositionEntity(r.Objects[15], r.x-3568.0*RoomScale, r.y-1089.0*RoomScale, r.z+4944.0*RoomScale, True)
+			PositionEntity(r.Objects[15], r.x-3568.0*RoomScale, r.y-1089.0*RoomScale, r.z+4944.0*RoomScale, true)
 			
 			r.Objects[16] = LoadMesh_Strict("GFX/map/gatea_hitbox1.b3d",r.obj)
 			EntityPickMode(r.Objects[16],2)
@@ -2479,49 +2495,49 @@ function FillRoom(r: Rooms) {
 		case "gateaentrance":
 			//[Block]
 			//alempi hissi
-			r.RoomDoors[0] = CreateDoor(0, r.x+744.0*RoomScale, 0, r.z+512.0*RoomScale, 90, r, True, 3)
+			r.RoomDoors[0] = CreateDoor(0, r.x+744.0*RoomScale, 0, r.z+512.0*RoomScale, 90, r, true, 3)
 			r.RoomDoors[0].AutoClose = False
-			r.RoomDoors[0].open = True
-			PositionEntity(r.RoomDoors[0].buttons[1],r.x+688*RoomScale, EntityY(r.RoomDoors[0].buttons[1],True), r.z+368*RoomScale, True)
-			PositionEntity(r.RoomDoors[0].buttons[0],r.x+784*RoomScale, EntityY(r.RoomDoors[0].buttons[0],True), r.z+656*RoomScale, True)
+			r.RoomDoors[0].open = true
+			PositionEntity(r.RoomDoors[0].buttons[1],r.x+688*RoomScale, EntityY(r.RoomDoors[0].buttons[1],true), r.z+368*RoomScale, true)
+			PositionEntity(r.RoomDoors[0].buttons[0],r.x+784*RoomScale, EntityY(r.RoomDoors[0].buttons[0],true), r.z+656*RoomScale, true)
 			r.Objects[0] = CreatePivot()
-			PositionEntity(r.Objects[0], r.x+1048.0*RoomScale, 0, r.z+512.0*RoomScale, True)
+			PositionEntity(r.Objects[0], r.x+1048.0*RoomScale, 0, r.z+512.0*RoomScale, true)
 			EntityParent(r.Objects[0], r.obj)
 			
-			r.RoomDoors[1] = CreateDoor(r.zone, r.x, 0, r.z - 360.0 * RoomScale, 0, r, False, True, 5)
+			r.RoomDoors[1] = CreateDoor(r.zone, r.x, 0, r.z - 360.0 * RoomScale, 0, r, False, true, 5)
 			r.RoomDoors[1].dir = 1
 			r.RoomDoors[1].AutoClose = False
 			r.RoomDoors[1].open = False
-			PositionEntity(r.RoomDoors[1].buttons[1], r.x+416*RoomScale, EntityY(r.RoomDoors[0].buttons[1],True), r.z-576*RoomScale, True)
-			RotateEntity(r.RoomDoors[1].buttons[1],0,r.angle-90,0,True)
-			PositionEntity(r.RoomDoors[1].buttons[0], r.x, 20.0, r.z, True)
+			PositionEntity(r.RoomDoors[1].buttons[1], r.x+416*RoomScale, EntityY(r.RoomDoors[0].buttons[1],true), r.z-576*RoomScale, true)
+			RotateEntity(r.RoomDoors[1].buttons[1],0,r.angle-90,0,true)
+			PositionEntity(r.RoomDoors[1].buttons[0], r.x, 20.0, r.z, true)
 			
 			//[End Block]
 		case "exit1":
 			//[Block]
 			r.Objects[0] = CreatePivot(r.obj)
-			PositionEntity(r.Objects[0], r.x+4356.0*RoomScale, 9767.0*RoomScale, r.z+2588.0*RoomScale, True)
+			PositionEntity(r.Objects[0], r.x+4356.0*RoomScale, 9767.0*RoomScale, r.z+2588.0*RoomScale, true)
 			
-			r.RoomDoors[4] = CreateDoor(r.zone, r.x, 0, r.z - 320.0 * RoomScale, 0, r, False, True, 5)
+			r.RoomDoors[4] = CreateDoor(r.zone, r.x, 0, r.z - 320.0 * RoomScale, 0, r, False, true, 5)
 			r.RoomDoors[4].dir = 1
 			r.RoomDoors[4].AutoClose = False
 			r.RoomDoors[4].open = False
-			PositionEntity(r.RoomDoors[4].buttons[1], r.x+352*RoomScale, 0.7, r.z-528*RoomScale, True)
-			RotateEntity(r.RoomDoors[4].buttons[1],0,r.angle-90,0,True)
-			PositionEntity(r.RoomDoors[4].buttons[0], r.x, 7.0, r.z, True)		
+			PositionEntity(r.RoomDoors[4].buttons[1], r.x+352*RoomScale, 0.7, r.z-528*RoomScale, true)
+			RotateEntity(r.RoomDoors[4].buttons[1],0,r.angle-90,0,true)
+			PositionEntity(r.RoomDoors[4].buttons[0], r.x, 7.0, r.z, true)		
 			
 			//k�yt�v�n takaosa
 			r.Objects[3] = CreatePivot()
-			PositionEntity(r.Objects[3], r.x-7680.0*RoomScale, 10992.0*RoomScale, r.z-27048.0*RoomScale, True)
+			PositionEntity(r.Objects[3], r.x-7680.0*RoomScale, 10992.0*RoomScale, r.z-27048.0*RoomScale, true)
 			EntityParent(r.Objects[3], r.obj)
 			
 			//oikean puolen watchpoint 1
 			r.Objects[4] = CreatePivot()
-			PositionEntity(r.Objects[4], r.x+5203.36*RoomScale, 12128.0*RoomScale, r.z-1739.19*RoomScale, True)
+			PositionEntity(r.Objects[4], r.x+5203.36*RoomScale, 12128.0*RoomScale, r.z-1739.19*RoomScale, true)
 			EntityParent(r.Objects[4], r.obj)
 			//oikean puolen watchpoint 2
 			r.Objects[5] = CreatePivot()
-			PositionEntity(r.Objects[5], r.x+4363.02*RoomScale, 10536.0*RoomScale, r.z+2766.16*RoomScale, True)
+			PositionEntity(r.Objects[5], r.x+4363.02*RoomScale, 10536.0*RoomScale, r.z+2766.16*RoomScale, true)
 			EntityParent(r.Objects[5], r.obj)
 			//vasemman puolen watchpoint 1
 			r.Objects[6] = CreatePivot()
@@ -8129,7 +8145,7 @@ function load_terrain(hmap,yscale: float=0.7,t1: int,t2: int,mask: int) {
 
 import {} from "./Skybox.ts/index.ts"
 import { SetBuffer, TextureBuffer, BackBuffer, ReadPixelFast, Cls, ClsColor, ColorRed, RenderWorld } from "./Helper/graphics.ts"
-import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces, AddMesh, CountVertices, EntityPitch, EntityRoll, EntityX, EntityY, EntityYaw, EntityZ, FlipMesh, FreeBrush, FreeEntity, GetBrushTexture, GetSurfaceBrush, MoveEntity, PositionMesh, RotateEntity, RotateMesh, TFormedX, TFormedY, TFormedZ, VertexX, VertexZ } from "./Helper/Mesh.ts"
+import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces, AddMesh, CountVertices, EntityPitch, EntityRoll, EntityX, EntityY, EntityYaw, EntityZ, FlipMesh, FreeBrush, FreeEntity, GetBrushTexture, GetSurfaceBrush, MoveEntity, PositionMesh, RotateEntity, RotateMesh, TFormedX, TFormedY, TFormedZ, VertexX, VertexZ, EntityAlpha, Delete } from "./Helper/Mesh.ts"
 import { Trim, Left, Instr, Replace, Right, Str, Len, Lower, Mid, Upper } from "./Helper/strings.ts"
 import { TFormVector } from "./Helper/vector.ts"
 import { OldAiPics, AccessCode, PlayerZone, PlayerRoom, DrawHandIcon, MouseUp1, MenuScale, ButtonSFX, FPSfactor, BlinkTimer, Wearing714, WearingHazmat, WearingGasMask, Sanity, RestoreSanity, VomitTimer, user_camera_pitch, GrabbedEntity, MouseHit1, MouseDown1, mouse_y_speed_1, DrawArrowIcon, DropSpeed, EnableRoomLights, Mesh_MinX, Mesh_MinY, Mesh_MinZ, Mesh_MaxX, Mesh_MaxY, Mesh_MaxZ } from "./Main.ts"
@@ -8142,6 +8158,7 @@ import { Rand, Abs, Sin, Sqr } from "./Helper/math.ts"
 import { TextureBlend, FreeTexture, ImageBuffer, ScaleTexture, LockBuffer, TextureWidth, TextureHeight, UnlockBuffer } from "./Helper/textures.ts"
 import { Items } from "./Items.ts"
 import { CameraZoom, CreateCamera, CameraViewport, CameraRange } from "./Helper/camera.ts"
+import { SetEmitter } from "./lib/DevilParticleSystem.ts"
 
 export var UpdateRoomLightsTimer: float = 0.0
 

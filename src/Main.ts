@@ -60,13 +60,14 @@ export var LauncherIMG: int
 
 export var GraphicWidth: int = GetINIInt(OptionFile, "options", "width")
 export var GraphicHeight: int = GetINIInt(OptionFile, "options", "height")
-export var Depth: int = 0, Fullscreen: int = GetINIInt(OptionFile, "options", "fullscreen")
+export var Depth: int = 0
+export var Fullscreen: boolean = Boolean(GetINIInt(OptionFile, "options", "fullscreen"))
 
-export var SelectedGFXMode: int
+export var SelectedGFXMode: int = -1
 export var SelectedGFXDriver: int = Max(GetINIInt(OptionFile, "options", "gfx driver"), 1)
 
 export var fresize_image: int, fresize_texture: int, fresize_texture2: int
-export var fresize_cam: int
+export var fresize_cam: int = -1
 
 export var ShowFPS = GetINIInt(OptionFile, "options", "show FPS")
 
@@ -74,7 +75,7 @@ export var WireframeState
 export var HalloweenTex
 
 export var TotalGFXModes: int = CountGfxModes3D()
-export var GFXModes: int
+export var GFXModes: int = -1
 export var GfxModeWidths: int[] = new Array(TotalGFXModes)
 export var GfxModeHeights: int[] = new Array(TotalGFXModes)
 
@@ -140,7 +141,7 @@ if (LauncherEnabled) {
 	for (let i of range(1, TotalGFXModes + 1)) {
 		let samefound: boolean = false
 		for  (let n of range(TotalGFXModes)) {
-			if (GfxModeWidths(n) == GfxModeWidth(i) && GfxModeHeights(n) == GfxModeHeight(i)) {
+			if (GfxModeWidths[n] == GfxModeWidth(i) && GfxModeHeights[n] == GfxModeHeight(i)) {
 				samefound = true
 				break
 			}
@@ -149,14 +150,14 @@ if (LauncherEnabled) {
 			if (GraphicWidth == GfxModeWidth(i) && GraphicHeight == GfxModeHeight(i)) {
 				SelectedGFXMode = GFXModes
 			}
-			GfxModeWidths(GFXModes) = GfxModeWidth(i)
-			GfxModeHeights(GFXModes) = GfxModeHeight(i)
+			GfxModeWidths[GFXModes] = GfxModeWidth(i)
+			GfxModeHeights[GFXModes] = GfxModeHeight(i)
 			GFXModes=GFXModes+1
 		}
 	}
 	
-	GraphicWidth = GfxModeWidths(SelectedGFXMode)
-	GraphicHeight = GfxModeHeights(SelectedGFXMode)
+	GraphicWidth = GfxModeWidths[SelectedGFXMode]
+	GraphicHeight = GfxModeHeights[SelectedGFXMode]
 	
 	//New "fake fullscreen" - ENDSHN Psst, it's called borderless windowed mode --Love Mark,
 	if (BorderlessWindowed) {
@@ -559,7 +560,7 @@ function UpdateConsole() {
 				
 				while (ConsoleReissue!=Null) {
 					if (ConsoleReissue.isCommand) {
-						Exit()
+						break
 					}
 					reissuePos = reissuePos - 15*MenuScale
 					ConsoleReissue = After (ConsoleReissue)
@@ -567,8 +568,8 @@ function UpdateConsole() {
 				
 			} else {
 				cm.ConsoleMsg = First (ConsoleMsg)
-				while (cm!=Null) {
-					if (cm==ConsoleReissue) {Exit()}
+				while (cm) {
+					if (cm==ConsoleReissue) {break}
 					reissuePos = reissuePos-15*MenuScale
 					cm = After (cm)
 				}
@@ -576,13 +577,13 @@ function UpdateConsole() {
 				reissuePos = reissuePos-15*MenuScale
 				
 				while (true) {
-					if (ConsoleReissue=Null) {
+					if (!ConsoleReissue) {
 						ConsoleReissue=First (ConsoleMsg)
 						reissuePos = 0
 					}
 				
 					if (ConsoleReissue.isCommand) {
-						Exit()
+						break
 					}
 					reissuePos = reissuePos - 15*MenuScale
 					ConsoleReissue = After (ConsoleReissue)
@@ -602,7 +603,7 @@ function UpdateConsole() {
 				
 				while (ConsoleReissue != Null) {
 					if (ConsoleReissue.isCommand) {
-						Exit()
+						break
 					}
 					reissuePos = reissuePos + 15*MenuScale
 					ConsoleReissue = Before (ConsoleReissue)
@@ -611,7 +612,7 @@ function UpdateConsole() {
 			} else {
 				cm.ConsoleMsg = Last (ConsoleMsg)
 				while (cm != Null) {
-					if (cm == ConsoleReissue) {Exit()}
+					if (cm == ConsoleReissue) {break}
 					reissuePos = reissuePos+15*MenuScale
 					cm = Before (cm)
 				}
@@ -625,7 +626,7 @@ function UpdateConsole() {
 					}
 				
 					if (ConsoleReissue.isCommand) {
-						Exit()
+						break
 					}
 					reissuePos = reissuePos + 15*MenuScale
 					ConsoleReissue = Before (ConsoleReissue)
@@ -866,7 +867,7 @@ function UpdateConsole() {
 							CreateConsoleMsg("-    state: "+ev.EventState)
 							CreateConsoleMsg("-    state2: "+ev.EventState2)	
 							CreateConsoleMsg("-    state3: "+ev.EventState3)
-							Exit()
+							break
 						}
 					}
 					
@@ -913,19 +914,19 @@ function UpdateConsole() {
 					
 				case "noclipspeed":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					NoClipSpeed = Float(StrTemp)
 					
 				case "injure":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					Injuries = Float(StrTemp)
 					
 				case "infect":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					Infect = Float(StrTemp)
 					
@@ -957,7 +958,7 @@ function UpdateConsole() {
 								it.disttimer = 0
 							}
 							PlayerRoom = r
-							Exit()
+							break
 						}
 					}
 					
@@ -1043,7 +1044,7 @@ function UpdateConsole() {
 								StopStream_Strict(n.SoundChn2)
 								n.SoundChn2=0
 							}
-							Exit()
+							break
 						}
 					}
 					
@@ -1217,7 +1218,7 @@ function UpdateConsole() {
 					
 				case "stopsound", "stfu":
 					//[Block]
-					for (snd of Sound.each) {
+					for (let snd of Sound.each) {
 						for (i of range(32)) {
 							if (snd.channels[i]!=0) {
 								StopChannel (snd.channels[i])
@@ -1227,9 +1228,9 @@ function UpdateConsole() {
 					
 					for (e of Events.each) {
 						if (e.EventName == "alarm") {
-							if (e.room.NPC[0] != Null) {RemoveNPC(e.room.NPC[0])}
-							if (e.room.NPC[1] != Null) {RemoveNPC(e.room.NPC[1])}
-							if (e.room.NPC[2] != Null) {RemoveNPC(e.room.NPC[2])}
+							if (e.room.NPC[0] != null) {RemoveNPC(e.room.NPC[0])}
+							if (e.room.NPC[1] != null) {RemoveNPC(e.room.NPC[1])}
+							if (e.room.NPC[2] != null) {RemoveNPC(e.room.NPC[2])}
 							
 							FreeEntity(e.room.Objects[0])
 							e.room.Objects[0]=0
@@ -1239,29 +1240,29 @@ function UpdateConsole() {
 							ResetEntity (Curr173.Collider)
 							ShowEntity (Curr173.obj)
 							RemoveEvent(e)
-							Exit()
+							break
 						}
 					}
 					CreateConsoleMsg("Stopped all sounds.")
 					
 				case "camerafog":
 					//[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					let args: string = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					CameraFogNear = Float(Left(args, Len(args) - Instr(args, " ")))
 					CameraFogFar = Float(Right(args, Len(args) - Instr(args, " ")))
 					CreateConsoleMsg("Near set to: " + CameraFogNear + ", far set to: " + CameraFogFar)
 					
 				case "gamma":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					ScreenGamma = Int(StrTemp)
 					CreateConsoleMsg("Gamma set to " + ScreenGamma)
 					
 				case "spawn":
 					//[Block]
-					args$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					StrTemp$ = Piece$(args$, 1)
-					StrTemp2$ = Piece$(args$, 2)
+					args = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Piece(args, 1)
+					StrTemp2 = Piece(args, 2)
 					
 					//Hacky fix for when the user doesn't input a second parameter.
 					if (StrTemp != StrTemp2) {
@@ -1273,13 +1274,13 @@ function UpdateConsole() {
 				//new Console Commands in SCP:CB 1.3 - ENDSHN
 				case "infinitestamina","infstam":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					let StrTemp: string = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					switch (StrTemp) {
 						case "on", "1", "true":
-							InfiniteStamina = True						
+							InfiniteStamina = true						
 						case "off", "0", "false":
-							InfiniteStamina = False
+							InfiniteStamina = false
 						default:
 							InfiniteStamina = !InfiniteStamina
 					}
@@ -1295,9 +1296,9 @@ function UpdateConsole() {
 					GodMode = 1
 					InfiniteStamina = 1
 					Curr173.Idle = 3
-					Curr106.Idle = True
+					Curr106.Idle = true
 					Curr106.State = 200000
-					Contained106 = True
+					Contained106 = true
 					
 				case "toggle_warhead_lever":
 					//[Block]
@@ -1310,15 +1311,15 @@ function UpdateConsole() {
 					
 				case "unlockexits":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					switch (StrTemp) {
 						case "a":
 							for (e of Events.each) {
 								if (e.EventName = "gateaentrance") {
 									e.EventState3 = 1
-									e.room.RoomDoors[1].open = True
-									Exit
+									e.room.RoomDoors[1].open = true
+									break
 								}
 							}
 							CreateConsoleMsg("Gate A is now unlocked.")	
@@ -1326,8 +1327,8 @@ function UpdateConsole() {
 							for (e of Events.each) {
 								if (e.EventName = "exit1") {
 									e.EventState3 = 1
-									e.room.RoomDoors[4].open = True
-									Exit
+									e.room.RoomDoors[4].open = true
+									break
 								}
 							}	
 							CreateConsoleMsg("Gate B is now unlocked.")	
@@ -1335,16 +1336,16 @@ function UpdateConsole() {
 							for (e of Events.each) {
 								if (e.EventName = "gateaentrance") {
 									e.EventState3 = 1
-									e.room.RoomDoors[1].open = True
+									e.room.RoomDoors[1].open = true
 								} else if (e.EventName = "exit1") {
 									e.EventState3 = 1
-									e.room.RoomDoors[4].open = True
+									e.room.RoomDoors[4].open = true
 								}
 							}
 							CreateConsoleMsg("Gate A and B are now unlocked.")	
 					}
 					
-					RemoteDoorOn = True
+					RemoteDoorOn = true
 					
 				case "kill","suicide":
 					//[Block]
@@ -1368,12 +1369,12 @@ function UpdateConsole() {
 					//[Block]
 					// I think this might be broken since the FMod library streaming was added. -Mark
 					if (Instr(ConsoleInput, " ")!=0) {
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+						StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					} else {
-						StrTemp$ = ""
+						StrTemp = ""
 					}
 					
-					if (StrTemp$ != "") {
+					if (StrTemp != "") {
 						PlayCustomMusic = True
 						if (CustomMusic != 0) {
 							FreeSound_Strict (CustomMusic)
@@ -1382,10 +1383,10 @@ function UpdateConsole() {
 						if (MusicCHN != 0) {StopChannel (MusicCHN)}
 						CustomMusic = LoadSound_Strict("SFX/Music/Custom/"+StrTemp$)
 						if (CustomMusic = 0) {
-							PlayCustomMusic = False
+							PlayCustomMusic = false
 						}
 					} else {
-						PlayCustomMusic = False
+						PlayCustomMusic = false
 						if (CustomMusic != 0) {
 							FreeSound_Strict (CustomMusic)
 							CustomMusic = 0
@@ -1400,7 +1401,7 @@ function UpdateConsole() {
 							if (n.MTFLeader = Null) {
 								PositionEntity (Collider,EntityX(n.Collider),EntityY(n.Collider)+5,EntityZ(n.Collider))
 								ResetEntity (Collider)
-								Exit()
+								break
 							}
 						}
 					}
@@ -1486,7 +1487,7 @@ function UpdateConsole() {
 								}
 								CreateConsoleMsg("Changed event states from current player room to: "+e.EventState+"|"+e.EventState2+"|"+e.EventState3)
 								pl_room_found = True
-								Exit()
+								break
 							}
 						}
 						if (!pl_room_found) {
@@ -1497,9 +1498,9 @@ function UpdateConsole() {
 				case "spawnparticles":
 					//[Block]
 					if (Instr(ConsoleInput, " ")!=0) {
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+						StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					} else {
-						StrTemp$ = ""
+						StrTemp = ""
 					}
 					
 					if (Int(StrTemp) > -1 && Int(StrTemp) <= 1) { //<--- This is the maximum ID of particles by Devil Particle system, will be increased after time - ENDSHN
@@ -1512,9 +1513,9 @@ function UpdateConsole() {
 				case "giveachievement":
 					//[Block]
 					if (Instr(ConsoleInput, " ")!=0) {
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+						StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					} else {
-						StrTemp$ = ""
+						StrTemp = ""
 					}
 					
 					if (Int(StrTemp)>=0 && Int(StrTemp)<MAXACHIEVEMENTS) {
@@ -2415,7 +2416,7 @@ while (true) {
 								PositionEntity (SoundEmitter, EntityX(SoundEmitter), 30.0, EntityZ(SoundEmitter))
 							}
 							
-							Exit()
+							break
 						}
 					}
 				}
@@ -2940,7 +2941,7 @@ function QuickLoadEvents() {
 						for (n of NPCs.each) {
 							if (n.NPCtype = NPCtype049) {
 								skip = True
-								Exit()
+								break
 							}
 						}
 						
@@ -3050,7 +3051,7 @@ function QuickLoadEvents() {
 							e.room.NPC[0].HideFromNVG = True
 							PositionEntity (e.room.NPC[0].Collider,EntityX(e.room.Objects[4],True),EntityY(e.room.Objects[4],True)+3,EntityZ(e.room.Objects[4],True))
 							ResetEntity (e.room.NPC[0].Collider)
-							Exit()
+							break
 						}
 					}
 					if (e.room.NPC[0]=Null) {
@@ -4145,7 +4146,7 @@ function DrawGUI() {
 							}
 						}
 							
-						Exit()
+						break
 					}
 				} else {
 					if (BlinkTimer < -3 && BlinkTimer > -10) {
@@ -4178,7 +4179,7 @@ function DrawGUI() {
 						}
 					}
 					
-					Exit()
+					break
 				}
 			}
 		}
@@ -4306,7 +4307,7 @@ function DrawGUI() {
 					AAText(x - 50, 210, "state2: " + ev.EventState2   )
 					AAText(x - 50, 230, "state3: " + ev.EventState3)
 					AAText(x - 50, 250, "str: "+ ev.EventStr)
-					Exit()
+					break
 				}
 			}
 			AAText(x - 50, 280, "Room coordinates: (" + Floor(EntityX(PlayerRoom.obj) / 8.0 + 0.5) + ", " + Floor(EntityZ(PlayerRoom.obj) / 8.0 + 0.5) + ", angle: "+PlayerRoom.angle + ")")
@@ -4599,7 +4600,7 @@ function DrawGUI() {
 			
 			DrawFrame(x, y, width, height, (x % 64), (x % 64))
 			
-			if (OtherOpen = Null) {Exit()}
+			if (OtherOpen = Null) {break}
 			
 			if (OtherOpen.SecondInv[n] != Null) {
 				if (SelectedItem != OtherOpen.SecondInv[n] || isMouseOn) {
@@ -4687,7 +4688,7 @@ function DrawGUI() {
 									let name: string = OtherOpen.SecondInv[z].itemtemplate.tempname
 									if (name$!="25ct" && name$!="coin" && name$!="key" && name$!="scp860" && name$!="scp714") {
 										isEmpty=False
-										Exit()
+										break
 									}
 								}
 							}
@@ -4696,7 +4697,7 @@ function DrawGUI() {
 						for (z of range(OtherSize)) {
 							if (OtherOpen.SecondInv[z]!=Null) {
 								isEmpty = False
-								Exit()
+								break
 							}
 						}
 					}
@@ -4946,7 +4947,7 @@ function DrawGUI() {
 													}
 													added = SelectedItem
 													SelectedItem = Null
-													Exit()
+													break
 												}
 											}
 										}
@@ -4991,7 +4992,7 @@ function DrawGUI() {
 													}
 													added = SelectedItem
 													SelectedItem = Null
-													Exit()
+													break
 												}
 											}
 										}
@@ -5219,7 +5220,7 @@ function DrawGUI() {
 									PlaySound_Strict(LoadTempSound("SFX/SCP/1123/Touch.ogg"))		
 								}
 								e.EventState = Max(1, e.EventState)
-								Exit()
+								break
 							}
 						}
 					}
@@ -5310,7 +5311,7 @@ function DrawGUI() {
 											PlaySound_Strict(Use914SFX)
 											DropSpeed = 0
 											Curr106.State = -2500
-											Exit()
+											break
 										}
 									}
 									Msg = "For some inexplicable reason, you find yourself inside the pocket dimension."
@@ -5564,7 +5565,7 @@ function DrawGUI() {
 							for (i of range(MaxItemAmount)) {
 								if (Inventory(i)=SelectedItem) {
 									Inventory(i) = it
-									Exit()
+									break
 								}
 							}					
 							EntityType (it.collider, HIT_ITEM)
@@ -6194,7 +6195,7 @@ function DrawGUI() {
 								if (e.EventState = 1.0) {
 									NavWorks = False
 								}
-								Exit()
+								break
 							}
 						}
 					}
@@ -6335,7 +6336,7 @@ function DrawGUI() {
 												SCPs_found = SCPs_found + 1
 											}
 										}
-										Exit()
+										break
 									}
 								}
 								if (PlayerRoom.RoomTemplate.Name = "coffin") {
@@ -6454,10 +6455,10 @@ function DrawGUI() {
 													e.EventState2 = e.EventState2 + 1
 												}
 											}
-											Exit()
+											break
 										}
 									}
-									Exit()
+									break
 								}
 							}
 						}
@@ -6999,7 +7000,7 @@ function DrawMenu() {
 					for (i of range(228)) {
 						if (KeyHit(i)) {
 							key = i
-							Exit()
+							break
 						}
 					}
 					if (key != 0) {
@@ -7191,7 +7192,7 @@ function DrawMenu() {
 					if (i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS) {
 						DrawAchvIMG(AchvXIMG,y+((i/4)*120*MenuScale),i+((AchievementsMenu-1)*12))
 					} else {
-						Exit()
+						break
 					}
 				}
 				
@@ -7199,10 +7200,10 @@ function DrawMenu() {
 					if (i+((AchievementsMenu-1)*12)<MAXACHIEVEMENTS) {
 						if (MouseOn(AchvXIMG+((i % 4)*SeparationConst),y+((i/4)*120*MenuScale),64*scale,64*scale)) {
 							AchievementTooltip(i+((AchievementsMenu-1)*12))
-							Exit()
+							break
 						}
 					} else {
-						Exit()
+						break
 					}
 				}
 				
@@ -7684,7 +7685,7 @@ function LoadEntities() {
 		while (true) {
 			file$=NextFile(Dir)
 			if (file="") {
-				Exit()
+				break
 			}
 			if (FileType("SFX/Radio/UserTracks/"+file$) = 1) {
 				test = LoadSound("SFX/Radio/UserTracks/"+file$)
@@ -8109,7 +8110,7 @@ function InitLoadGame() {
 				
 				DebugLog ("Loaded dimension1499 successful")
 				
-				Exit()
+				break
 				
 			}
 		}
@@ -8413,21 +8414,26 @@ import "save.bb"
 import { Contained106, GorePics, HideDistance, MapFound, MapHeight, MapTemp, MapWidth, MaxRoomLights, PrevSecondaryLightOn, RemoteDoorOn, Room2slCam, Rooms, RoomScale, ScreenTexs, SecondaryLightOn, SelectedMonitor, Sky } from "./MapSystem.ts"
 import { BackBuffer, Cls, ClsColor, CountGfxModes3D, Flip, GfxModeHeight, GfxModeWidth, Rect, RenderWorld, SetBuffer, TextureBuffer } from "./Helper/graphics.ts"
 import { Asc, Instr, Left, Len, Lower, Mid, Right, Str, StringHeight, Trim, Upper } from "./Helper/strings.ts"
-import { AALoadFont, AASetFont } from "./AAText.ts"
-import { MAXACHIEVEMENTS, Achievements, Achv055, AchvConsole, AchvKeter, AchvMaynard, AchvHarp, Achv500, Achv1025, Achv420, Achv714, Achv1499, Achv427 } from "./Achievements.ts"
+import { AALoadFont, AASetFont, AAText, InitAAFont } from "./AAText.ts"
+import { MAXACHIEVEMENTS, Achievements, Achv055, AchvConsole, AchvKeter, AchvMaynard, AchvHarp, Achv500, Achv1025, Achv420, Achv714, Achv1499, Achv427, AchievementsMenu, AchievementStrings, AchievementTooltip, AchvMSGenabled, GiveAchievement, UsedConsole } from "./Achievements.ts"
 import { TextureName, CurrentDir, ReadLine, Eof, ReadFile, CloseFile, WriteFile, WriteLine, FilePos, FileSize } from "./Helper/Files.ts"
-import { EntityX, EntityY, EntityZ, EntityPitch, EntityYaw, EntityRoll, GetSurface, GetSurfaceBrush, GetBrushTexture, FreeEntity, CountSurfaces, FreeBrush, CountVertices, VertexX, VertexY, VertexZ, TFormedX, TFormedY, TFormedZ, CreateMesh, CreateSurface, AddVertex, AddTriangle } from "./Helper/Mesh.ts"
+import { EntityX, EntityY, EntityZ, EntityPitch, EntityYaw, EntityRoll, GetSurface, GetSurfaceBrush, GetBrushTexture, FreeEntity, CountSurfaces, FreeBrush, CountVertices, VertexX, VertexY, VertexZ, TFormedX, TFormedY, TFormedZ, CreateMesh, CreateSurface, AddVertex, AddTriangle, MoveEntity, RotateEntity } from "./Helper/Mesh.ts"
 import { LoadSound } from "./Helper/sounds.ts"
-import { FreeTexture, ImageBuffer } from "./Helper/textures.ts"
+import { DrawImage, FreeTexture, ImageBuffer, TextureBlend } from "./Helper/textures.ts"
 import { TFormVector } from "./Helper/vector.ts"
 import { Curr173, Curr106, NPCtype096, NPCtypeMTF, NPCtype049, NPCtypeD, NPCtype939, NPCtypeZombie, NPCtype860, NPCtype966, Curr5131, NPCtype5131, Curr096, NPCtype173, NPCtypeOldMan, NPCtype1499, NPCtype008 } from "./NPCs.ts"
-import { LoadSound_Strict, AutoReleaseSounds, LoadAnimMesh_Strict } from "./StrictLoads.ts"
+import { LoadSound_Strict, AutoReleaseSounds, LoadAnimMesh_Strict, LoadImage_Strict } from "./StrictLoads.ts"
 import { G_viewport_width, G_viewport_height, G_app_handle, C_GWL_STYLE, C_WS_POPUP, C_HWND_TOP, G_viewport_x, G_viewport_y, C_SWP_SHOWWINDOW } from "./fullscreen_window_fix.ts"
 import { UpdateBlur, CreateBlurImage, ark_blur_cam } from "./Dreamfilter.ts"
 import { PeekByte, FreeBank, CreateBank, PokeByte } from "./Helper/bank.ts"
 import { Chr, RuntimeError, int, FileType, float, DebugLog, Float, range, SeedRnd, AppTitle, Int, Color, KeyHit, First, Exit, PositionEntity, EntityTexture, Collisions, FlushKeys, Delay, ChannelPlaying, FreeSound, EntityFX, ScaleEntity, ImageWidth, SetFont, CopyEntity, GetParent, Graphics3D } from "./Helper/bbhelper.ts"
 import { CameraRange, CameraZoom, CreateCamera, CameraViewport, CameraProjMode, CameraClsMode } from "./Helper/camera.ts"
-import { Sin, Sqr } from "./Helper/math.ts"
+import { Abs, Rand, Sin, Sqr } from "./Helper/math.ts"
+import { EASY, NORMAL, HARD, SAVEANYWHERE, SAVEONSCREENS, SAVEONQUIT } from "./Difficulty.ts"
+import { SetAnimTime } from "./Helper/animation.ts"
+import { Items, Update294, InitItemTemplates } from "./Items.ts"
+import { BlitzMovie_Open, BlitzMovie_GetWidth, BlitzMovie_GetHeight, BlitzMovie_Close, BlitzMovie_OpenDecodeToImage, BlitzMovie_Play, BlitzMovie_Stop } from "./lib/BlitzMovie.ts"
+import { SetEmitter, UpdateParticles, InitParticles, CreateTemplate, SetTemplateEmitterBlend, SetTemplateInterval, SetTemplateParticlesPerInterval, SetTemplateEmitterLifeTime, SetTemplateParticleLifeTime, SetTemplateTexture, SetTemplateOffset, SetTemplateVelocity, SetTemplateAlignToFall, SetTemplateGravity, SetTemplateAlphaVel, SetTemplateSize, SetTemplateColors, SetTemplateFloor, SetTemplateSizeVel, SetTemplateSubTemplate, FreeParticles } from "./lib/DevilParticleSystem.ts"
 
 //--------------------------------------- music & sounds ----------------------------------------------
 
@@ -8771,7 +8777,7 @@ function GetStepSound(entity: int) {
 							FreeBrush(brush)
 							return mat.StepSound-1
 						}
-						Exit()
+						break
 					}
 				}                
 			}
@@ -8785,7 +8791,7 @@ function GetStepSound(entity: int) {
 							FreeBrush(brush)
 							return mat.StepSound-1
 						}
-						Exit()
+						break
 					}
 				}                
 			}
@@ -8799,7 +8805,7 @@ function GetStepSound(entity: int) {
 						if (mat.StepSound > 0) {
 							return mat.StepSound-1
 						}
-						Exit()
+						break
 					}
 				}                
 			}
@@ -9054,10 +9060,10 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 						if (it!=item && it.collider != 0 && it.Picked == False) {
 							if (Distance(EntityX(it.collider,True), EntityZ(it.collider,True), EntityX(item.collider, True), EntityZ(item.collider, True)) < (180.0 * RoomScale)) {
 								it2 = it
-								Exit()
+								break
 							} else if (Distance(EntityX(it.collider,True), EntityZ(it.collider,True), x,z) < (180.0 * RoomScale)) {
 								it2 = it
-								Exit()
+								break
 							}
 						}
 					}
@@ -9487,7 +9493,7 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 					for (it3 of Items.each) {
 						if (it3.itemtemplate.tempname = "scp427") {
 							no427Spawn = True
-							Exit()
+							break
 						}
 					}
 					if (!no427Spawn) {
@@ -9760,7 +9766,7 @@ function Use294() {
 				for (e of Events.each) {
 					if (e.room = PlayerRoom) {
 						e.EventState2 = 0
-						Exit()
+						break
 					}
 				}
 			}
@@ -9882,7 +9888,7 @@ function UpdateMTF(): int {
 			for (r of Rooms.each) {
 				if (Lower(r.RoomTemplate.Name) = "gateaentrance") {
 					entrance = r
-					Exit()
+					break
 				}
 			}
 			
@@ -9934,7 +9940,7 @@ function UpdateMTF(): int {
 							PlayAnnouncement("SFX/Character/MTF/ThreatAnnouncPossession.ogg")
 							MTFtimer = 25000
 							return
-							Exit()
+							break
 						}
 					}
 				}
@@ -10030,7 +10036,7 @@ function UpdateInfect() {
 								r.NPC[0].State=6
 								PlayerRoom = r
 								UnableToMove = False
-								Exit()
+								break
 							}
 						}
 					}
@@ -11097,7 +11103,7 @@ function UpdateLeave1499() {
 						if (EntityY(it.collider) >= EntityY(r1499.obj)-5) {
 							PositionEntity (it.collider,NTF_1499PrevX,NTF_1499PrevY+(EntityY(it.collider)-EntityY(r1499.obj)),NTF_1499PrevZ)
 							ResetEntity (it.collider)
-							Exit()
+							break
 						}
 					}
 				}
@@ -11108,7 +11114,7 @@ function UpdateLeave1499() {
 				NTF_1499PrevY = 0.0
 				NTF_1499PrevZ = 0.0
 				NTF_1499PrevRoom = Null
-				Exit()
+				break
 			}
 		}
 	}
@@ -11218,7 +11224,7 @@ function CheckTriggers(): string {
 				if (EntityY(Collider)>((sy*Mesh_MinY)+PlayerRoom.y) && EntityY(Collider)<((sy*Mesh_MaxY)+PlayerRoom.y)) {
 					if (EntityZ(Collider)>((sz*Mesh_MinZ)+PlayerRoom.z) && EntityZ(Collider)<((sz*Mesh_MaxZ)+PlayerRoom.z)) {
 						inside = i
-						Exit()
+						break
 					}
 				}
 			}
@@ -11262,7 +11268,7 @@ function CatchErrors(location: string) {
 				let l: string = ReadLine(errF)
 				if (Left(l,Len(location))=location) {
 					canwriteError = False
-					Exit()
+					break
 				}
 			}
 			if (canwriteError) {

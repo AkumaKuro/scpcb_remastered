@@ -55,3 +55,7 @@ export function VertexBlue( surface: int,index: int) : float {return 0}
 export function FlipMesh(mesh: int) {}
 
 export function MoveEntity (entity: int,x: float,y: float,z: float) {}
+
+export function Delete (custom_type_name: any) {}
+
+export function EntityAlpha (entity: int,alpha: float) {}

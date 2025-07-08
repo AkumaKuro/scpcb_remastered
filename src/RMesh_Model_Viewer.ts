@@ -1,3 +1,5 @@
+import { BBText } from "./Helper/graphics"
+
 Global XE_XF,XE_MAXtextures
 
 Type XE_texdata
@@ -412,14 +414,14 @@ Function StripPath$(file$)
 	Return name$ 
 End Function
 
-Function Piece$(s$,entry,char$=" ")
-	While Instr(s,char+char)
+function Piece(s$,entry,char$=" ") : string {
+	while (Instr(s,char+char)) {
 		s=Replace(s,char+char,char)
-	Wend
-	For n=1 To entry-1
+	}
+	for (n of range(1, entry)) {
 		p=Instr(s,char)
 		s=Right(s,Len(s)-p)
-	Next
+	}
 	p=Instr(s,char)
 	If p<1
 		a$=s
@@ -427,7 +429,7 @@ Function Piece$(s$,entry,char$=" ")
 		a=Left(s,p-1)
 	EndIf
 	Return a
-End Function
+}
 
 Function KeyValue$(entity,key$,defaultvalue$="")
 	properties$=EntityName(entity)
@@ -765,14 +767,14 @@ while (!KeyHit(1)) {
 	If camPitch<-90.0
 		camPitch = -90.0
 	EndIf
-	RotateEntity Camera,camPitch,camYaw,0.0,True
+	RotateEntity(Camera,camPitch,camYaw,0.0,True)
 	
-	If KeyDown(17) Then MoveEntity Camera,0,0,1+KeyDown(42)*2
+	if (KeyDown(17)) {MoveEntity(Camera,0,0,1+KeyDown(42)*2)}
 	
-	If KeyDown(30) Then MoveEntity Camera,-1-KeyDown(42)*2,0,0
-	If KeyDown(32) Then MoveEntity Camera,1+KeyDown(42)*2,0,0
+	if (KeyDown(30)) {MoveEntity(Camera,-1-KeyDown(42)*2,0,0)}
+	if (KeyDown(32)) {MoveEntity(Camera,1+KeyDown(42)*2,0,0)}
 	
-	If KeyDown(31) Then MoveEntity Camera,0,0,-1-KeyDown(42)*2
+	if (KeyDown(31)) {MoveEntity(Camera,0,0,-1-KeyDown(42)*2)}
 	
 	If KeyDown(57) Then TranslateEntity Camera,0,4+KeyDown(42)*8,0
 	
@@ -785,38 +787,31 @@ while (!KeyHit(1)) {
 	
 	RenderWorld
 	
-	Color 0,0,0
-	Text 6,6,"Picked X = "+Str(PickedX()*10.0)
-	Text 6,26,"Picked Y = "+Str(PickedY()*10.0)
-	Text 6,46,"Picked Z = "+Str(PickedZ()*10.0)
-	Color 0,255,0
-	Text 5,5,"Picked X = "+Str(PickedX()*10.0)
-	Text 5,25,"Picked Y = "+Str(PickedY()*10.0)
-	Text 5,45,"Picked Z = "+Str(PickedZ()*10.0)
+	Color(0,0,0)
+	BBText(6,6,"Picked X = "+Str(PickedX()*10.0))
+	BBText(6,26,"Picked Y = "+Str(PickedY()*10.0))
+	BBText(6,46,"Picked Z = "+Str(PickedZ()*10.0))
+	Color(0,255,0)
+	BBText(5,5,"Picked X = "+Str(PickedX()*10.0))
+	BBText(5,25,"Picked Y = "+Str(PickedY()*10.0))
+	BBText(5,45,"Picked Z = "+Str(PickedZ()*10.0))
 	
-	If KeyHit(44) Then
+	if (KeyHit(44)) {
 		BumpEnvMat = -BumpEnvMat
-	EndIf
+	}
 	
-	If KeyHit(45) Then
+	if (KeyHit(45)) {
 		BumpEnvMat = BumpEnvMat/2
-	EndIf
-	If KeyHit(46) Then
+	}
+	if (KeyHit(46)) {
 		BumpEnvMat = BumpEnvMat*2
-	EndIf
+	}
 	
-	If KeyHit(47) Then
+	if (KeyHit(47)) {
 		BumpEnvMat = BumpEnvMat/3
-	EndIf
-	If KeyHit(48) Then
+	}
+	if (KeyHit(48)) {
 		BumpEnvMat = BumpEnvMat*3
-	EndIf
-	
-	;TextureBumpEnvMat bump,0,0,-BumpEnvMat
-	;TextureBumpEnvMat bump,0,1,-BumpEnvMat
-	;TextureBumpEnvMat bump,1,0,BumpEnvMat
-	;TextureBumpEnvMat bump,1,1,BumpEnvMat
-	;TextureBumpEnvOffset bump,0.5
-	
-	Flip
-Wend
+	}	
+	Flip()
+}
