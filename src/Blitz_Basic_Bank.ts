@@ -3,15 +3,20 @@
 // <param name="offset">Offset in bytes that the poke operation will be started at.</param>
 // <param name="value">The string to poke.</param>
 // <remarks>If the end of the bank is reached, string will still end with a NULL byte.</remarks>
+
+import { BankSize, Hex, PeekByte, PokeByte } from "./Helper/bank"
+import { Chr, DebugLog, int, range } from "./Helper/bbhelper"
+import { Len, Asc, Mid, Right } from "./Helper/strings"
+
 // <subsystem>Blitz.Bank</subsystem>
-function PokeString(bankHandle, offset, value$) {
+export function PokeString(bankHandle: int, offset: int, value: string) {
 	
 	let stringPos		= 1
 	let bankPos		= offset + stringPos - 1
 	let bankLength	= BankSize(bankHandle) - 1
 	
 	while ((stringPos <= Len(value)) && (bankPos < bankLength)) {
-		PokeByte (bankHandle, bankPos, Asc(Mid(value$, stringPos, 1)))
+		PokeByte (bankHandle, bankPos, Asc(Mid(value, stringPos, 1)))
 		
 		// Move to next char
 		bankPos 	= bankPos + 1
@@ -28,7 +33,7 @@ function PokeString(bankHandle, offset, value$) {
 // <param name="offset">Offset in bytes that the peek operation will be started at.</param>
 // <returns>The Peeked string.</returns>
 // <subsystem>Blitz.Bank</subsystem>
-function PeekString(bankHandle, offset) : string {
+export function PeekString(bankHandle: int, offset: int) : string {
 	
 	let bankPos		= offset
 	let bankLength	= BankSize(bankHandle)
@@ -57,28 +62,27 @@ function PeekString(bankHandle, offset) : string {
 // <param name="bankHandle">Handle of the bank to dump.</param>
 // <param name="rowSize">Optional value to control the length of a dumped row.</param>
 // <subsystem>Blitz.Bank</subsystem>
-Function DumpBank(bankHandle, rowSize = 16)
+export function DumpBank(bankHandle: int, rowSize: int = 16) {
 	
-	Local dumpString$	= ""
-	Local ascString$	= ""
+	let dumpString: string	= ""
+	let ascString: string	= ""
 	
 	// Header
-	DebugLog "Bank Size: " + BankSize(bankHandle)
-	For i = 0 To BankSize(bankHandle) - 1
+	DebugLog("Bank Size: " + BankSize(bankHandle))
+	for (let i of range(BankSize(bankHandle))) {
 		
 		// Dump is raw data (as hex), asc is the ascii data
 		dumpString = dumpString + Right(Hex(PeekByte(bankHandle, i)), 2) + " "
 		ascString	= ascString + Chr(PeekByte(bankHandle, i))
 		
 		// Dump the line if we're at the end of the row
-		If i Mod rowSize = rowSize - 1 Then
-			DebugLog dumpString + "   " + ascString
+		if (i % rowSize == rowSize - 1) {
+			DebugLog(dumpString + "   " + ascString)
 			dumpString = ""
 			ascString = ""
-		EndIf
-	Next
+		}
+	}
 	
 	// Any extra data not dumped.
-	DebugLog dumpString + "   " + ascString
-	
-End Function
+	DebugLog (dumpString + "   " + ascString)	
+}

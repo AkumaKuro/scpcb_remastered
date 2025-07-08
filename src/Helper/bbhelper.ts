@@ -11,7 +11,7 @@ export function Chr(integer: int): string {return ""}
 
 export function Float<T>(value: T): float {return 0}
 
-export function SetFont(font_handle) {}
+export function SetFont(font_handle: int) {}
 
 export function range(a: int, b: int = -1, step: int = 1): int[] {
     return []
@@ -21,35 +21,15 @@ export function range(a: int, b: int = -1, step: int = 1): int[] {
 
 export function EntityTexture(entity, texture ,frame = null, index = null) {}
 
-export function Asc(string: string): int {
-    return 0
-}
 
-
-
-export function StringHeight(str: string): int {
-    return 0
-}
 
 // Image
 export function ImageWidth (image_handle) {}
 
 // Entity
 export function EntityFX(entity,fx) {}
-export function PositionEntity( entity,x: float,y: float,z: float, global = null) {}
-export function ScaleEntity (entity,x_scale: float,y_scale: float,z_scalel: float,global = null) {}
-
-// Camera
-export function CreateCamera (parent = null ): int {
-    return 0
-}
-
-export function CameraViewport (camera,x,y,width,height){}
-
-export function CameraClsMode (camera,cls_color: boolean,cls_zbuffer: boolean){}
-export function CameraZoom (camera,zoom: float) {}
-export function CameraRange (camera,near: float,far: float) {}
-
+export function PositionEntity( entity,x: float,y: float,z: float, global: boolean = false) {}
+export function ScaleEntity (entity,x_scale: float,y_scale: float,z_scalel: float,global: boolean = false) {}
 
 // Files
 export function FileType (filename: string): FileTypeResult {
@@ -71,9 +51,7 @@ export function ChannelPlaying (channel_handle): boolean {
     return true
 }
 
-export function FileSize(filename: string): int {
-    return 0
-}
+
 
 export class BColor {
     r: int
@@ -111,8 +89,6 @@ enum CollisionResponse {
     slide2 = 3 //prevent entities from sliding down slopes 
 }
 
-export function BankSize(bankhandle: int) : int { return 0 }
-
 export function Graphics3D(width: int, height: int, depth: int, mode: DisplayMode = DisplayMode.WindowedDebugFullscreenRelease) {}
 
 enum DisplayMode {
@@ -124,11 +100,7 @@ enum DisplayMode {
 
 export function EntityName(entity: int) : string {return ''}
 
-export function Sqr(x: float) : float {return 0}
 
-
-// Animation
-export function AddAnimSeq(entity: int,length: int) {}
 
 export function GetChild (entity: int,index: int) : int {return 0}
 
@@ -146,11 +118,7 @@ export function GetParent ( entity: int ) : int {return 0}
 
 export function KeyHit (scancode: int) : boolean {return false}
 
-export function Cls() {}
 
-export function Flip() {}
-
-export function ClsColor(red: int,green: int,blue: int) {}
 
 export function Delay (milliseconds: int) {}
 

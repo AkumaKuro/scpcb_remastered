@@ -1,4 +1,3 @@
-import {int, CameraRange, CameraViewport, CameraZoom, ChannelPlaying, Chr, CopyEntity, CreateCamera, DebugLog, EntityFX, EntityName, EntityTexture, Exit, float, Float, GetChild, ImageWidth, Int, PositionEntity, RuntimeError, ScaleEntity, SeedRnd, Sqr} from "./Helper/bbhelper.ts"
 
 class Materials {
 	name: string
@@ -106,9 +105,9 @@ function LoadWorld(file: string, rt: RoomTemplates) {
 				// nothing?
 			case "screen":
 				
-				x: float = EntityX(node)*RoomScale
-				y: float = EntityY(node)*RoomScale
-				z: float = EntityZ(node)*RoomScale
+				x = EntityX(node)*RoomScale
+				y = EntityY(node)*RoomScale
+				z = EntityZ(node)*RoomScale
 				
 				if (x != 0 || y != 0 || z != 0) {
 					let ts: TempScreens = new TempScreens()
@@ -120,9 +119,9 @@ function LoadWorld(file: string, rt: RoomTemplates) {
 				}
 				
 			case "waypoint":
-				x: float = EntityX(node)*RoomScale
-				y: float = EntityY(node)*RoomScale
-				z: float = EntityZ(node)*RoomScale				
+				x = EntityX(node)*RoomScale
+				y = EntityY(node)*RoomScale
+				z = EntityZ(node)*RoomScale				
 				let w: TempWayPoints = new TempWayPoints()
 				w.roomtemplate = rt
 				w.x = x
@@ -279,7 +278,7 @@ function AddTextureToCache(texture: int) {
 }
 
 function ClearTextureCache() {
-	for (tc of Materials.each) {
+	for (let tc of Materials.each) {
 		if (tc.Diff != 0) {
 			FreeTexture(tc.Diff)
 		}
@@ -291,7 +290,7 @@ function ClearTextureCache() {
 }
 
 function FreeTextureCache() {
-	for (tc of Materials.each) {
+	for (let tc of Materials.each) {
 		if (tc.Diff != 0) {
 			FreeTexture (tc.Diff)
 		}
@@ -332,13 +331,13 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 	
 	let collisionMeshes: int = CreatePivot()
 	
-	let hasTriggerBox: int = False
+	let hasTriggerBox: boolean = false
 	
 	for (i of range(4)) { //reattempt up to 3 times
 		if (f == 0) {
 			f=ReadFile(file)
 		} else {
-			Exit()
+			break
 		}
 	}
 	if (f == 0) {
@@ -529,7 +528,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 	if (hasTriggerBox) {
 		DebugLog ("TriggerBoxEnable")
 		rt.TempTriggerboxAmount = ReadInt(f)
-		for (tb of range(rt.TempTriggerboxAmount)) {
+		for (let tb of range(rt.TempTriggerboxAmount)) {
 			rt.TempTriggerbox[tb] = CreateMesh(rt.obj)
 			count = ReadInt(f)
 			for (i of range(1, count + 1)) {
@@ -556,7 +555,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 	
 	count=ReadInt(f) //point entities
 	for (i of range(1, count + 1)) {
-		temp1s=ReadString(f)
+		let temp1s = ReadString(f)
 		switch (temp1s) {
 			case "screen":
 				
@@ -564,7 +563,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 				temp2=ReadFloat(f)*RoomScale
 				temp3=ReadFloat(f)*RoomScale
 				
-				temp2s =ReadString(f)
+				let temp2s = ReadString(f)
 				
 				if (temp1 != 0 || temp2 != 0 || temp3 != 0) {
 					let ts: TempScreens = new TempScreens()
@@ -616,7 +615,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 				
 				if (temp1 != 0 || temp2 != 0 || temp3 != 0) {
 					range = ReadFloat(f)/2000.0
-					lcolor$=ReadString(f)
+					lcolor = ReadString(f)
 					intensity = Min(ReadFloat(f)*0.8,1.0)
 					r = Int(Piece(lcolor,1," "))*intensity
 					g = Int(Piece(lcolor,2," "))*intensity
@@ -774,16 +773,18 @@ function StripPath(file: string): string {
 }
 
 function Piece(s: string,entry,char: string=" "): string {
+	let p
+	let a
 	while (Instr(s,char+char)) {
 		s=Replace(s,char+char,char)
 	}
-	for (n of range(1, entry)) {
+	for (let n of range(1, entry)) {
 		p=Instr(s,char)
 		s=Right(s,Len(s)-p)
 	}
 	p=Instr(s,char)
 	if (p<1) {
-		a$=s
+		a=s
 	} else {
 		a=Left(s,p-1)
 	}
@@ -821,22 +822,22 @@ function KeyValue(entity,key: string,defaultvalue: string=""): string {
 
 
 //Forest gen consts
-const gridsize: int = 10
-const deviation_chance: int = 40 //out of 100
-const branch_chance: int = 65
-const branch_max_life: int = 4
-const branch_die_chance: int = 18
-const max_deviation_distance: int = 3
-const return_chance: int = 27
-const center = 5 //(gridsize-1) / 2
+export const gridsize: int = 10
+export const deviation_chance: int = 40 //out of 100
+export const branch_chance: int = 65
+export const branch_max_life: int = 4
+export const branch_die_chance: int = 18
+export const max_deviation_distance: int = 3
+export const return_chance: int = 27
+export const center = 5 //(gridsize-1) / 2
 
 import "Drawportals.bb"
-import { range } from "./Helper/bbhelper.ts"
+import { ChannelPlaying, Chr, CopyEntity, CountChildren, DebugLog, EntityFX, EntityName, EntityTexture, Exit, Float, float, GetChild, ImageWidth, Int, int, PositionEntity, range, RuntimeError, ScaleEntity, SeedRnd } from "./Helper/bbhelper.ts"
 
 class Forest {
-	TileMesh: int[6]
-	DetailMesh: int[6]
-	TileTexture: int[10]
+	TileMesh: int[] = new Array(6)
+	DetailMesh: int[] = new Array(6)
+	TileTexture: int[] = new Array(10)
 	grid: int[] = new Array((gridsize*gridsize)+11)
 	TileEntities: int[] = new Array((gridsize*gridsize)+1)
 	Forest_Pivot: int
@@ -863,7 +864,7 @@ function move_forward(dir: int,pathx: int,pathy: int,retval: int=0) : int {
 	}
 }
 
-function chance(chanc: int) : int {
+function chance(chanc: int) : boolean {
 	//perform a chance given a probability
 	return (Rand(0,100)<=chanc)
 }
@@ -886,7 +887,7 @@ function turn_if_deviating(max_deviation_distance_: int,pathx: int,center_: int,
 function GenForestGrid(fr: Forest) {
 	CatchErrors("Uncaught (GenForestGrid)")
 	fr.ID=LastForestID+1
-	LastForestID=LastForestID+1
+	LastForestID += 1
 	
 	let door1_pos: int
 	let door2_pos: int
@@ -8126,14 +8127,21 @@ function load_terrain(hmap,yscale: float=0.7,t1: int,t2: int,mask: int) {
 
 
 
-import {} from "./Skybox.bb"
-import { SetBuffer, TextureBuffer, BackBuffer, ReadPixelFast } from "./Helper/graphics.ts"
-import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces } from "./Helper/Mesh.ts"
-import { Trim, Left, Instr, Replace, Right, Str, Len, Lower, Mid } from "./Helper/strings.ts"
+import {} from "./Skybox.ts/index.ts"
+import { SetBuffer, TextureBuffer, BackBuffer, ReadPixelFast, Cls, ClsColor, ColorRed, RenderWorld } from "./Helper/graphics.ts"
+import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces, AddMesh, CountVertices, EntityPitch, EntityRoll, EntityX, EntityY, EntityYaw, EntityZ, FlipMesh, FreeBrush, FreeEntity, GetBrushTexture, GetSurfaceBrush, MoveEntity, PositionMesh, RotateEntity, RotateMesh, TFormedX, TFormedY, TFormedZ, VertexX, VertexZ } from "./Helper/Mesh.ts"
+import { Trim, Left, Instr, Replace, Right, Str, Len, Lower, Mid, Upper } from "./Helper/strings.ts"
 import { TFormVector } from "./Helper/vector.ts"
 import { OldAiPics, AccessCode, PlayerZone, PlayerRoom, DrawHandIcon, MouseUp1, MenuScale, ButtonSFX, FPSfactor, BlinkTimer, Wearing714, WearingHazmat, WearingGasMask, Sanity, RestoreSanity, VomitTimer, user_camera_pitch, GrabbedEntity, MouseHit1, MouseDown1, mouse_y_speed_1, DrawArrowIcon, DropSpeed, EnableRoomLights, Mesh_MinX, Mesh_MinY, Mesh_MinZ, Mesh_MaxX, Mesh_MaxY, Mesh_MaxZ } from "./Main.ts"
 import { NPCtypeMTF, Curr173, NPCtype1499 } from "./NPCs.ts"
-import { LoadAnimMesh_Strict, LoadSound_Strict } from "./StrictLoads.ts"
+import { LoadAnimMesh_Strict, LoadImage_Strict, LoadSound_Strict } from "./StrictLoads.ts"
+import { GetINIString, GetINIInt } from "./Converter.ts"
+import { SAVEONSCREENS } from "./Difficulty.ts"
+import { Eof, ReadLine, CloseFile, TextureName, ReadFile, ReadFloat, ReadInt, ReadString } from "./Helper/Files.ts"
+import { Rand, Abs, Sin, Sqr } from "./Helper/math.ts"
+import { TextureBlend, FreeTexture, ImageBuffer, ScaleTexture, LockBuffer, TextureWidth, TextureHeight, UnlockBuffer } from "./Helper/textures.ts"
+import { Items } from "./Items.ts"
+import { CameraZoom, CreateCamera, CameraViewport, CameraRange } from "./Helper/camera.ts"
 
 export var UpdateRoomLightsTimer: float = 0.0
 

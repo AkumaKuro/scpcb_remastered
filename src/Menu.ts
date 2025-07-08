@@ -1,5 +1,11 @@
-import {int, float} from "./bbhelper.ts"
-import { LoadImage_Strict } from "./StrictLoads.ts"
+import { AppTitle, ChannelPlaying, Chr, Color, DebugLog, EntityFX, Exit, FileType, Float, float, FlushKeys, FreeSound, ImageWidth, Int, int, KeyHit, range, SeedRnd, SetFont } from "./Helper/bbhelper"
+import { CurrentDir, Eof, ReadLine, CloseFile } from "./Helper/Files"
+import { Rect, SetBuffer, BackBuffer, GfxModeWidth, GfxModeHeight, Flip, ClsColor, Cls, TextureBuffer } from "./Helper/graphics"
+import { FreeEntity } from "./Helper/Mesh"
+import { LoadSound } from "./Helper/sounds"
+import { Left, Replace, Len, Trim, Mid, Lower, Instr, Right, StringHeight } from "./Helper/strings"
+import { LoadImage_Strict, LoadSound_Strict } from "./StrictLoads"
+
 
 const CurrentGameVersion: string = "1.3.10"
 
@@ -16,10 +22,10 @@ ResizeImage(MenuText, ImageWidth(MenuText) * MenuScale, ImageHeight(MenuText) * 
 ResizeImage(Menu173, ImageWidth(Menu173) * MenuScale, ImageHeight(Menu173) * MenuScale)
 ResizeImage(QuickLoadIcon, ImageWidth(QuickLoadIcon) * MenuScale, ImageHeight(QuickLoadIcon) * MenuScale)
 
-for (i of range(4)) {
-	ArrowIMG(i) = LoadImage_Strict("GFX/menu/arrow.png")
-	RotateImage(ArrowIMG(i), 90 * i)
-	HandleImage(ArrowIMG(i), 0, 0)
+for (let i of range(4)) {
+	ArrowIMG[i] = LoadImage_Strict("GFX/menu/arrow.png")
+	RotateImage(ArrowIMG[i], 90 * i)
+	HandleImage(ArrowIMG[i], 0, 0)
 }
 
 var RandomSeed: string
@@ -57,14 +63,18 @@ var SavedMapsAmount: int = 0
 var SavedMaps: string[] = new Array(SavedMapsAmount+1)
 var SavedMapsAuthor: string[] = new Array(SavedMapsAmount+1)
 
-var SelectedMap$
+var SelectedMap: string
 
 LoadSaveGames()
 
 var CurrLoadGamePage: int = 0
 
 function UpdateMainMenu() {
-	let x: int, y: int, width: int, height: int, temp: int
+	let x: int
+	let y: int
+	let width: int
+	let height: int
+	let temp: int
 	
 	Color (0,0,0)
 	Rect (0,0,GraphicWidth,GraphicHeight,True)
@@ -795,7 +805,7 @@ function UpdateMainMenu() {
 									if (test != 0) {
 										UserTrackCheck2 = UserTrackCheck2 + 1
 									}
-									FreeSound test
+									FreeSound(test)
 								}
 							}
 							CloseDir (Dir)
@@ -1065,13 +1075,13 @@ function UpdateMainMenu() {
 				
 				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SavedMapsAmount)/6.0))),1)),True,True)
 				
-				AASetFont Font1
+				AASetFont(Font1)
 				
-				If CurrLoadGamePage > Ceil(Float(SavedMapsAmount)/6.0)-1 Then
+				if (CurrLoadGamePage > Ceil(Float(SavedMapsAmount)/6.0)-1) {
 					CurrLoadGamePage = CurrLoadGamePage - 1
-				EndIf
+				}
 				
-				AASetFont Font1
+				AASetFont(Font1)
 				
 				if (SavedMaps(0)="") {
 					AAText (x + 20 * MenuScale, y + 20 * MenuScale, "No saved maps. Use the Map Creator to create new maps.")

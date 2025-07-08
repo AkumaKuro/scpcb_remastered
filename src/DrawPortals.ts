@@ -1,5 +1,8 @@
-import {int, float, CameraRange, CameraViewport, CameraZoom, CreateCamera, EntityFX, EntityTexture, Float, PositionEntity} from "./Helper/bbhelper.ts"
-import { SetBuffer, TextureBuffer, BackBuffer } from "./Helper/graphics.ts"
+import { float, int, Float, PositionEntity, EntityTexture, EntityFX } from "./Helper/bbhelper.ts"
+import { CreateCamera, CameraRange, CameraZoom, CameraProjMode, CameraViewport } from "./Helper/camera.ts"
+import { SetBuffer, TextureBuffer, BackBuffer, Cls, RenderWorld } from "./Helper/graphics.ts"
+import { RotateEntity, ScaleMesh, FreeEntity, FlipMesh } from "./Helper/Mesh.ts"
+import { FreeTexture, PositionTexture, ScaleTexture, TextureBlend } from "./Helper/textures.ts"
 import { GraphicWidth, GraphicHeight } from "./Main.ts"
 
 class DrawPortal {
@@ -19,9 +22,10 @@ class DrawPortal {
 	texw: int
 	texh: int
 	id: int
+	static each: DrawPortal[] = []
 }
 
-function CreateDrawPortal(x: float,y: float,z: float,pitch: float,yaw: float,roll: float,w: float,h: float,camx: float=0.0,camy: float=0.0,camz: float=0.0,campitch: float=0.0,camyaw: float=0.0,camroll: float=0.0,camZoom: float=1.0,texw: int=2048,texh: int=2048): DrawPortal {
+export function CreateDrawPortal(x: float,y: float,z: float,pitch: float,yaw: float,roll: float,w: float,h: float,camx: float=0.0,camy: float=0.0,camz: float=0.0,campitch: float=0.0,camyaw: float=0.0,camroll: float=0.0,camZoom: float=1.0,texw: int=2048,texh: int=2048): DrawPortal {
 	let ndp: DrawPortal = new DrawPortal()
 	
 	ndp.w = w
@@ -56,21 +60,21 @@ function CreateDrawPortal(x: float,y: float,z: float,pitch: float,yaw: float,rol
 	PositionEntity (ndp.portal,x,y,z,true)
 	RotateEntity (ndp.portal,pitch,yaw,roll,true)
 	
-	CameraProjMode ndp.cam,0 //prevent the camera from causing problems with the BackBuffer
+	CameraProjMode(ndp.cam,0) //prevent the camera from causing problems with the BackBuffer
 	
 	ndp.id = 0
 	
 	let temp: int = 0
-	For c.DrawPortal = Each DrawPortal
+	for (let c of DrawPortal.each) {
 	//	temp=temp+1
 		temp = Max(c.id,temp)
-	Next
+	}
 	ndp.id = temp+1
 	
-	Return ndp
-End Function
+	return ndp
+}
 
-function DestroyDrawPortal(ndp: DrawPortal) {
+export function DestroyDrawPortal(ndp: DrawPortal) {
 	if (ndp.tex != 0) {FreeTexture (ndp.tex)}
 	ndp.tex = 0
 	ndp.texw = 0
@@ -79,10 +83,10 @@ function DestroyDrawPortal(ndp: DrawPortal) {
 	ndp.cam = 0
 	if (ndp.portal != 0) {FreeEntity (ndp.portal)}
 	ndp.portal = 0
-	Delete (ndp)
+	Delete(ndp)
 }
 
-function UpdateDrawPortal(ndp: DrawPortal) {
+export function UpdateDrawPortal(ndp: DrawPortal) {
 	RotateEntity (ndp.cam,ndp.campitch,ndp.camyaw,ndp.camroll,true)
 	CameraZoom (ndp.cam,ndp.camZoom)
 	

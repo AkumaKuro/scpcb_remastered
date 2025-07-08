@@ -1,6 +1,10 @@
-import {float, int, Abs, PositionEntity, MoveEntity} from "./bbhelper.ts"
-import {FPSfactor, Sin, Max, Min} from "./Main.ts"
-import {Rooms} from "./MapSystem.ts"
+import { int, float, CopyEntity, ScaleEntity, Exit, PositionEntity, range, EntityFX, Chr } from "./Helper/bbhelper"
+import { Rand, Sin } from "./Helper/math"
+import { EntityX, EntityZ, EntityY, FreeEntity, RotateEntity, MoveEntity } from "./Helper/Mesh"
+import { Instr } from "./Helper/strings"
+import { PlayerRoom, FPSfactor, GrabbedEntity, Wearing714, MsgTimer } from "./Main"
+import { Rooms, RoomScale, HideDistance, RemoteDoorOn } from "./MapSystem"
+
 
 var ClosestButton: int
 var ClosestDoor: Doors
@@ -345,9 +349,9 @@ function UpdateDoors() {
 					if (d.AutoClose && RemoteDoorOn) {
 						if (EntityDistance(Camera, d.obj) < 2.1) {
 							if (!Wearing714) {PlaySound_Strict (HorrorSFX(7))}
-							d.open = False
+							d.open = false
 							d.SoundCHN = PlaySound2(CloseDoorSFX(Min(d.dir,1), Rand(0, 2)), Camera, d.obj)
-							d.AutoClose = False
+							d.AutoClose = false
 						}
 					}				
 				}
@@ -421,20 +425,20 @@ function UpdateDoors() {
 					}
 					
 					if (d.DoorHitOBJ != 0) {
-						ShowEntity d.DoorHitOBJ
+						ShowEntity(d.DoorHitOBJ)
 					}
 				} else {
 					d.fastopen = 0
-					PositionEntity(d.obj, EntityX(d.frameobj, True), EntityY(d.frameobj, True), EntityZ(d.frameobj, True))
+					PositionEntity(d.obj, EntityX(d.frameobj, true), EntityY(d.frameobj, true), EntityZ(d.frameobj, true))
 					if (d.obj2 != 0) {
-						PositionEntity(d.obj2, EntityX(d.frameobj, True), EntityY(d.frameobj, True), EntityZ(d.frameobj, True))
+						PositionEntity(d.obj2, EntityX(d.frameobj, true), EntityY(d.frameobj, true), EntityZ(d.frameobj, true))
 					}
-					if d.obj2 != 0 And d.dir = 0 Then
+					if (d.obj2 != 0 && d.dir == 0) {
 						MoveEntity(d.obj, 0, 0, 8.0 * RoomScale)
 						MoveEntity(d.obj2, 0, 0, 8.0 * RoomScale)
 					}
-					If d.DoorHitOBJ != 0 Then
-						HideEntity d.DoorHitOBJ
+					if (d.DoorHitOBJ != 0) {
+						HideEntity(d.DoorHitOBJ)
 					}
 				}
 			}
@@ -455,9 +459,9 @@ function UpdateDoors() {
 function UseDoor(d: Doors, showmsg: boolean = true, playsfx: boolean = true) {
 	let temp: int = 0
 	if (d.KeyCard > 0) {
-		if (SelectedItem = Null) {
+		if (!SelectedItem) {
 			if (showmsg) {
-				if ((Instr(Msg,"The keycard")=0 && Instr(Msg,"A keycard with")=0) Or (MsgTimer<70*3)) {
+				if ((Instr(Msg,"The keycard") == 0 && Instr(Msg,"A keycard with") == 0) || (MsgTimer<70*3)) {
 					Msg = "A keycard is required to operate this door."
 					MsgTimer = 70 * 7
 				}
@@ -504,7 +508,7 @@ function UseDoor(d: Doors, showmsg: boolean = true, playsfx: boolean = true) {
 					}
 				}
 			} else {
-				SelectedItem = Null
+				SelectedItem = null
 				if (showmsg) {
 					PlaySound_Strict(KeyCardSFX2)
 					if (d.locked) {

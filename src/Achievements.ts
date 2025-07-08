@@ -1,5 +1,11 @@
-import { Color, float, int, range } from "./Helper/bbhelper"
+import { AASetFont, AAText } from "./AAText"
+import { GetINIInt } from "./Converter"
+import { Color, float, ImageWidth, int, range } from "./Helper/bbhelper"
+import { Rect } from "./Helper/graphics"
 import { Str } from "./Helper/strings"
+import { DrawImage } from "./Helper/textures"
+import { GraphicHeight, Font3, Font1, MenuScale, FPSfactor2, GraphicWidth } from "./Main"
+import { LoadImage_Strict } from "./StrictLoads"
 
 export const MAXACHIEVEMENTS=37
 export var Achievements: boolean[] = new Array(MAXACHIEVEMENTS)
@@ -45,13 +51,13 @@ export const Achv1499: int = 35
 
 export const AchvKeter: int = 36
 
-var UsedConsole
+export var UsedConsole
 
-var AchievementsMenu: int
-var AchvMSGenabled: int = GetINIInt("options.ini", "options", "achievement popup enabled")
-var AchievementStrings: string[] = new Array(MAXACHIEVEMENTS)
-var AchievementDescs: string[] = new Array(MAXACHIEVEMENTS)
-var AchvIMG: int[] = new Array(MAXACHIEVEMENTS)
+export var AchievementsMenu: int
+export var AchvMSGenabled: int = GetINIInt("options.ini", "options", "achievement popup enabled")
+export var AchievementStrings: string[] = new Array(MAXACHIEVEMENTS)
+export var AchievementDescs: string[] = new Array(MAXACHIEVEMENTS)
+export var AchvIMG: int[] = new Array(MAXACHIEVEMENTS)
 
 for (let i of range(MAXACHIEVEMENTS)) {
 	let loc2: int = GetINISectionLocation("Data/achievementstrings.ini", "s"+Str(i))
@@ -84,7 +90,7 @@ function AchievementTooltip(achvno: int) {
     AASetFont(Font3)
     let width = AAStringWidth(AchievementStrings(achvno))
     AASetFont(Font1)
-    If (AAStringWidth(AchievementDescs(achvno))>width) Then
+    if (AAStringWidth(AchievementDescs(achvno))>width) {
         width = AAStringWidth(AchievementDescs(achvno))
 	}
     width = width+20*MenuScale
@@ -92,13 +98,13 @@ function AchievementTooltip(achvno: int) {
     let height = 38*scale
     
     Color(25,25,25)
-    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,True)
+    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,true)
     Color(150,150,150)
-    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,False)
+    Rect(ScaledMouseX()+(20*MenuScale),ScaledMouseY()+(20*MenuScale),width,height,false)
     AASetFont(Font3)
-    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), AchievementStrings(achvno), True, True)
+    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), AchievementStrings(achvno), true, true)
     AASetFont(Font1)
-    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs(achvno), True, True)
+    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs(achvno), true, true)
 }
 
 function DrawAchvIMG(x: int, y: int, achvno: int) {
@@ -126,6 +132,7 @@ class AchievementMsg {
 	msgx: float
 	msgtime: float
 	msgID: int
+	static each: AchievementMsg[] = []
 }
 
 function CreateAchievementMsg(id: int,txt: string): AchievementMsg {
@@ -163,10 +170,10 @@ function UpdateAchievementMsg() {
 			}
 			DrawFrame(x,y,width,height)
 			Color(0,0,0)
-			Rect(x+10*scale,y+10*scale,64*scale,64*scale,True)
+			Rect(x+10*scale,y+10*scale,64*scale,64*scale,true)
 			DrawImage(AchvIMG(amsg.achvID),x+10*scale,y+10*scale)
 			Color(50,50,50)
-			Rect(x+10*scale,y+10*scale,64*scale,64*scale,False)
+			Rect(x+10*scale,y+10*scale,64*scale,64*scale,false)
 			Color(255,255,255)
 			AASetFont(Font1)
 			RowText("Achievement Unlocked - "+amsg.txt,x+84*scale,y+10*scale,width-94*scale,y-20*scale)

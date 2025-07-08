@@ -1,4 +1,4 @@
-import { int } from "./bbhelper";
+import { float, int } from "./bbhelper";
 
 export function SetBuffer (buffer: int) {}
 export function BackBuffer() : int {return 0}
@@ -18,3 +18,11 @@ export function GfxModeWidth (mode: int) : int {return 0}
 export function ColorRed() : int {return 0}
 export function ColorBlue() : int {return 0}
 export function ColorGreen() : int {return 0}
+
+export function Cls() {}
+
+export function Flip() {}
+
+export function ClsColor(red: int,green: int,blue: int) {}
+
+export function RenderWorld(tween: float = 1) {}

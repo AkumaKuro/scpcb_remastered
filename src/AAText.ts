@@ -35,7 +35,7 @@ class AAFont {
 	isAA: int
 }
 
-function InitAAFont() {
+export function InitAAFont() {
 	if (AATextEnable) {
 		//Create Camera
 		let cam: int = CreateCamera()
@@ -150,7 +150,7 @@ export function AAStringHeight(txt: string): int {
 	return StringHeight(txt)
 }
 
-function AAText(x: int,y: int,txt: string,cx: boolean=false,cy: boolean = false,a: float = 1.0) {
+export function AAText(x: int,y: int,txt: string,cx: boolean=false,cy: boolean = false,a: float = 1.0) {
 	if (Len(txt) == 0) {return}
 	let font: AAFont = Object.AAFont(AASelectedFont)
 	

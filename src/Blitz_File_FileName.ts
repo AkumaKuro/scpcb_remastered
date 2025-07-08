@@ -1,8 +1,11 @@
-import {Replace, Right, Left, Len, Mid, range} from "./bbhelper.ts"
+
 
 // --------------------------------------------------
 // -- API Functions
 // --------------------------------------------------
+
+import { range } from "./Helper/bbhelper"
+import { Right, Left, Len, Replace, Mid } from "./Helper/strings"
 
 // File_GetDirName
 // File_GetFileName

@@ -1,29 +1,29 @@
-Include "BlitzAL.bb"
+import "BlitzAL.bb"
 
-AppTitle "SCP:CB Music Player"
+AppTitle("SCP:CB Music Player")
 
-Graphics 800,600,0,2
-SetBuffer BackBuffer()
+Graphics(800,600,0,2)
+SetBuffer(BackBuffer())
 
 alInitialise()
 
-Global CurrMusicWindow%=0
-Global MusicVolume# = 1.0
-Global MusicCHN = 0
-Global CurrMusic = -1
-Global MusicPlaying = -1
-Dim Music$(256)
-Global MusicAmount%=0
-Global MusicAmount2%=0
-Global IsMusicPlaying%=0
+export var CurrMusicWindow: int = 0
+export var MusicVolume: float = 1.0
+export var MusicCHN = 0
+export var CurrMusic = -1
+export var MusicPlaying = -1
+export var Music: string [] = new Array(256)
+export var MusicAmount: int = 0
+export var MusicAmount2: int = 0
+export var IsMusicPlaying: int = 0
 
-Local dirPath$ = "SFX\Radio\UserTracks\"
+Local dirPath$ = "SFX/Radio/UserTracks/"
 If FileType(dirPath)<>2 Then
 	CreateDir(dirPath)
 EndIf
 
-Const MusicPath$ = "SFX\Music\"
-Const MusicPath2$ = "SFX\Radio\UserTracks\"
+Const MusicPath$ = "SFX/Music/"
+Const MusicPath2$ = "SFX/Radio/UserTracks/"
 
 Local Dir% = ReadDir(MusicPath)
 Repeat
@@ -380,11 +380,3 @@ Function UpdateMusic()
 	EndIf
 	
 End Function
-
-
-
-
-
-;~IDEal Editor Parameters:
-;~F#E4#112#116#11A#11E#126#13A#156#160
-;~C#Blitz3D

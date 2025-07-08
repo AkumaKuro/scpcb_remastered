@@ -107,7 +107,7 @@ DebugLog CountChildren(h)
 			brush=GetSurfaceBrush(surf)
 			tex=GetBrushTexture (brush)
 			
-			;get rid of tex path & copy textures
+			//get rid of tex path & copy textures
 			If forcematerial$="" Then
 				from$=TextureName(tex)
 				XE_XFilen$=strip_path(from)
@@ -117,31 +117,31 @@ DebugLog CountChildren(h)
 				XE_XFilen$=strip_path(forcematerial$)
 			EndIf 
 	
-			;mark possible 'new' texture index
+			//mark possible 'new' texture index
 			Tindex=XE_MAXtextures
 	
-			;see id texture is alreadt in database, if so make tindex match the existing one
+			//see id texture is alreadt in database, if so make tindex match the existing one
 			For txs.XE_texdata = Each XE_texdata
 				If txs\fn=XE_XFilen$ Then noadd=1:Tindex=txs\idx
 			Next
 	
-			;Save texture data in index with surface handle for an index key
+			//Save texture data in index with surface handle for an index key
 			txs.XE_texdata = New XE_texdata
 			txs\h = surf
 			txs\idx = Tindex
 			txs\fn = XE_XFilen$
 			
-			;only add texture if a new one is present
+			//only add texture if a new one is present
 			If Not noadd
-				WriteLine XE_XF,"Material dx_brush"+Str(Tindex)+" {"
-				WriteLine XE_XF,"   1.000000;1.000000;1.000000;1.000000;;"
-				WriteLine XE_XF,"   0.000000;"
-				WriteLine XE_XF,"   1.000000;1.000000;1.000000;;"
-				WriteLine XE_XF,"   0.000000;0.000000;0.000000;;"
-				WriteLine XE_XF,"   TextureFilename {"
-				WriteLine XE_XF,"      "+Chr(34)+XE_XFilen$+Chr(34)+";"
-				WriteLine XE_XF,"   }"
-				WriteLine XE_XF,"}"
+				WriteLine(XE_XF,"Material dx_brush"+Str(Tindex)+" {")
+				WriteLine(XE_XF,"   1.000000;1.000000;1.000000;1.000000;;")
+				WriteLine(XE_XF,"   0.000000;")
+				WriteLine(XE_XF,"   1.000000;1.000000;1.000000;;")
+				WriteLine(XE_XF,"   0.000000;0.000000;0.000000;;")
+				WriteLine(XE_XF,"   TextureFilename {")
+				WriteLine(XE_XF,"      "+Chr(34)+XE_XFilen$+Chr(34)+";")
+				WriteLine(XE_XF,"   }")
+				WriteLine(XE_XF,"}")
 				XE_MAXtextures=XE_MAXtextures+1
 			EndIf 
 	
@@ -192,78 +192,78 @@ Function RecursiveAddMesh(h,basescaleX#=1,basescaleY#=1,basescaleZ#=1)
 ;		EntityParent mesh,0
 		mesh=h
 
-		WriteLine XE_XF,"   Frame "+ChiName$+" {"
-		WriteLine XE_XF,"      FrameTransformMatrix {"
-		WriteLine XE_XF,"         "+GetStringofMatElement(mesh,0,0)+","+GetStringofMatElement(mesh,0,1)+","+GetStringofMatElement(mesh,0,2)+",0.000000,"
-		WriteLine XE_XF,"         "+GetStringofMatElement(mesh,1,0)+","+GetStringofMatElement(mesh,1,1)+","+GetStringofMatElement(mesh,1,2)+",0.000000,"
-		WriteLine XE_XF,"         "+GetStringofMatElement(mesh,2,0)+","+GetStringofMatElement(mesh,2,1)+","+GetStringofMatElement(mesh,2,2)+",0.000000,"
-		WriteLine XE_XF,"         "+GetStringofMatElement(mesh,3,0)+","+GetStringofMatElement(mesh,3,1)+","+GetStringofMatElement(mesh,3,2)+",1.000000;;"
-		WriteLine XE_XF,"   }"
+		WriteLine(XE_XF,"   Frame "+ChiName$+" {")
+		WriteLine(XE_XF,"      FrameTransformMatrix {")
+		WriteLine(XE_XF,"         "+GetStringofMatElement(mesh,0,0)+","+GetStringofMatElement(mesh,0,1)+","+GetStringofMatElement(mesh,0,2)+",0.000000,")
+		WriteLine(XE_XF,"         "+GetStringofMatElement(mesh,1,0)+","+GetStringofMatElement(mesh,1,1)+","+GetStringofMatElement(mesh,1,2)+",0.000000,")
+		WriteLine(XE_XF,"         "+GetStringofMatElement(mesh,2,0)+","+GetStringofMatElement(mesh,2,1)+","+GetStringofMatElement(mesh,2,2)+",0.000000,")
+		WriteLine(XE_XF,"         "+GetStringofMatElement(mesh,3,0)+","+GetStringofMatElement(mesh,3,1)+","+GetStringofMatElement(mesh,3,2)+",1.000000;;")
+		WriteLine(XE_XF,"   }")
 
 		
-		If EntityClass$(mesh)="Mesh"
-			For surfc=1 To CountSurfaces (mesh)
+		if (EntityClass$(mesh) == "Mesh") {
+			for (surfc of range(1, CountSurfaces (mesh) + 1)) {
 				surf=GetSurface(mesh,surfc)
 				verts=CountVertices(surf)
 				tris=CountTriangles(surf)
 				;meshinfo
-				WriteLine XE_XF,"      Mesh "+ChiName$+" {"
+				WriteLine(XE_XF,"      Mesh "+ChiName$+" {")
 	
 	
 				;Number of verts;
-				WriteLine XE_XF,"         "+verts+";"
+				WriteLine(XE_XF,"         "+verts+";")
 	
 	
 				;X;Y;Z; of verts;
 				For v=0 To verts-1
 					If v=verts-1 Then term$=";;" Else term$=";,"
-					WriteLine XE_XF,"         "+VertexX (surf,v)+";"+VertexY (surf,v)+";"+VertexZ (surf,v)+term$
+					WriteLine(XE_XF,"         "+VertexX (surf,v)+";"+VertexY (surf,v)+";"+VertexZ (surf,v)+term$)
 				Next
 	
 				
 				;No of tris;
-				WriteLine XE_XF,"         "+tris+";"
+				WriteLine(XE_XF,"         "+tris+";")
 	
 	
 				;Tri ordering 3;t0,t1,t2;,
 				For t=0 To Tris-1
 					If t=tris-1 Then term$=";;" Else term$=";,"
-					WriteLine XE_XF,"         3;"+TriangleVertex(Surf,t,0)+","+TriangleVertex(Surf,t,1)+","+TriangleVertex(Surf,t,2)+term$
+					WriteLine(XE_XF,"         3;"+TriangleVertex(Surf,t,0)+","+TriangleVertex(Surf,t,1)+","+TriangleVertex(Surf,t,2)+term$)
 				Next 
 	
-				;Material List
-				WriteLine XE_XF,"         MeshMaterialList {"
-				WriteLine XE_XF,"            1;";num of materials for mesh
-				WriteLine XE_XF,"            "+tris+";";number of faces/tris
-				For t=0 To tris-1
+				//Material List
+				WriteLine(XE_XF,"         MeshMaterialList {")
+				WriteLine(XE_XF,"            1;") //num of materials for mesh
+				WriteLine(XE_XF,"            "+tris+";") //;number of faces/tris
+				for (t of range(tris)) {
 					If t=tris-1 Then term$=";;" Else term$=","
-					WriteLine XE_XF,"            0"+term$ ; face indexes?
+					WriteLine(XE_XF,"            0"+term$) //; face indexes?
 				Next 
-				WriteLine XE_XF,"            {dx_brush"+LookUpTindex(surf)+"}"
-				WriteLine XE_XF,"         } // end of material list"
+				WriteLine(XE_XF,"            {dx_brush"+LookUpTindex(surf)+"}")
+				WriteLine(XE_XF,"         } // end of material list")
 	
 				;Normals List
-				WriteLine XE_XF,"         MeshNormals {"
-				WriteLine XE_XF,"            "+verts+";"
+				WriteLine(XE_XF,"         MeshNormals {")
+				WriteLine(XE_XF,"            "+verts+";")
 				For v=0 To verts-1
 					If v=verts-1 Then term$=";;" Else term$=";,"
-					WriteLine XE_XF,"            "+VertexNX (surf,v)+";"+VertexNY (surf,v)+";"+VertexNZ (surf,v)+term$
+					WriteLine(XE_XF,"            "+VertexNX (surf,v)+";"+VertexNY (surf,v)+";"+VertexNZ (surf,v)+term$)
 				Next
-				WriteLine XE_XF,"            "+tris+";"
+				WriteLine(XE_XF,"            "+tris+";")
 				For t=0 To Tris-1
 					If t=tris-1 Then term$=";;" Else term$=";,"
-					WriteLine XE_XF,"            3;"+TriangleVertex(Surf,t,0)+","+TriangleVertex(Surf,t,1)+","+TriangleVertex(Surf,t,2)+term$
+					WriteLine(XE_XF,"            3;"+TriangleVertex(Surf,t,0)+","+TriangleVertex(Surf,t,1)+","+TriangleVertex(Surf,t,2)+term$)
 				Next 
-				WriteLine XE_XF,"         } // end of normal list"
+				WriteLine(XE_XF,"         } // end of normal list")
 	
 				;Texturecoords List
-				WriteLine XE_XF,"         MeshTextureCoords {"
-				WriteLine XE_XF,"            "+verts+";"
+				WriteLine(XE_XF,"         MeshTextureCoords {")
+				WriteLine(XE_XF,"            "+verts+";")
 				For v=0 To verts-1
 					If v=verts-1 Then term$=";;" Else term$=";,"
-					WriteLine XE_XF,"            "+VertexU (surf,v)+";"+VertexV (surf,v)+term$
+					WriteLine(XE_XF,"            "+VertexU (surf,v)+";"+VertexV (surf,v)+term$)
 				Next
-				WriteLine XE_XF,"         } // end of Texturecoord list"
+				WriteLine(XE_XF,"         } // end of Texturecoord list")
 	
 				;Vertexcolor List
 				WriteLine XE_XF,"         MeshVertexColors {"
@@ -506,35 +506,45 @@ Function FreeTextureCache()
 End Function
 
 
-Function LoadRMesh(file$)
-	;generate a texture made of white
-	Local blankTexture%
+function LoadRMesh(file: string) {
+	//generate a texture made of white
+	let blankTexture: int
 	blankTexture=CreateTexture(4,4,1,1)
-	ClsColor 255,255,255
-	SetBuffer TextureBuffer(blankTexture)
-	Cls
-	SetBuffer BackBuffer()
+	ClsColor(255,255,255)
+	SetBuffer(TextureBuffer(blankTexture))
+	Cls()
+	SetBuffer(BackBuffer())
 	
-	Local pinkTexture%
+	let pinkTexture: int
 	pinkTexture=CreateTexture(4,4,1,1)
-	ClsColor 255,255,255
-	SetBuffer TextureBuffer(pinkTexture)
-	Cls
-	SetBuffer BackBuffer()
+	ClsColor(255,255,255)
+	SetBuffer(TextureBuffer(pinkTexture))
+	Cls()
+	SetBuffer(BackBuffer())
 	
-	ClsColor 0,0,0
+	ClsColor(0,0,0)
 	
-	;read the file
-	Local f%=ReadFile(file)
-	Local i%,j%,k%,x#,y#,z#,yaw#
-	Local vertex%
-	Local temp1i%,temp2i%,temp3i%
-	Local temp1#,temp2#,temp3#
-	Local temp1s$, temp2s$
+	//read the file
+	let f: int = ReadFile(file)
+	let i: int
+	let j: int
+	let k: int
+	let x: float
+	let y: float
+	let z: float
+	let yaw: float
+	let vertex: int
+	let temp1i: int
+	let temp2i: int
+	let temp3i: int
+	let temp1: float
+	let temp2: float
+	let temp3: float
+	let temp1s$, temp2s$
 	
-	Local collisionMeshes% = CreatePivot()
+	let collisionMeshes% = CreatePivot()
 	
-	Local hasTriggerBox% = False
+	let hasTriggerBox% = False
 	
 	For i=0 To 3 ;reattempt up to 3 times
 		If f=0 Then
@@ -544,7 +554,7 @@ Function LoadRMesh(file$)
 		EndIf
 	Next
 	If f=0 Then RuntimeError "Error reading file "+Chr(34)+file+Chr(34)
-	Local isRMesh$ = ReadString(f)
+	let isRMesh$ = ReadString(f)
 	If isRMesh$="RoomMesh"
 		;Continue
 	ElseIf isRMesh$="RoomMesh.HasTriggerBox"
@@ -564,12 +574,15 @@ Function LoadRMesh(file$)
 	Alpha=CreateMesh()
 	
 	count = ReadInt(f)
-	Local childMesh%
-	Local surf%,tex%[2],brush%
+	let childMesh: int
+	let surf: int
+	let tex: int[2]
+	let brush: int
 	
-	Local isAlpha%
+	let isAlpha: int
 	
-	Local u#,v#
+	let u: float
+	let v: float
 	
 	For i=1 To count ;drawn mesh
 		childMesh=CreateMesh()
@@ -707,30 +720,16 @@ Function LoadRMesh(file$)
 	Return Opaque
 End Function
 
-Print "Hey Mark,"
-Print "stop losing this ffs"
-Print "Thanks for your time."
-Print ""
-Local fname$ = Input("RMesh To load: ")
+Print("Hey Mark,")
+Print("stop losing this ffs")
+Print("Thanks for your time.")
+Print("")
+let fname: string = Input("RMesh To load: ")
 
 Graphics3D 1280,720,32,2
 
-;Global bump% = LoadTexture("scpcb/gfx/map/tilebump.jpg")
-;TextureBlend bump,6
-;TextureBumpEnvMat bump,0,0,1.009
-;TextureBumpEnvMat bump,0,1,-1.000
-;TextureBumpEnvMat bump,1,0,-1.000
-;TextureBumpEnvMat bump,1,1,1.009
-;TextureBumpEnvScale bump,1.0
-;TextureBumpEnvOffset bump,0.0
-
 Global mesh% = LoadRMesh(fname)
 
-;white% = LoadTexture("scpcb/gfx/map/wood.jpg")
-;TextureCoords white,1
-;EntityTexture mesh,bump,0,0
-;FreeTexture bump
-;EntityTexture mesh,white,0,2
 ScaleEntity mesh,0.1,0.1,0.1
 EntityPickMode mesh,2
 ShowEntity mesh
@@ -747,11 +746,11 @@ HidePointer
 
 Global BumpEnvMat# = 0.0075
 
-While Not KeyHit(1)
-	;mouselook
-	Local diffX% = MouseX()-(GraphicsWidth()/2)
-	Local diffY% = MouseY()-(GraphicsHeight()/2)
-	MoveMouse GraphicsWidth()/2,GraphicsHeight()/2
+while (!KeyHit(1)) {
+	//mouselook
+	let diffX: int = MouseX()-(GraphicsWidth()/2)
+	let diffY: int = MouseY()-(GraphicsHeight()/2)
+	MoveMouse(GraphicsWidth()/2,GraphicsHeight()/2)
 	camYaw = camYaw - (Float(diffX)/30.0)
 	While camYaw>=360.0
 		camYaw=camYaw-360.0

@@ -1,4 +1,5 @@
-import {int, float, BColor} from "./bbhelper.ts"
+import { BColor, int } from "./Helper/bbhelper"
+
 
 class Difficulty {
 	name: string
@@ -17,7 +18,10 @@ var difficulties: Difficulty[] = new Array(4)
 
 var SelectedDifficulty: Difficulty
 
-const SAFE=0, EUCLID=1, KETER=2, CUSTOM=3
+export const SAFE=0
+export const EUCLID=1
+export const KETER=2
+export const CUSTOM=3
 enum DifficultyLevel {
 	SAFE,
 	EUCLID,
@@ -25,14 +29,18 @@ enum DifficultyLevel {
 	CUSTOM
 }
 
-const SAVEANYWHERE = 0, SAVEONQUIT=1, SAVEONSCREENS=2
+export const SAVEANYWHERE = 0
+export const SAVEONQUIT=1
+export const SAVEONSCREENS=2
 enum SaveSetting {
 	SAVE_ANYWHERE,
 	SAVE_ON_QUIT,
 	SAVE_ON_SCREENS
 }
 
-const EASY = 0, NORMAL = 1, HARD = 2
+export const EASY = 0
+export const NORMAL = 1
+export const HARD = 2
 enum DifficultySetting {
 	EASY,
 	NORMAL,

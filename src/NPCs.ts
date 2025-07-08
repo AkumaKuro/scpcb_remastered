@@ -4651,7 +4651,7 @@ function UpdateNPCs() {
 									n.CurrSpeed = CurveValue(n.Speed*1.75,n.CurrSpeed,10.0)
 								}
 								
-								if (n.ID % 2 = 0) Then
+								if (n.ID % 2 == 0) {
 									AnimateNPC(n,1,62,(n.CurrSpeed*28))
 								} else {
 									AnimateNPC(n,100,167,(n.CurrSpeed*28))
@@ -4710,64 +4710,64 @@ function UpdateNPCs() {
 									n.State2 = 0.0
 									n.State = 1
 								}
-							Else
+							} else {
 								AnimateNPC(n,168,202,0.6,False)
-								If prevFrame < 189 And n.Frame>=189
-									If dist > 0.85 Or Abs(DeltaYaw(n.Collider,Collider))>60.0
+								if (prevFrame < 189 && n.Frame>=189) {
+									if (dist > 0.85 || Abs(DeltaYaw(n.Collider,Collider))>60.0) {
 										//Miss
-									Else
+									} else {
 										Injuries = Injuries + Rnd(0.75,1.5)
 										PlaySound2(LoadTempSound("SFX/General/Slash"+Rand(1,2)+".ogg"), Camera, n.Collider)
-										If Injuries > 10.0
+										if (Injuries > 10.0) {
 											Kill()
-											If PlayerRoom.RoomTemplate.Name$ = "dimension1499"
+											if (PlayerRoom.RoomTemplate.Name$ = "dimension1499") {
 												DeathMSG = "All personnel situated within Evacuation Shelter LC-2 during the breach have been administered "
 												DeathMSG = DeathMSG + "Class-B amnestics due to Incident 1499-E. The Class D subject involved in the event "
 												DeathMSG = DeathMSG + "died shortly after being shot by Agent [REDACTED]."
-											Else
+											} else {
 												DeathMSG = "An unidentified male and a deceased Class D subject were discovered in [REDACTED] by the Nine-Tailed Fox. "
 												DeathMSG = DeathMSG + "The man was described as highly agitated and seemed to only speak Russian. "
 												DeathMSG = DeathMSG + "He's been taken into a temporary holding area at [REDACTED] while waiting for a translator to arrive."
-											EndIf
-										EndIf
-									EndIf
-								ElseIf n\Frame >= 201
-									n\State2 = 0.0
-									n\State = 1
-								EndIf
-							EndIf
+											}
+										}
+									}
+								} else if (n.Frame >= 201) {
+									n.State2 = 0.0
+									n.State = 1
+								}
+							}
 							
-						Case 4 //standing in front of the player
+						case 4: //standing in front of the player
 							
-							dist = EntityDistance(n\Collider,Collider)
-							n\CurrSpeed = CurveValue(0.0,n\CurrSpeed,5.0)
+							dist = EntityDistance(n.Collider,Collider)
+							n.CurrSpeed = CurveValue(0.0,n.CurrSpeed,5.0)
 							AnimateNPC(n,296,320,0.2)
 							
-							PointEntity n\obj,Collider
-							RotateEntity n\Collider,0,CurveAngle(EntityYaw(n\obj),EntityYaw(n\Collider),20.0),0
+							PointEntity(n.obj,Collider)
+							RotateEntity(n.Collider,0,CurveAngle(EntityYaw(n.obj),EntityYaw(n.Collider),20.0),0)
 							
-							If dist > 0.85
-								n\State = 1
-							EndIf
+							if (dist > 0.85) {
+								n.State = 1
+							}
 							
-					End Select
+					}
 					
-					If n\SoundChn != 0 And ChannelPlaying(n\SoundChn) Then
-						UpdateSoundOrigin(n\SoundChn,Camera,n\Collider,20.0)
-					EndIf
+					if (n.SoundChn != 0 && ChannelPlaying(n.SoundChn)) {
+						UpdateSoundOrigin(n.SoundChn,Camera,n.Collider,20.0)
+					}
 					
-					MoveEntity n\Collider,0,0,n\CurrSpeed*FPSfactor
+					MoveEntity(n.Collider,0,0,n.CurrSpeed*FPSfactor)
 					
-					RotateEntity n\obj,0,EntityYaw(n\Collider)-180,0
-					PositionEntity n\obj,EntityX(n\Collider),EntityY(n\Collider)-0.2,EntityZ(n\Collider)
+					RotateEntity(n.obj,0,EntityYaw(n.Collider)-180,0)
+					PositionEntity(n.obj,EntityX(n.Collider),EntityY(n.Collider)-0.2,EntityZ(n.Collider))
 					
-					ShowEntity n\obj
-				Else
-					HideEntity n\obj
-				EndIf
+					ShowEntity(n.obj)
+				} else {
+					HideEntity(n.obj)
+				}
 				
 				
-			Case NPCtype008
+			case NPCtype008:
 				
 				//n\State: Main State
 				//n\State2: A timer used for the player detection
@@ -4776,48 +4776,48 @@ function UpdateNPCs() {
 				if (!n.IsDead) {
 					if (n.State == 0) {
 						EntityType(n.Collider,HIT_DEAD)
-					Else
+					} else {
 						EntityType(n.Collider,HIT_PLAYER)
-					EndIf
+					}
 					
-					prevFrame = n\Frame
+					prevFrame = n.Frame
 					
-					n\BlinkTimer = 1
+					n.BlinkTimer = 1
 					
-					Select n\State
-						Case 0 //Lying next to the wall
+					switch (n.State) {
+						case 0: //Lying next to the wall
 							SetNPCFrame(n,11)
-						Case 1 //Standing up
+						case 1: //Standing up
 							AnimateNPC(n,11,32,0.1,False)
-							If n\Frame >= 29
-								n\State = 2
-							EndIf
-						Case 2 //Being active
+							if (n.Frame >= 29) {
+								n.State = 2
+							}
+						case 2: //Being active
 							PlayerSeeAble = MeNPCSeesPlayer(n)
-							If PlayerSeeAble=1 Or n.State2 > 0.0
-								If PlayerSeeAble=1
+							if (PlayerSeeAble == 1 || n.State2 > 0.0) {
+								if (PlayerSeeAble == 1) {
 									n.State2 = 70*2
-								Else
+								} else {
 									n.State2 = Max(n.State2-FPSfactor,0)
-								EndIf
-								PointEntity n.obj, Collider
-								RotateEntity n.Collider, 0, CurveAngle(EntityYaw(n.obj), EntityYaw(n.Collider), 20.0), 0
+								}
+								PointEntity(n.obj, Collider)
+								RotateEntity(n.Collider, 0, CurveAngle(EntityYaw(n.obj), EntityYaw(n.Collider), 20.0), 0)
 								
 								AnimateNPC(n, 64, 93, n.CurrSpeed*30)
 								n.CurrSpeed = CurveValue(n.Speed*0.7, n.CurrSpeed, 20.0)
-								MoveEntity n.Collider, 0, 0, n.CurrSpeed * FPSfactor
+								MoveEntity(n.Collider, 0, 0, n.CurrSpeed * FPSfactor)
 								
-								If EntityDistance(n.Collider,Collider)<1.0
-									If (Abs(DeltaYaw(n.Collider,Collider))<=60.0)
+								if (EntityDistance(n.Collider,Collider)<1.0) {
+									if (Abs(DeltaYaw(n.Collider,Collider))<=60.0) {
 										n.State = 3
-									EndIf
-								EndIf
+									}
+								}
 								
 								n.PathTimer = 0
 								n.PathStatus = 0
 								n.PathLocation = 0
 								n.State3 = 0
-							Else
+							} else {
 								if (n.PathStatus == 1) {
 									if (n.Path[n.PathLocation]=Null) { 
 										if (n.PathLocation > 19) { 
@@ -4860,30 +4860,30 @@ function UpdateNPCs() {
 								} else {
 									AnimateNPC(n, 323, 344, 0.2, True)
 									n.CurrSpeed = 0
-									If n.PathTimer < 70*5
+									if (n.PathTimer < 70*5) {
 										n.PathTimer = n.PathTimer + Rnd(1,2+(2*SelectedDifficulty.aggressiveNPCs))*FPSfactor
-									Else
+									} else {
 										n.PathStatus = FindPath(n,EntityX(Collider),EntityY(Collider),EntityZ(Collider))
 										n.PathTimer = 0
-									EndIf
-								EndIf
+									}
+								}
 								
-								If EntityDistance(n.Collider,Collider)>HideDistance
-									If n.State3 < 70*(15+(10*SelectedDifficulty.aggressiveNPCs))
+								if (EntityDistance(n.Collider,Collider)>HideDistance) {
+									if (n.State3 < 70*(15+(10*SelectedDifficulty.aggressiveNPCs))) {
 										n.State3 = n.State3+FPSfactor
-									Else
+									} else {
 										DebugLog("SCP-008-1 IDLE")
 										n.State3 = 70*(6*60)
 										n.State = 4
-									EndIf
-								EndIf
-							EndIf
+									}
+								}
+							}
 							
-							If n.CurrSpeed > 0.005 Then
-								If (prevFrame < 80 And n.Frame>=80) Or (prevFrame > 92 And n.Frame<65)
+							if (n.CurrSpeed > 0.005) {
+								if ((prevFrame < 80 && n.Frame>=80) || (prevFrame > 92 && n.Frame<65)) {
 									PlaySound2(StepSFX(0,0,Rand(0,7)),Camera, n.Collider, 8.0, Rnd(0.3,0.5))
-								EndIf
-							EndIf
+								}
+							}
 							
 							n.SoundChn = LoopSound2(n.Sound,n.SoundChn,Camera,n.Collider)
 						case 3: //Attacking
@@ -4958,47 +4958,53 @@ function UpdateNPCs() {
 					AnimateNPC(n, 344, 363, 0.5, False)
 				}
 				
-				RotateEntity n.obj,0,EntityYaw(n.Collider)-180,0
-				PositionEntity n.obj,EntityX(n.Collider),EntityY(n.Collider)-0.2,EntityZ(n.Collider)
+				RotateEntity(n.obj,0,EntityYaw(n.Collider)-180,0)
+				PositionEntity(n.obj,EntityX(n.Collider),EntityY(n.Collider)-0.2,EntityZ(n.Collider))
 				
-		End Select
+		}
 		
-		If n.IsDead
-			EntityType n.Collider,HIT_DEAD
-		EndIf
+		if (n.IsDead) {
+			EntityType(n.Collider,HIT_DEAD)
+		}
 		
-		Local gravityDist = Distance(EntityX(Collider),EntityZ(Collider),EntityX(n.Collider),EntityZ(n.Collider))
+		let gravityDist = Distance(EntityX(Collider),EntityZ(Collider),EntityX(n.Collider),EntityZ(n.Collider))
 		
-		If gravityDist<HideDistance*0.7 Or n.NPCtype = NPCtype1499 Then
-			If n.InFacility = InFacility
-				TranslateEntity n.Collider, 0, n.DropSpeed, 0
+		if (gravityDist<HideDistance*0.7 || n.NPCtype == NPCtype1499) {
+			if (n.InFacility == InFacility) {
+				TranslateEntity(n.Collider, 0, n.DropSpeed, 0)
 				
-				Local CollidedFloor% = False
-				For i% = 1 To CountCollisions(n.Collider)
-					If CollisionY(n.Collider, i) < EntityY(n.Collider) - 0.01 Then CollidedFloor = True : Exit
-				Next
+				let CollidedFloor: boolean = false
+				for (i of range(1, CountCollisions(n.Collider) + 1)) {
+					if (CollisionY(n.Collider, i) < EntityY(n.Collider) - 0.01) {
+						CollidedFloor = True
+						break
+					}
+				}
 				
-				If CollidedFloor = True Then
-					n.DropSpeed# = 0
-				Else
-					If ShouldEntitiesFall
+				if (CollidedFloor) {
+					n.DropSpeed = 0
+				} else {
+					if (ShouldEntitiesFall) {
 						let UpdateGravity: boolean = False
-						let MaxX#,MinX#,MaxZ#,MinZ#
-						If n.InFacility=1
-							If PlayerRoom.RoomTemplate.Name$ != "173"
-								For e.Events = Each Events
-									If e.EventName = "room860"
-										If e.EventState = 1.0
+						let MaxX: float
+						let MinX: float
+						let MaxZ: float
+						let MinZ: float
+						if (n.InFacility=1) {
+							if (PlayerRoom.RoomTemplate.Name$ != "173") {
+								for (e of Events.each) {
+									if (e.EventName = "room860") {
+										if (e.EventState = 1.0) {
 											UpdateGravity = True
-											Exit
-										EndIf
-									EndIf
-								Next
-							Else
+											break
+										}
+									}
+								}
+							} else {
 								UpdateGravity = True
-							EndIf
+							}
 							if (!UpdateGravity) {
-								For r.Rooms = Each Rooms
+								for (r of Rooms.each) {
 									if (r.MaxX!=0 || r.MinX!=0 || r.MaxZ!=0 || r.MinZ!=0) {
 										MaxX = r.MaxX
 										MinX = r.MinX
@@ -5010,52 +5016,52 @@ function UpdateNPCs() {
 										MaxZ = 4.0
 										MinZ = 0.0
 									}
-									If Abs(EntityX(n.Collider)-EntityX(r.obj))<=Abs(MaxX-MinX)
-										If Abs(EntityZ(n.Collider)-EntityZ(r.obj))<=Abs(MaxZ-MinZ)
-											If r=PlayerRoom
+									if (Abs(EntityX(n.Collider)-EntityX(r.obj))<=Abs(MaxX-MinX)) {
+										if (Abs(EntityZ(n.Collider)-EntityZ(r.obj))<=Abs(MaxZ-MinZ)) {
+											if (r == PlayerRoom) {
 												UpdateGravity = True
-												Exit
+												break
 											}
-											If IsRoomAdjacent(PlayerRoom,r)
+											if (IsRoomAdjacent(PlayerRoom,r)) {
 												UpdateGravity = True
-												Exit
+												break
 											}
 											for (i of range(4)) {
-												If (IsRoomAdjacent(PlayerRoom.Adjacent[i],r))
+												if (IsRoomAdjacent(PlayerRoom.Adjacent[i],r)) {
 													UpdateGravity = True
-													Exit
+													break
 												}
 											}
 										}
 									}
 								}
 							}
-						Else
+						} else {
 							UpdateGravity = True
-						EndIf
-						If UpdateGravity
-							n.DropSpeed# = Max(n.DropSpeed - 0.005*FPSfactor*n.GravityMult,-n.MaxGravity)
-						Else
-							If n.FallingPickDistance>0
+						}
+						if (UpdateGravity) {
+							n.DropSpeed = Max(n.DropSpeed - 0.005*FPSfactor*n.GravityMult,-n.MaxGravity)
+						} else {
+							if (n.FallingPickDistance>0) {
 								n.DropSpeed = 0.0
-							Else
-								n.DropSpeed# = Max(n.DropSpeed - 0.005*FPSfactor*n.GravityMult,-n.MaxGravity)
-							EndIf
-						EndIf
-					Else
-						n.DropSpeed# = 0.0
-					EndIf
-				EndIf
-			Else
+							} else {
+								n.DropSpeed = Max(n.DropSpeed - 0.005*FPSfactor*n.GravityMult,-n.MaxGravity)
+							}
+						}
+					} else {
+						n.DropSpeed = 0.0
+					}
+				}
+			} else {
 				n.DropSpeed = 0
-			EndIf
-		Else
+			}
+		} else {
 			n.DropSpeed = 0
-		EndIf
+		}
 		
 		CatchErrors(Chr(34)+n.NVName+Chr(34)+" NPC")
 		
-	Next
+	}
 	
 	if (MTF_CameraCheckTimer>0.0 && MTF_CameraCheckTimer<70*90) {
 		MTF_CameraCheckTimer=MTF_CameraCheckTimer+FPSfactor
@@ -5077,61 +5083,61 @@ function UpdateNPCs() {
 	}
 }
 
-Function TeleportCloser(n.NPCs)
-	Local closestDist# = 0
-	Local closestWaypoint.WayPoints
-	Local w.WayPoints
+function TeleportCloser(n: NPCs) {
+	let closestDist: float = 0
+	let closestWaypoint: WayPoints
+	let w: WayPoints
 	
-	Local xtemp#, ztemp#
+	let xtemp: float
+	let ztemp: float
 	
-	For w.WayPoints = Each WayPoints
-		If w.door = Null Then
+	for (w of WayPoints.each) {
+		if (w.door = Null) {
 			xtemp = Abs(EntityX(w.obj,True)-EntityX(n.Collider,True))
-			If xtemp < 10.0 And xtemp > 1.0 Then 
+			if (xtemp < 10.0 && xtemp > 1.0) { 
 				ztemp = Abs(EntityZ(w.obj,True)-EntityZ(n.Collider,True))
-				If ztemp < 10.0 And ztemp > 1.0 Then
-					If (EntityDistance(Collider, w.obj)>16-(8*SelectedDifficulty.aggressiveNPCs)) Then
+				if (ztemp < 10.0 && ztemp > 1.0) {
+					if (EntityDistance(Collider, w.obj)>16-(8*SelectedDifficulty.aggressiveNPCs)) {
 						//teleports to the nearby waypoint that takes it closest to the player
-						Local newDist# = EntityDistance(Collider, w.obj)
-						If (newDist < closestDist Or closestWaypoint = Null) Then
+						let newDist: float = EntityDistance(Collider, w.obj)
+						if (newDist < closestDist || closestWaypoint == Null) {
 							closestDist = newDist	
 							closestWaypoint = w
-						EndIf						
-					EndIf
-				EndIf
-			EndIf
-		EndIf
-	Next
+						}						
+					}
+				}
+			}
+		}
+	}
 	
-	Local shouldTeleport% = False
-	If (closestWaypoint!=Null) Then
-		If n.InFacility != 1 Or SelectedDifficulty.aggressiveNPCs Then
+	let shouldTeleport: boolean = False
+	if (closestWaypoint!=Null) {
+		if (n.InFacility != 1 || SelectedDifficulty.aggressiveNPCs) {
 			shouldTeleport = True
-		ElseIf EntityY(closestWaypoint.obj,True)<=7.0 And EntityY(closestWaypoint.obj,True)>=-10.0 Then
+		} else if (EntityY(closestWaypoint.obj,True)<=7.0 && EntityY(closestWaypoint.obj,True)>=-10.0) {
 			shouldTeleport = True
-		EndIf
+		}
 		
-		If shouldTeleport Then
-			PositionEntity n.Collider, EntityX(closestWaypoint.obj,True), EntityY(closestWaypoint.obj,True)+0.15, EntityZ(closestWaypoint.obj,True), True
-			ResetEntity n.Collider
+		if (shouldTeleport) {
+			PositionEntity(n.Collider, EntityX(closestWaypoint.obj,True), EntityY(closestWaypoint.obj,True)+0.15, EntityZ(closestWaypoint.obj,True), True)
+			ResetEntity(n.Collider)
 			n.PathStatus = 0
-			n.PathTimer# = 0.0
+			n.PathTimer = 0.0
 			n.PathLocation = 0
-		EndIf
-	EndIf
-	
-End Function
+		}
+	}
+}
 
-Function OtherNPCSeesMeNPC%(me.NPCs,other.NPCs)
-	If other.BlinkTimer<=0.0 Then Return False
+function OtherNPCSeesMeNPC(me: NPCs,other: NPCs) : int {
+	if (other.BlinkTimer<=0.0) {return False}
 	
-	If EntityDistance(other.Collider,me.Collider)<6.0 Then
-		If Abs(DeltaYaw(other.Collider,me.Collider))<60.0 Then
-			Return True
-		EndIf
-	EndIf
-	Return False
-End Function
+	if (EntityDistance(other.Collider,me.Collider)<6.0) {
+		if (Abs(DeltaYaw(other.Collider,me.Collider))<60.0) {
+			return True
+		}
+	}
+	return False
+}
 
 Function MeNPCSeesPlayer%(me.NPCs,disablesoundoncrouch%=False)
 	//Return values:

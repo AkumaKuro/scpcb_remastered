@@ -19,4 +19,8 @@ export function Str (value) : string {return ''}
 
 export function Upper(string: string) : string {return ''}
 
-export function BBString(string: string, repeat: int) : string {return ''}
+export function BBString(string: string, repeat: int = 1) : string {return ''}
+
+export function Asc(string: string): int {return 0}
+
+export function StringHeight(str: string): int {return 0}

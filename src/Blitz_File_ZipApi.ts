@@ -1,5 +1,8 @@
-import { CreateBank, FreeBank, PokeInt } from "./Helper/bank.ts"
-import {float, int, BankSize} from "./Helper/bbhelper.ts"
+import { File_GetFileName } from "./Blitz_File_FileName.ts"
+import { BankSize, CreateBank, FreeBank, PeekInt, PokeInt, ResizeBank } from "./Helper/bank.ts"
+import { FileType, Int, int } from "./Helper/bbhelper.ts"
+import { WriteFile, CloseFile, ReadFile, FileSize } from "./Helper/Files.ts"
+import { Left, Right, Upper, Mid } from "./Helper/strings.ts"
 
 
 // --------------------------------------------------
@@ -355,11 +358,11 @@ function ZipApi_ExtractFile(zipHandle, fileName: string, destName: string = "", 
 	ZipApi_GotoFirstFile(zipHandle)
 
 	// Find file
-	if (ZlibWapi_UnzLocateFile(zipHandle, File_ConvertSlashes(fileName), False) == ZIPAPI_END_OF_LIST_OF_FILE) {	// Couldn't find it
+	if (ZlibWapi_UnzLocateFile(zipHandle, File_ConvertSlashes(fileName), false) == ZIPAPI_END_OF_LIST_OF_FILE) {	// Couldn't find it
 		
 		// Reset
 		if (prevFile) {
-			ZlibWapi_UnzLocateFile(zipHandle, prevFile.FileName, False)
+			ZlibWapi_UnzLocateFile(zipHandle, prevFile.FileName, false)
 			ZIPAPI_UnzFileInfo_Dispose(prevFile)
 		}
 		
@@ -376,14 +379,14 @@ function ZipApi_ExtractFile(zipHandle, fileName: string, destName: string = "", 
 	let fileHandle
 	
 	// Check if we're using a password
-	if (password <> "") {
+	if (password != "") {
 		// Password protected
 		fileHandle	= ZlibWapi_UnzOpenCurrentFilePassword(zipHandle, password$)
 	} else {
 		fileHandle	= ZlibWapi_UnzOpenCurrentFile(zipHandle)
 	}
 	
-	if (fileHandle <> ZIPAPI_OK) {
+	if (fileHandle != ZIPAPI_OK) {
 		return ""
 	}
 	
@@ -437,7 +440,7 @@ Function ZipApi_ExtractFileAsBank%(zipHandle, fileName$, password$ = "")
 	If ZlibWapi_UnzLocateFile(zipHandle, File_ConvertSlashes(fileName), False) = ZIPAPI_END_OF_LIST_OF_FILE Then	// Couldn't find it
 		
 		// Reset
-		If prevFile <> Null Then
+		If prevFile != Null Then
 			ZlibWapi_UnzLocateFile(zipHandle, prevFile\FileName, False)
 			ZIPAPI_UnzFileInfo_Dispose(prevFile)
 		EndIf
@@ -446,23 +449,23 @@ Function ZipApi_ExtractFileAsBank%(zipHandle, fileName$, password$ = "")
 		
 	EndIf
 	
-	Local fileInfo.ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfoFast(zipHandle)
+	let fileInfo: ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfoFast(zipHandle)
 	
 	// Create a buffer to store unpacked contents in
-	Local fileBuffer	= CreateBank(fileInfo\UnCompressedSize)
+	let fileBuffer	= CreateBank(fileInfo\UnCompressedSize)
 	
 	// Open the file for reading, read all bytes and cleanup
-	Local fileHandle
+	let fileHandle
 	
 	// Check if we're using a password
-	If password <> "" Then
+	If password != "" Then
 		// Password protected
 		fileHandle	= ZlibWapi_UnzOpenCurrentFilePassword(zipHandle, password$)
 	Else
 		fileHandle	= ZlibWapi_UnzOpenCurrentFile(zipHandle)
 	EndIf
 	
-	If fileHandle <> ZIPAPI_OK Then
+	If fileHandle != ZIPAPI_OK Then
 		Return 0
 	EndIf
 	
@@ -474,7 +477,7 @@ Function ZipApi_ExtractFileAsBank%(zipHandle, fileName$, password$ = "")
 	EndIf
 	
 	// Reset
-	If prevFile <> Null Then
+	If prevFile != Null Then
 		ZlibWapi_UnzLocateFile(zipHandle, prevFile\FileName, False)
 		ZIPAPI_UnzFileInfo_Dispose(prevFile)
 	EndIf

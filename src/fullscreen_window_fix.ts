@@ -1,3 +1,6 @@
+import { CreateBank, FreeBank, PeekInt } from "./Helper/bank"
+import { RuntimeError, FlushKeys } from "./Helper/bbhelper"
+import { SetBuffer, BackBuffer, Flip, RenderWorld } from "./Helper/graphics"
 
 // -- Declare Windows API constants.
 export const C_GWL_STYLE = -16
@@ -33,7 +36,7 @@ export function GetDesktopSize() {
 	api_GetClientRect( api_GetDesktopWindow(), rectangle )
 	G_desktop_screen_width = PeekInt( rectangle, 8 ) - PeekInt( rectangle, 0 )
 	G_desktop_screen_height = PeekInt( rectangle, 12 ) - PeekInt( rectangle, 4 )
-	FreeBank rectangle
+	FreeBank(rectangle)
 }
 
 

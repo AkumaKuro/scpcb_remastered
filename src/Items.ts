@@ -54,58 +54,61 @@ function CreateItemTemplate(name: string, tempname: string, objpath: string, inv
 	}
 	
 	if (it.obj = 0) {
-		If Anim!=0 Then
+		if (Anim!=0) {
 			it.obj = LoadAnimMesh_Strict(objpath)
-			it.isAnim=True
-		Else
+			it.isAnim = true
+		} else {
 			it.obj = LoadMesh_Strict(objpath)
-			it.isAnim=False
-		EndIf
+			it.isAnim=false
+		}
 		it.objpath = objpath
-	EndIf
+	}
 	it.objpath = objpath
 	
-	Local texture%
+	let texture: int
 	
-	If texturepath != "" Then
-		For it2.itemtemplates = Each ItemTemplates
-			If it2\texpath = texturepath And it2\tex!=0 Then
-				texture = it2\tex
-				Exit
-			EndIf
-		Next
-		If texture=0 Then texture=LoadTexture_Strict(texturepath,texflags%) : it\texpath = texturepath// : DebugLog texturepath
-		EntityTexture it\obj, texture
-		it\tex = texture
-	EndIf  
+	if (texturepath != "") {
+		for (let it2 of ItemTemplates.each) {
+			if (it2.texpath == texturepath && it2.tex!=0) {
+				texture = it2.tex
+				break
+			}
+		}
+		if (texture == 0) {
+			texture=LoadTexture_Strict(texturepath,texflags)
+			it.texpath = texturepath
+		}
+		EntityTexture(it.obj, texture)
+		it.tex = texture
+	}  
 	
-	it\scale = scale
-	ScaleEntity it\obj, scale, scale, scale, True
+	it.scale = scale
+	ScaleEntity(it.obj, scale, scale, scale, true)
 	
 	//if another item shares the same object, copy it
-	For it2.itemtemplates = Each ItemTemplates
-		If it2.invimgpath = invimgpath And it2.invimg != 0 Then
-			it.invimg = it2.invimg //CopyImage()
-			If it2.invimg2!=0 Then
-				it.invimg2=it2.invimg2 //CopyImage()
-			EndIf
-			Exit
-		EndIf
-	Next
-	If it.invimg=0 Then
+	for (let it2 of ItemTemplates.each) {
+		if (it2.invimgpath == invimgpath && it2.invimg != 0) {
+			it.invimg = it2.invimg
+			if (it2.invimg2!=0) {
+				it.invimg2 = it2.invimg2
+			}
+			break
+		}
+	}
+	if (it.invimg == 0) {
 		it.invimg = LoadImage_Strict(invimgpath)
 		it.invimgpath = invimgpath
 		MaskImage(it.invimg, 255, 0, 255)
-	EndIf
+	}
 	
-	If (invimgpath2 != "") Then
-		If it.invimg2=0 Then
+	if (invimgpath2 != "") {
+		if (it.invimg2 == 0) {
 			it.invimg2 = LoadImage_Strict(invimgpath2)
 			MaskImage(it.invimg2,255,0,255)
-		EndIf
-	Else
+		}
+	} else {
 		it.invimg2 = 0
-	EndIf
+	}
 	
 	it.imgpath = imgpath
 	
@@ -116,11 +119,10 @@ function CreateItemTemplate(name: string, tempname: string, objpath: string, inv
 
 	HideEntity(it.obj)
 	
-	Return it
-	
-End Function
+	return it
+}
 
-function InitItemTemplates() {
+export function InitItemTemplates() {
 	let it: ItemTemplates,it2: ItemTemplates
 	
 	it = CreateItemTemplate("Some SCP-420-J", "420", "GFX/items/420.x", "GFX/items/INV420.jpg", "", 0.0005)
@@ -280,7 +282,7 @@ function InitItemTemplates() {
 	
 	it = CreateItemTemplate("SCP-500-01", "scp500", "GFX/items/pill.b3d", "GFX/items/INVpill.jpg", "", 0.0001)
 	it.sound = 2
-	EntityColor (it.obj,255,0,0)
+	EntityColor(it.obj,255,0,0)
 	
 	it = CreateItemTemplate("First Aid Kit", "firstaid", "GFX/items/firstaid.x", "GFX/items/INVfirstaid.jpg", "", 0.05)
 	it = CreateItemTemplate("Small First Aid Kit", "finefirstaid", "GFX/items/firstaid.x", "GFX/items/INVfirstaid.jpg", "", 0.03)
@@ -426,31 +428,39 @@ function InitItemTemplates() {
 
 
 
-Type Items
-	Field name$
-	Field collider%,model%
-	Field itemtemplate.ItemTemplates
-	Field DropSpeed#
+export class Items {
+	name: string
+	collider: int
+	model: int
+	itemtemplate: ItemTemplates
+	DropSpeed: float
 	
-	Field r%,g%,b%,a#
+	r: int
+	g: int
+	b: int
+	a: float
 	
-	Field level
+	level
 	
-	Field SoundChn%
+	SoundChn: int
 	
-	Field dist#, disttimer#
+	dist: float
+	disttimer: float
 	
-	Field state#, state2#
+	state: float
+	state2: float
 	
-	Field Picked%,Dropped%
+	Picked: int
+	Dropped: int
 	
-	Field invimg%
-	Field WontColl% = False
-	Field xspeed#,zspeed#
-	Field SecondInv.Items[20]
-	Field ID%
-	Field invSlots%
-End Type 
+	invimg: int
+	WontColl: boolean = false
+	xspeed: float
+	zspeed: float
+	SecondInv: Items[] = new Array(20)
+	ID: int
+	invSlots: int
+}
 
 function CreateItem(name: string, tempname: string, x: float, y: float, z: float, r: int = 0,g: int = 0,b: int = 0,a: float = 1.0,invSlots: int = 0) : Items {
 	CatchErrors("Uncaught (CreateItem)")
@@ -903,7 +913,7 @@ function DropItem(item: Items,playdropsound: boolean = True) {
 }
 
 //Update any ailments inflicted by SCP-294 drinks.
-function Update294() {
+export function Update294() {
 	CatchErrors("Uncaught (Update294)")
 	
 	if (CameraShakeTimer > 0) {

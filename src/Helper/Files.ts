@@ -17,3 +17,8 @@ export function FilePos (filehandle: int) : int {return 0}
 export function CurrentDir() : string {return ''}
 
 export function CopyFile(from: string, to: string) {}
+export function FileSize(filename: string): int {return 0}
+
+export function ReadFloat (filehandle: int) : float {return 0}
+export function ReadInt (filehandle: int) : int {return 0}
+export function ReadString(filehandle: int) : string {return ''}

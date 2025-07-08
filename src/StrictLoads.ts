@@ -1,7 +1,7 @@
 import {range, ChannelPlaying, Chr, FreeSound, FileType, int, RuntimeError} from "./Helper/bbhelper.ts"
 import { LoadSound } from "./Helper/sounds.ts"
 
-function LoadImage_Strict(file: string) {
+export function LoadImage_Strict(file: string) {
 	if (FileType(file) != FileTypeResult.EXISTS) {
 		RuntimeError ("Image " + Chr(34) + file + Chr(34) + " missing. ")
 	}

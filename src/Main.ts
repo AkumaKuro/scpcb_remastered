@@ -1,4 +1,3 @@
-import {FileSize, Chr, int, float, FileType, SeedRnd, Int, AppTitle, Asc, CameraClsMode, CameraRange, CameraViewport, CameraZoom, ChannelPlaying, Cls, ClsColor, Collisions, Color, CopyEntity, CreateCamera, DebugLog, Delay, EntityFX, EntityTexture, Exit, Flip, Float, FlushKeys, FreeSound, GetParent, Graphics3D, ImageWidth, KeyHit, PositionEntity, range, RuntimeError, ScaleEntity, SetFont, Sqr, StringHeight, First} from "./Helper/bbhelper.ts"
 
 let InitErrorStr: string = ""
 if (FileSize("fmod.dll")==0) {InitErrorStr=InitErrorStr+ "fmod.dll"+Chr(13)+Chr(10)}
@@ -8412,18 +8411,23 @@ function NullGame(playbuttonsfx: boolean = True) {
 
 import "save.bb"
 import { Contained106, GorePics, HideDistance, MapFound, MapHeight, MapTemp, MapWidth, MaxRoomLights, PrevSecondaryLightOn, RemoteDoorOn, Room2slCam, Rooms, RoomScale, ScreenTexs, SecondaryLightOn, SelectedMonitor, Sky } from "./MapSystem.ts"
-import { BackBuffer, CountGfxModes3D, GfxModeHeight, GfxModeWidth, Rect, SetBuffer, TextureBuffer } from "./Helper/graphics.ts"
-import { Instr, Left, Len, Lower, Mid, Right, Str, Trim, Upper } from "./Helper/strings.ts"
+import { BackBuffer, Cls, ClsColor, CountGfxModes3D, Flip, GfxModeHeight, GfxModeWidth, Rect, RenderWorld, SetBuffer, TextureBuffer } from "./Helper/graphics.ts"
+import { Asc, Instr, Left, Len, Lower, Mid, Right, Str, StringHeight, Trim, Upper } from "./Helper/strings.ts"
 import { AALoadFont, AASetFont } from "./AAText.ts"
 import { MAXACHIEVEMENTS, Achievements, Achv055, AchvConsole, AchvKeter, AchvMaynard, AchvHarp, Achv500, Achv1025, Achv420, Achv714, Achv1499, Achv427 } from "./Achievements.ts"
-import { TextureName, CurrentDir, ReadLine, Eof, ReadFile, CloseFile, WriteFile, WriteLine, FilePos } from "./Helper/Files.ts"
+import { TextureName, CurrentDir, ReadLine, Eof, ReadFile, CloseFile, WriteFile, WriteLine, FilePos, FileSize } from "./Helper/Files.ts"
 import { EntityX, EntityY, EntityZ, EntityPitch, EntityYaw, EntityRoll, GetSurface, GetSurfaceBrush, GetBrushTexture, FreeEntity, CountSurfaces, FreeBrush, CountVertices, VertexX, VertexY, VertexZ, TFormedX, TFormedY, TFormedZ, CreateMesh, CreateSurface, AddVertex, AddTriangle } from "./Helper/Mesh.ts"
 import { LoadSound } from "./Helper/sounds.ts"
-import { FreeTexture } from "./Helper/textures.ts"
+import { FreeTexture, ImageBuffer } from "./Helper/textures.ts"
 import { TFormVector } from "./Helper/vector.ts"
 import { Curr173, Curr106, NPCtype096, NPCtypeMTF, NPCtype049, NPCtypeD, NPCtype939, NPCtypeZombie, NPCtype860, NPCtype966, Curr5131, NPCtype5131, Curr096, NPCtype173, NPCtypeOldMan, NPCtype1499, NPCtype008 } from "./NPCs.ts"
 import { LoadSound_Strict, AutoReleaseSounds, LoadAnimMesh_Strict } from "./StrictLoads.ts"
 import { G_viewport_width, G_viewport_height, G_app_handle, C_GWL_STYLE, C_WS_POPUP, C_HWND_TOP, G_viewport_x, G_viewport_y, C_SWP_SHOWWINDOW } from "./fullscreen_window_fix.ts"
+import { UpdateBlur, CreateBlurImage, ark_blur_cam } from "./Dreamfilter.ts"
+import { PeekByte, FreeBank, CreateBank, PokeByte } from "./Helper/bank.ts"
+import { Chr, RuntimeError, int, FileType, float, DebugLog, Float, range, SeedRnd, AppTitle, Int, Color, KeyHit, First, Exit, PositionEntity, EntityTexture, Collisions, FlushKeys, Delay, ChannelPlaying, FreeSound, EntityFX, ScaleEntity, ImageWidth, SetFont, CopyEntity, GetParent, Graphics3D } from "./Helper/bbhelper.ts"
+import { CameraRange, CameraZoom, CreateCamera, CameraViewport, CameraProjMode, CameraClsMode } from "./Helper/camera.ts"
+import { Sin, Sqr } from "./Helper/math.ts"
 
 //--------------------------------------- music & sounds ----------------------------------------------
 
