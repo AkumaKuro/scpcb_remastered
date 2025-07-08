@@ -1,89 +1,6 @@
+import { CreateBank, FreeBank, PokeInt } from "./Helper/bank.ts"
 import {float, int, BankSize} from "./Helper/bbhelper.ts"
 
-// ---------------------------------------------------------------------------
-// -- 
-// -- Blitz_File_ZipApi.bb
-// -- 
-// -- Helpers for using ZIP functionality to manipulate ZIP files, and
-// -- compressing/decompressing Blitz banks.
-// -- 
-// -- Author  : Phil Newton
-// -- Version : 1.2.0
-// -- Release : 27th August, 2007 
-// -- Homepage: http://wwww.sodaware.net/dev/blitz/libs/Blitz.ZipApi/
-// --
-// -- Requires: 
-// -- 	* ZlibWapi.dll					-- Compression DLL
-// --	* Blitz_File_FileName.bb		-- Commands for finding file names
-// --	* Blitz_Basic_BankCommands.bb	-- Contains PeekString & PokeString
-// --
-// ---------------------------------------------------------------------------
-
-// --------------------------------------------------
-// -- Quick Function Reference
-// --------------------------------------------------
-
-// For extracting files from ZIP files, you'll 
-// want to use:
-// 	* ZipApi_Open
-//	* ZipApi_Close
-//	* ZipApi_ExtractFile
-//	* ZipApi_ExtractFileAsBank
-//
-// For creating ZIP files:
-//	* ZipApi_CreateZip
-//	* ZipApi_AddFile
-//	* ZipApi_AddBankAsFile
-//	* ZipApi_CloseZip
-//
-// For compression of banks (appends size information to results)
-//	* ZipApi_CompressBank
-//	* ZipApi_UnCompressBank
-//
-// For compression of data in banks
-//	* ZipApi_Compress
-//	* ZipApi_UnCompress
-//
-// Other useful functions:
-//	* ZipApi_GetUncompressedSize	- Get total unpacked size of a zip
-//	* ZipApi_VerifyZipBankHeader	- Verify the header of a zip file
-
-// --------------------------------------------------
-// -- API Functions
-// --------------------------------------------------
-
-// ZipApi_Compress
-// ZipApi_UnCompress
-
-// ZipApi_CompressBank
-// ZipApi_UnCompressBank
-
-// ZipApi_Open
-// ZipApi_Close
-// ZipApi_ExtractFile
-// ZipApi_ExtractFileAsBank
-// ZipApi_GetFileInfo
-// ZipApi_GotoFirstFile
-// ZipApi_GotoNextFile
-// ZipApi_GetCurrentFileInfo
-// ZipApi_GetGlobalInfo
-
-// ZipApi_CreateZip
-// ZipApi_AddFile
-// ZipApi_AddBankAsFile
-// ZipApi_CloseZip
-
-// ZipApi_Crc32
-// ZipApi_Adler32
-
-// -- Internal Utility Functions
-// ZipApi_ZipOpenFileInZip
-// ZipApi_GetCurrentFileInfoFast
-
-// Types: 
-// 	* ZIPAPI_UnzFileInfo
-//	* ZIPAPI_GlobalInfo
-//	* ZIPAPI_Date
 
 // --------------------------------------------------
 // -- General Constants
@@ -290,11 +207,11 @@ function ZipApi_UnCompressBank(bankHandle: int): int {
 // <param name="compressionLevel">Optional compression level between 0 and 9. 1 is fastest, 9 is most compressed.</param>
 // <returns>Bank containing compressed data, or an error code if there was an error.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-function ZipApi_Compress(bankHandle: int, compressionLevel: int = ZIPAPI_DEFAULT_COMPRESSION): boolean {
+function ZipApi_Compress(bankHandle: int, compressionLevel: int = ZIPAPI_DEFAULT_COMPRESSION): int {
 	
 	// Check bank input - return 0 if invalid
-	if (bankHandle < 1) {return false}
-	if (BankSize(bankHandle) < 1) {return false}
+	if (bankHandle < 1) {return 0}
+	if (BankSize(bankHandle) < 1) {return 0}
 	
 	// Check compression level and limit appropriately
 	if (compressionLevel < 1) {compressionLevel = 1}
@@ -345,7 +262,7 @@ function ZipApi_UnCompress(bankHandle: int, unpackedSize: int = 0) : int {
 	
 	// Create a bank to place uncompressed data into
 	// If no size is specified, use input * 100 just to be safe
-	If unpackedSize = 0 Then unpackedSize = BankSize(bankHandle) * 100
+	if (unpackedSize == 0) {unpackedSize = BankSize(bankHandle) * 100}
 	let destBank	= CreateBank(unpackedSize)
 	
 	// Create bank to store uncompressed size & populate
@@ -382,8 +299,8 @@ function ZipApi_UnCompress(bankHandle: int, unpackedSize: int = 0) : int {
 // <param name="fileName">The name of the file to open.</param>
 // <returns>Handle of the opened file, or 0 if the file could not be opened.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_Open%(fileName$)
-	Return ZlibWapi_UnzOpen(fileName)
+function ZipApi_Open(fileName: string) : int {
+	return ZlibWapi_UnzOpen(fileName)
 }
 
 // <summary>Closes a zip file. Make sure to close files opened with ZipApi_OpenCurrentFile first.</summary>
@@ -391,28 +308,28 @@ Function ZipApi_Open%(fileName$)
 // <param name="cleanUp">If true, will delete any files extracted to the Windows temporary directory.</param>
 // <returns>ZIPAPI_OK if file was closed.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_Close%(zipHandle%, cleanUp% = True)
+function ZipApi_Close(zipHandle: int, cleanUp: boolean = true) : int {
 	
-	If cleanUp Then
+	if (cleanUp) {
 		
 		ZipApi_GotoFirstFile(zipHandle)
 		
-		Repeat
+		do {
 			
-			Local currentFile.ZIPAPI_UnzFileInfo	= ZipApi_GetCurrentFileInfo(zipHandle)
+			let currentFile: ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfo(zipHandle)
 			
-			If currentFile <> Null Then
-				If FileType(SystemProperty("tempdir") + File_GetFileName(currentFile\FileName)) = FILETYPE_FOUND Then
-					DeleteFile(SystemProperty("tempdir") + File_GetFileName(currentFile\FileName))		
-				EndIf
+			if (currentFile != null) {
+				if (FileType(SystemProperty("tempdir") + File_GetFileName(currentFile.FileName)) == FILETYPE_FOUND) {
+					DeleteFile(SystemProperty("tempdir") + File_GetFileName(currentFile.FileName))		
+				}
 				
-			EndIf
+			}
 			
-		Until ZipApi_GotoNextFile(zipHandle) = ZIPAPI_END_OF_LIST_OF_FILE
+		} while (ZipApi_GotoNextFile(zipHandle) != ZIPAPI_END_OF_LIST_OF_FILE)
 		
-	EndIf
+	}
 	
-	Return ZlibWapi_UnzClose(zipHandle)
+	return ZlibWapi_UnzClose(zipHandle)
 	
 }
 
@@ -423,78 +340,80 @@ Function ZipApi_Close%(zipHandle%, cleanUp% = True)
 // <param name="password">Optional password if the file is password protected.</param>
 // <returns>String containing the path of the extracted file, or blank if there was an error.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_ExtractFile$(zipHandle, fileName$, destName$ = "", password$ = "")
+function ZipApi_ExtractFile(zipHandle, fileName: string, destName: string = "", password: string = "") : string {
 	
 	// Check inputs
-	If zipHandle < 1 Then Return ""
-	If fileName = "" Then Return ""
+	if (zipHandle < 1) {return ""}
+	if (fileName = "") {return ""}
 	
 	// Get the name of the extracted file
-	If destName = "" Then destName = SystemProperty("TEMPDIR") + File_GetFileName(fileName)
+	if (destName == "") {
+		destName = SystemProperty("TEMPDIR") + File_GetFileName(fileName)
+	}
 	
-	Local prevFile.ZIPAPI_UnzFileInfo	= ZipApi_GetCurrentFileInfo(zipHandle)
+	let prevFile: ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfo(zipHandle)
 	ZipApi_GotoFirstFile(zipHandle)
 
 	// Find file
-	If ZlibWapi_UnzLocateFile(zipHandle, File_ConvertSlashes(fileName), False) = ZIPAPI_END_OF_LIST_OF_FILE Then	// Couldn't find it
+	if (ZlibWapi_UnzLocateFile(zipHandle, File_ConvertSlashes(fileName), False) == ZIPAPI_END_OF_LIST_OF_FILE) {	// Couldn't find it
 		
 		// Reset
-		If prevFile <> Null Then
-			ZlibWapi_UnzLocateFile(zipHandle, prevFile\FileName, False)
+		if (prevFile) {
+			ZlibWapi_UnzLocateFile(zipHandle, prevFile.FileName, False)
 			ZIPAPI_UnzFileInfo_Dispose(prevFile)
-		EndIf
+		}
 		
-		Return ""		
+		return ""		
 		
-	EndIf
+	}
 	
-	Local fileInfo.ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfo(zipHandle)
+	let fileInfo: ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfo(zipHandle)
 	
 	// Create a buffer to store unpacked contents in
-	Local fileBuffer	= CreateBank(fileInfo\UnCompressedSize)
+	let fileBuffer	= CreateBank(fileInfo.UnCompressedSize)
 	
 	// Open the file for reading, read all bytes and cleanup
-	Local fileHandle
+	let fileHandle
 	
 	// Check if we're using a password
-	If password <> "" Then
+	if (password <> "") {
 		// Password protected
 		fileHandle	= ZlibWapi_UnzOpenCurrentFilePassword(zipHandle, password$)
-	Else
+	} else {
 		fileHandle	= ZlibWapi_UnzOpenCurrentFile(zipHandle)
-	EndIf
+	}
 	
-	If fileHandle <> ZIPAPI_OK Then
-		Return ""
-	EndIf
+	if (fileHandle <> ZIPAPI_OK) {
+		return ""
+	}
 	
 	// Read all bytes (depacks too)
-	Local bytesRead	= ZlibWapi_UnzReadCurrentFile%(zipHandle, fileBuffer, BankSize(fileBuffer))
+	let bytesRead	= ZlibWapi_UnzReadCurrentFile(zipHandle, fileBuffer, BankSize(fileBuffer))
 	
-	If bytesRead = ZIPAPI_DATA_ERROR Then // Extraction error
+	if (bytesRead = ZIPAPI_DATA_ERROR) { // Extraction error
 		destName = ""
-	EndIf
+	}
 	
 	// Cleanup
 	ZlibWapi_UnzCloseCurrentFile(zipHandle)
 	
-	If bytesRead = fileInfo\UnCompressedSize Then
+	if (bytesRead == fileInfo.UnCompressedSize) {
 		// Save
-		Local fileOut = WriteFile(destName)
+		let fileOut = WriteFile(destName)
 		WriteBytes(fileBuffer, fileOut, 0, BankSize(fileBuffer))
 		CloseFile(fileOut)
-	EndIf
+	}
 	
 	// Reset
-	If prevFile <> Null Then
-		ZlibWapi_UnzLocateFile(zipHandle, prevFile\FileName, False)
+	if (prevFile) {
+		ZlibWapi_UnzLocateFile(zipHandle, prevFile.FileName, False)
 		ZIPAPI_UnzFileInfo_Dispose(prevFile)
-	EndIf
+	}
 	
 	// Cleanup
-	FreeBank fileBuffer
+	FreeBank(fileBuffer)
 	
-	Return destName
+	return destName
 	
 }
 
@@ -574,32 +493,32 @@ Function ZipApi_ExtractFileAsBank%(zipHandle, fileName$, password$ = "")
 // <remarks>This doesn't affect the internal file pointer.</remarks>
 // <returns>A ZIPAPI_UnzFileInfo object containing file information, or null if the file is not found.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_GetFileInfo.ZIPAPI_UnzFileInfo(zipHandle%, fileName$, caseSensitive% = False)
+function ZipApi_GetFileInfo(zipHandle: int, fileName: string, caseSensitive: boolean = false) : ZIPAPI_UnzFileInfo | null {
 	
 	// Check inputs
-	If zipHandle < 1 Then Return Null
-	If fileName = "" Then Return Null
+	if (zipHandle < 1) {return null}
+	if (fileName == "") {return null}
 	
 	// Store the current file, so we can reset file pointer afterwards
-	Local previousFile.ZIPAPI_UnzFileInfo 	= ZipApi_GetCurrentFileInfo(zipHandle)
-	Local fileInfo.ZIPAPI_UnzFileInfo		= Null
+	let previousFile: ZIPAPI_UnzFileInfo 	= ZipApi_GetCurrentFileInfo(zipHandle)
+	let fileInfo: ZIPAPI_UnzFileInfo		= Null
 	
 	// Find the file
-	If ZlibWapi_UnzLocateFile(zipHandle, fileName, caseSensitive) = ZIPAPI_END_OF_LIST_OF_FILE Then
+	if (ZlibWapi_UnzLocateFile(zipHandle, fileName, caseSensitive) == ZIPAPI_END_OF_LIST_OF_FILE) {
 		//TODO: Not found - insert your error code here (if you wish)
-		Return Null
-	EndIf
+		return null
+	}
 	
 	// Get file information
 	fileInfo = ZipApi_GetCurrentFileInfo(zipHandle)
 	
 	// Reset internal pointer
-	ZlibWapi_UnzLocateFile(zipHandle, previousFile\FileName, False)
+	ZlibWapi_UnzLocateFile(zipHandle, previousFile.FileName, False)
 	
 	// Cleanup and return
 	ZIPAPI_UnzFileInfo_Dispose(previousFile)
 	
-	Return fileInfo
+	return fileInfo
 	
 }
 
@@ -607,51 +526,51 @@ Function ZipApi_GetFileInfo.ZIPAPI_UnzFileInfo(zipHandle%, fileName$, caseSensit
 // <param name="zipHandle">Handle to a ZIP resource opened with ZipApi_Open.</param>
 // <returns>ZIPAPI_OK if there is no problem.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_GotoFirstFile(zipHandle%)
-	If zipHandle < 1 Then Return ZIPAPI_INVALIDPOINTER
-	Return ZlibWapi_UnzGoToFirstFile(zipHandle)
+function ZipApi_GotoFirstFile(zipHandle: int) {
+	if (zipHandle < 1) {return ZIPAPI_INVALIDPOINTER}
+	return ZlibWapi_UnzGoToFirstFile(zipHandle)
 }
 
 // <summary>Sets the current file of the zip to the next file.</summary>
 // <param name="zipHandle">Handle to a ZIP resource opened with ZipApi_Open.</param>
 // <returns>ZIPAPI_OK if no problem, or ZIPAPI_END_OF_LIST_OF_FILE if it's the last file.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_GotoNextFile(zipHandle)
-	If zipHandle < 1 Then Return ZIPAPI_INVALIDPOINTER
-	Return ZlibWapi_UnzGoToNextFile(zipHandle)
+function ZipApi_GotoNextFile(zipHandle) {
+	if (zipHandle < 1) {return ZIPAPI_INVALIDPOINTER}
+	return ZlibWapi_UnzGoToNextFile(zipHandle)
 }
 
 // <summary>Gets information about the current file pointed at in the zip.</summary>
 // <param name="zipHandle">Handle to a ZIP resource opened with ZipApi_Open.</param>
 // <returns>A ZIPAPI_UnzFileInfo object on success, or Null if there was an error.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_GetCurrentFileInfo.ZIPAPI_UnzFileInfo(zipHandle%)
-	If zipHandle < 1 Then Return Null
+function ZipApi_GetCurrentFileInfo(zipHandle: int) : ZIPAPI_UnzFileInfo {
+	if (zipHandle < 1) {return Null}
 	
 	// Get default information
-	Local fileInfo.ZIPAPI_UnzFileInfo	= ZipApi_GetCurrentFileInfoFast(zipHandle)
+	let fileInfo: ZIPAPI_UnzFileInfo = ZipApi_GetCurrentFileInfoFast(zipHandle)
 	
 	// Now we want to get filename and other fields
-	Local tBank				= CreateBank(ZIPAPI_UNZFILEINFO_LENGTH)
-	Local fileNameBank		= CreateBank(fileInfo\FileNameLength + 1)
-	Local extraFieldBank	= CreateBank(fileInfo\ExtraFieldLength + 1)
-	Local commentBank		= CreateBank(fileInfo\CommentLength + 1)
+	let tBank				= CreateBank(ZIPAPI_UNZFILEINFO_LENGTH)
+	let fileNameBank		= CreateBank(fileInfo.FileNameLength + 1)
+	let extraFieldBank	= CreateBank(fileInfo.ExtraFieldLength + 1)
+	let commentBank		= CreateBank(fileInfo.CommentLength + 1)
 	
 	// Call method a second time - this is so we get the exact length of these fields
-	ZlibWapi_UnzGetCurrentFileInfo(zipHandle, tBank, fileNameBank, fileInfo\FileNameLength, extraFieldBank, fileInfo\ExtraFieldLength, commentBank, fileInfo\CommentLength)
+	ZlibWapi_UnzGetCurrentFileInfo(zipHandle, tBank, fileNameBank, fileInfo.FileNameLength, extraFieldBank, fileInfo.ExtraFieldLength, commentBank, fileInfo.CommentLength)
 	
 	// Peek our strings
-	fileInfo\FileName	= PeekString(fileNameBank, 0)
-	fileInfo\ExtraField	= PeekString(extraFieldBank, 0)
-	fileInfo\Comment	= PeekString(commentBank, 0)
+	fileInfo.FileName	= PeekString(fileNameBank, 0)
+	fileInfo.ExtraField	= PeekString(extraFieldBank, 0)
+	fileInfo.Comment	= PeekString(commentBank, 0)
 	
 	// Cleanup & Return
-	FreeBank tBank
-	FreeBank fileNameBank
-	FreeBank extraFieldBank
-	FreeBank commentBank
+	FreeBank(tBank)
+	FreeBank(fileNameBank)
+	FreeBank(extraFieldBank)
+	FreeBank(commentBank)
 	
-	Return fileInfo
+	return fileInfo
 	
 }
 
@@ -729,16 +648,16 @@ function ZipApi_GetUnpackedSize(zipHandle: int): int {
 // <remarks>Use this to verify a zip file's validity.</remarks>
 // <returns>True if the file is valid, or false if not.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_VerifyZipFileHeader(fileName$)
+function ZipApi_VerifyZipFileHeader(fileName: string) {
 	
-	If FileType(fileName) <> 1 Then Return False
+	if (FileType(fileName) != 1) {return False}
 	
 	// Open the file and read the first four bytes
-	Local fileIn	= ReadFile(fileName)
-	Local header	= ReadInt(fileIn)	
+	let fileIn	= ReadFile(fileName)
+	let header	= ReadInt(fileIn)	
 	CloseFile(fileIn)
 	
-	Return (header = ZIPAPI_HEADER_INT)
+	return (header == ZIPAPI_HEADER_INT)
 	
 }
 
@@ -751,8 +670,8 @@ Function ZipApi_VerifyZipFileHeader(fileName$)
 // <param name="fileMode">The file mode to use. Can be ZIPAPI_APPEND_CREATE, ZIPAPI_APPEND_CREATEAFTER or ZIPAPI_APPEND_ADDINZIP.</param>
 // <returns>Handle to opened file, or 0 if it could not be opened.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZipApi_CreateZip(fileName$, fileMode% = ZIPAPI_APPEND_CREATE)
-	Return ZlibWapi_ZipOpen(fileName, fileMode)
+function ZipApi_CreateZip(fileName: string, fileMode: int = ZIPAPI_APPEND_CREATE) {
+	return ZlibWapi_ZipOpen(fileName, fileMode)
 }
 
 // <summary>Add a file to a ZIP that has been opened with ZipApi_CreateZip.</summary>
@@ -761,40 +680,40 @@ Function ZipApi_CreateZip(fileName$, fileMode% = ZIPAPI_APPEND_CREATE)
 // <param name="includePath">If the file is passed with a full path, setting this to false will exclude the path from the zip entry.</param>
 // <returns>True if the file was added, false if not.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-function ZipApi_AddFile(zipHandle, fileName$, includePath% = True, password$ = "") : int {
+function ZipApi_AddFile(zipHandle, fileName: string, includePath: boolean = True, password: string = "") : int {
 	
 	// Check inputs
-	If zipHandle < 1 Then Return False
-	If fileName$ = "" Then Return False
-	If FileType(fileName) <> 1 Then Return False
+	if (zipHandle < 1) {return false}
+	if (fileName$ = "") {return false}
+	if (FileType(fileName) != 1) {return false}
 	
 	// Read file data into memory
-	Local fileData	= CreateBank(FileSize(fileName$))
-	Local fileIn	= ReadFile(fileName)
+	let fileData	= CreateBank(FileSize(fileName$))
+	let fileIn	= ReadFile(fileName)
 	ReadBytes(fileData, fileIn, 0, BankSize(fileData)) 
-	CloseFile fileIn
+	CloseFile(fileIn)
 	
 	// Generate the filename as it will appear in the Zip archive
-	Local zipFileName$	= fileName
-	If includePath = False Then 	// Strip path
+	let zipFileName: string = fileName
+	if (!includePath) {	// Strip path
 		zipFileName = File_GetFileName(zipFileName)
-	EndIf
+	}
 	
 	// Add file data to the zip (possible password protected)
-	If password = "" Then 
+	if (password = "") {
 		ZipApi_ZipOpenFileInZip(zipHandle, zipFileName$, ZIPAPI_Date_FromFile(fileName))
-	Else
+	} else {
 		ZipApi_ZipOpenFileInZip(zipHandle, zipFileName$, ZIPAPI_Date_FromFile(fileName), "", 0, 0, True, ZIPAPI_DEFAULT_COMPRESSION, password, ZipApi_Crc32(fileData))
-	EndIf
+	}
 	
 	// Write our data
-	ZlibWapi_ZipWriteFileInZip%(zipHandle%, fileData, BankSize(fileData))
+	ZlibWapi_ZipWriteFileInZip(zipHandle, fileData, BankSize(fileData))
 	
 	// Cleanup & Close
-	FreeBank fileData
+	FreeBank(fileData)
 	ZlibWapi_ZipCloseFileInZip(zipHandle)
 	
-	Return True
+	return True
 	
 }
 
@@ -835,7 +754,7 @@ function ZipApi_AddBankAsFile(zipHandle, bankHandle: int, fileName: String, pass
 // <param name="globalComment">Optional global comment for this ZIP.</param>
 // <subsystem>Blitz.File.ZipApi</subsystem>
 function ZipApi_CloseZip(zipHandle: int, globalComment: string = "") {
-	ZlibWapi_ZipClose(zipHandle, globalComment$)
+	ZlibWapi_ZipClose(zipHandle, globalComment)
 }
 
 // --------------------------------------------------
@@ -1187,30 +1106,30 @@ function ZIPAPI_Date_Create() : ZIPAPI_Date {
 // <remarks>NOT YET IMPLEMENTED - Returns current time and date.</remarks>
 // <returns>ZIPAPI_Date object containing the file's creation date and time.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZIPAPI_Date_FromFile.ZIPAPI_Date(fileName$)
+function ZIPAPI_Date_FromFile(fileName: string) : ZIPAPI_Date {
 	// TODO: Make this work. Will probably need to access Windows dlls
-	Return ZipApi_Date_Create()
+	return ZipApi_Date_Create()
 }
 
 // <summary>Creates a new ZipApi_Date object and reads its contents from a bank.</summary>
 // <param name="bankIn">The bank to read information from.</param>
 // <returns>The ZIPAPI_Date object, or null if it could not be read.</returns>
 // <subsystem>Blitz.File.ZipApi</subsystem>
-Function ZIPAPI_Date_FromBank.ZIPAPI_Date(bankIn)
+function ZIPAPI_Date_FromBank(bankIn) : ZIPAPI_Date {
 	
 	// Check inputs
-	If BankSize(bankIn) < ZIPAPI_DATE_LENGTH Then Return Null
+	if (BankSize(bankIn) < ZIPAPI_DATE_LENGTH) {return Null}
 	
-	Local this.ZIPAPI_Date	= New ZIPAPI_Date
+	let date: ZIPAPI_Date = new ZIPAPI_Date()
 	
-	this\Seconds	= PeekInt(bankIn, 0)
-	this\Minutes	= PeekInt(bankIn, 4)
-	this\Hours		= PeekInt(bankIn, 8)
-	this\Day		= PeekInt(bankIn, 12)
-	this\Month		= PeekInt(bankIn, 16)
-	this\Year		= PeekInt(bankIn, 20)
+	date.Seconds	= PeekInt(bankIn, 0)
+	date.Minutes	= PeekInt(bankIn, 4)
+	date.Hours		= PeekInt(bankIn, 8)
+	date.Day		= PeekInt(bankIn, 12)
+	date.Month		= PeekInt(bankIn, 16)
+	date.Year		= PeekInt(bankIn, 20)
 	
-	Return this
+	return date
 	
 }
 
