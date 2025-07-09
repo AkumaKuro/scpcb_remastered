@@ -90,8 +90,8 @@ export function AchievementTooltip(achvno: int) {
     AASetFont(Font3)
     let width = AAStringWidth(AchievementStrings(achvno))
     AASetFont(Font1)
-    if (AAStringWidth(AchievementDescs(achvno))>width) {
-        width = AAStringWidth(AchievementDescs(achvno))
+    if (AAStringWidth(AchievementDescs[achvno])>width) {
+        width = AAStringWidth(AchievementDescs[achvno])
 	}
     width = width+20*MenuScale
     
@@ -104,7 +104,7 @@ export function AchievementTooltip(achvno: int) {
     AASetFont(Font3)
     AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(35*MenuScale), AchievementStrings(achvno), true, true)
     AASetFont(Font1)
-    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs(achvno), true, true)
+    AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(55*MenuScale), AchievementDescs[achvno], true, true)
 }
 
 function DrawAchvIMG(x: int, y: int, achvno: int) {

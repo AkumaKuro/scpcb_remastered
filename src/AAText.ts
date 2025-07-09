@@ -1,22 +1,26 @@
-import {int, range, Asc, CameraClsMode, CameraRange, CameraViewport, CameraZoom, Chr, Color, CreateCamera, EntityFX, EntityTexture, float, Float, PositionEntity, ScaleEntity, SetFont, StringHeight, Int, Cls, ClsColor, DebugLog} from "./Helper/bbhelper"
-import { BackBuffer, BBText, ColorBlue, ColorGreen, ColorRed, ReadPixelFast, SetBuffer, TextureBuffer, WritePixelFast } from "./Helper/graphics"
-import { CreateMesh, AddTriangle, GetSurface, AddVertex, VertexTexCoords, CreateSurface } from "./Helper/Mesh"
-import { Len, Mid } from "./Helper/strings"
-import { LockBuffer, UnlockBuffer } from "./Helper/textures"
-import { GraphicWidth, GraphicHeight, OptionFile } from "./Main"
+import { GetINIInt } from "./Converter"
+import { ark_blur_cam } from "./Dreamfilter"
+import { Chr, Color, DebugLog, EntityFX, EntityTexture, float, Float, Int, int, PositionEntity, range, ScaleEntity, SetFont } from "./Helper/bbhelper"
+import { CreateCamera, CameraViewport, CameraZoom, CameraClsMode, CameraRange, CameraProjMode } from "./Helper/camera"
+import { TextureBuffer, ReadPixelFast, WritePixelFast, BackBuffer, ColorRed, ColorGreen, ColorBlue, BBText, RenderWorld, ClsColor, SetBuffer, Cls } from "./Helper/graphics"
+import { Abs } from "./Helper/math"
+import { MoveEntity, CreateMesh, CreateSurface, AddVertex, AddTriangle, EntityAlpha, VertexTexCoords, GetSurface } from "./Helper/Mesh"
+import { Len, Asc, Mid, StringHeight } from "./Helper/strings"
+import { LockBuffer, ImageBuffer, UnlockBuffer } from "./Helper/textures"
+import { OptionFile, GraphicWidth, GraphicHeight, Camera } from "./Main"
 
-var AATextEnable: int = GetINIInt(OptionFile, "options", "antialiased text")
-var AASelectedFont: int
-var AATextCam: int
-var AATextSprite: int[] = new Array(150)
-var AACharW: int
-var AACharH: int
-var AATextEnable_Prev: int = AATextEnable
+export var AATextEnable: int = GetINIInt(OptionFile, "options", "antialiased text")
+export var AASelectedFont: int
+export var AATextCam: int
+export var AATextSprite: int[] = new Array(150)
+export var AACharW: int
+export var AACharH: int
+export var AATextEnable_Prev: int = AATextEnable
 
-var AACamViewW: int
-var AACamViewH: int
+export var AACamViewW: int
+export var AACamViewH: int
 
-class AAFont {
+export class AAFont {
 	static each: AAFont[]
 	texture: int
 	backup: int //images don't get erased by clearworld
@@ -32,7 +36,7 @@ class AAFont {
 	mH: int
 	texH: int
 	
-	isAA: int
+	isAA: boolean
 }
 
 export function InitAAFont() {
@@ -75,7 +79,7 @@ export function InitAAFont() {
 	}
 }
 
-function AASpritePosition(ind: int,x: int,y: int) {
+export function AASpritePosition(ind: int,x: int,y: int) {
 	//THE HORROR
 	let nx: float = (((Float(x-(AACamViewW/2))/Float(AACamViewW))*2))
 	let ny: float = -(((Float(y-(AACamViewH/2))/Float(AACamViewW))*2))
@@ -87,13 +91,13 @@ function AASpritePosition(ind: int,x: int,y: int) {
 	PositionEntity(AATextSprite[ind],nx,ny,1.0)
 }
 
-function AASpriteScale(ind: int,w: int,h: int) {
+export function AASpriteScale(ind: int,w: int,h: int) {
 	ScaleEntity (AATextSprite[ind],1.0/Float(AACamViewW)*Float(w), 1/Float(AACamViewW)*Float(h), 1)
 	AACharW = w
 	AACharH = h
 }
 
-function ReloadAAFont() { //CALL ONLY AFTER CLEARWORLD
+export function ReloadAAFont() { //CALL ONLY AFTER CLEARWORLD
 	if (AATextEnable) {
 		InitAAFont()
 		for (let font of AAFont.each) {
@@ -124,7 +128,7 @@ export function AASetFont(fnt: int) {
 	}
 }
 
-function AAStringWidth(txt: string): int {
+export function AAStringWidth(txt: string): int {
 	let font: AAFont = AAFont.each[AASelectedFont]
 	if ((AATextEnable) && (font.isAA)) {
 		let retVal: int = 0
@@ -142,7 +146,7 @@ function AAStringWidth(txt: string): int {
 }
 
 export function AAStringHeight(txt: string): int {
-	let font: AAFont = AAFont.each[AASelectedFont] //Object.AAFont
+	let font: AAFont = AAFont.each[AASelectedFont]
 	if ((AATextEnable) && (font.isAA)) {
 		return font.mH
 	}
@@ -152,7 +156,7 @@ export function AAStringHeight(txt: string): int {
 
 export function AAText(x: int,y: int,txt: string,cx: boolean=false,cy: boolean = false,a: float = 1.0) {
 	if (Len(txt) == 0) {return}
-	let font: AAFont = Object.AAFont(AASelectedFont)
+	let font: AAFont = AAFont.each[AASelectedFont]
 	
 	if ((GraphicsBuffer() != BackBuffer()) || (!AATextEnable) || (!font.isAA)) {
 		SetFont (font.lowResFont)
@@ -182,7 +186,7 @@ export function AAText(x: int,y: int,txt: string,cx: boolean=false,cy: boolean =
 	let char: int
 	
 	let tw: int = 0
-	for (i of range(1, Len(txt) + 1)) {
+	for (let i of range(1, Len(txt) + 1)) {
 		char = Asc(Mid(txt,i,1))
 		if (char>=0 && char<=127) {
 			tw=tw+font.w[char]
@@ -228,7 +232,7 @@ export function AAText(x: int,y: int,txt: string,cx: boolean=false,cy: boolean =
 	RenderWorld()
 	CameraProjMode(AATextCam,0)
 	
-	for (i of range(1, Len(txt) + 1)) {
+	for (let i of range(1, Len(txt) + 1)) {
 		HideEntity(AATextSprite[i-1])
 	}
 	
@@ -340,7 +344,7 @@ export function AALoadFont(file: string="Tahoma", height=13, bold=0, italic=0, u
 		LockBuffer(ImageBuffer(backup))
 		for (let ix of range(1024)) {
 			for (let iy of range(newFont.texH + 1)) {
-				px = ReadPixelFast(ix,iy,TextureBuffer(tImage)) >> 24
+				let px = ReadPixelFast(ix,iy,TextureBuffer(tImage)) >> 24
 				px += (px << 8) + (px << 16)
 				WritePixelFast(ix,iy,0xFF000000+px,ImageBuffer(backup))
 			}

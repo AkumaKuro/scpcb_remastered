@@ -211,12 +211,12 @@ export var CurrFrameLimit: float = (Framelimit-19)/100.0
 
 export var ScreenGamma: float = GetINIFloat(OptionFile, "options", "screengamma")
 
-const HIT_MAP: int = 1
-const HIT_PLAYER: int = 2
-const HIT_ITEM: int = 3
-const HIT_APACHE: int = 4
-const HIT_178: int = 5
-const HIT_DEAD: int = 6
+export const HIT_MAP: int = 1
+export const HIT_PLAYER: int = 2
+export const HIT_ITEM: int = 3
+export const HIT_APACHE: int = 4
+export const HIT_178: int = 5
+export const HIT_DEAD: int = 6
 SeedRnd (MilliSecs())
 
 export var GameSaved: int
@@ -232,7 +232,9 @@ PlayStartupVideos()
 
 export var CursorIMG: int = LoadImage_Strict("GFX/cursor.png")
 
-export var SelectedLoadingScreen: LoadingScreens, LoadingScreenAmount: int, LoadingScreenText: int
+export var SelectedLoadingScreen: LoadingScreens
+export var LoadingScreenAmount: int
+export var LoadingScreenText: int
 export var LoadingBack: int = LoadImage_Strict("Loadingscreens/loadingback.jpg")
 InitLoadingScreens("Loadingscreens/loadingscreens.ini")
 
@@ -259,16 +261,20 @@ export var BlinkMeterIMG: int = LoadImage_Strict("GFX/blinkmeter.jpg")
 DrawLoading(0, true)
 
 // - -Viewport.
-export var viewport_center_x: int = GraphicWidth / 2, viewport_center_y: int = GraphicHeight / 2
+export var viewport_center_x: int = GraphicWidth / 2
+export var viewport_center_y: int = GraphicHeight / 2
 
 // -- Mouselook.
 export var mouselook_x_inc: float = 0.3 // This sets both the sensitivity and direction (+/-) of the mouse on the X axis.
 export var mouselook_y_inc: float = 0.3 // This sets both the sensitivity and direction (+/-) of the mouse on the Y axis.
 // Used to limit the mouse movement to within a certain number of pixels (250 is used here) from the center of the screen.
 // This produces smoother mouse movement than continuously moving the mouse back to the center each loop.
-export var mouse_left_limit: int = 250, mouse_right_limit: int = GraphicsWidth () - 250
-export var mouse_top_limit: int = 150, mouse_bottom_limit: int = GraphicsHeight () - 150 // As above.
-export var mouse_x_speed_1: float, mouse_y_speed_1: float
+export var mouse_left_limit: int = 250
+export var mouse_right_limit: int = GraphicsWidth () - 250
+export var mouse_top_limit: int = 150
+export var mouse_bottom_limit: int = GraphicsHeight () - 150 // As above.
+export var mouse_x_speed_1: float
+export var mouse_y_speed_1: float
 
 export var KEY_RIGHT = GetINIInt(OptionFile, "binds", "Right key")
 export var KEY_LEFT = GetINIInt(OptionFile, "binds", "Left key")
@@ -359,14 +365,14 @@ export var side: float
 export var Crouch: int
 export var CrouchState: float
 
-export var PlayerZone: int
+export var PlayerZone: AreaName
 export var PlayerRoom: Rooms
 
 export var GrabbedEntity: int
 
 export var InvertMouse: int = GetINIInt(OptionFile, "options", "invert mouse y")
 export var MouseHit1: int
-export var MouseDown1: int
+export var MouseDown1: boolean
 export var MouseHit2: int
 export var DoubleClick: int
 export var LastMouseHit1: int
@@ -390,24 +396,24 @@ export var LightsOn: boolean = true
 export var SoundTransmission: int
 
 //menus, GUI ---------------------------------------------------------------------------------------------------------
-export var MainMenuOpen: int
-export var MenuOpen: int
+export var MainMenuOpen: boolean
+export var MenuOpen: boolean
 export var StopHidingTimer: float
-export var InvOpen: int
-export var OtherOpen: Items = null
+export var InvOpen: boolean
+export var OtherOpen: Items
 
-export var SelectedEnding$
+export var SelectedEnding: string
 export var EndingScreen: int
 export var EndingTimer: float
 
 export var MsgTimer: float
-export var Msg$
-export var DeathMSG$
+export var Msg: string
+export var DeathMSG: string
 
 export var AccessCode: int
-export var KeypadInput$
+export var KeypadInput: string
 export var KeypadTimer: float
-export var KeypadMSG$
+export var KeypadMSG: string
 
 export var DrawHandIcon: int
 export var DrawArrowIcon: int[] = new Array(4)
@@ -442,13 +448,17 @@ export var IsNVGBlinking: boolean = false
 
 //----------------------------------------------  Console -----------------------------------------------------
 
-export var ConsoleOpen: int, ConsoleInput: string
-export var ConsoleScroll: float,ConsoleScrollDragging: int
+export var ConsoleOpen: int
+export var ConsoleInput: string
+export var ConsoleScroll: float
+export var ConsoleScrollDragging: int
 export var ConsoleMouseMem: int
-export var ConsoleReissue: ConsoleMsg = null
-export var ConsoleR: int = 255,ConsoleG: int = 255,ConsoleB: int = 255
+export var ConsoleReissue: ConsoleMsg
+export var ConsoleR: int = 255
+export var ConsoleG: int = 255
+export var ConsoleB: int = 255
 
-class ConsoleMsg {
+export class ConsoleMsg {
 	txt: string
 	isCommand: int
 	r: int
@@ -457,7 +467,7 @@ class ConsoleMsg {
 	static each: ConsoleMsg[] = []
 }
 
-function CreateConsoleMsg(txt: string,r: int=-1,g: int=-1,b: int=-1,isCommand: boolean = false) {
+export function CreateConsoleMsg(txt: string,r: int=-1,g: int=-1,b: int=-1,isCommand: boolean = false) {
 	let c: ConsoleMsg = new ConsoleMsg()
 	ConsoleMsg.each.Insert(c)
 	
@@ -473,7 +483,7 @@ function CreateConsoleMsg(txt: string,r: int=-1,g: int=-1,b: int=-1,isCommand: b
 	if (c.b<0) {c.b = ConsoleB}
 }
 
-function UpdateConsole() {
+export function UpdateConsole() {
 	let e: Events
 	
 	if (!CanOpenConsole) {
@@ -527,7 +537,7 @@ function UpdateConsole() {
 		Rect (x+width-23*MenuScale,y+height-scrollbarHeight+(ConsoleScroll*scrollbarHeight/height),20*MenuScale,scrollbarHeight,true)
 		
 		if (!MouseDown(1)) {
-			ConsoleScrollDragging=False
+			ConsoleScrollDragging=false
 		} else if (ConsoleScrollDragging) {
 			ConsoleScroll = ConsoleScroll+((ScaledMouseY()-ConsoleMouseMem)*height/scrollbarHeight)
 			ConsoleMouseMem = ScaledMouseY()
@@ -536,7 +546,7 @@ function UpdateConsole() {
 		if (!ConsoleScrollDragging) {
 			if (MouseHit1) {
 				if (inBox) {
-					ConsoleScrollDragging=True
+					ConsoleScrollDragging=true
 					ConsoleMouseMem = ScaledMouseY()
 				} else if(inBar) {
 					ConsoleScroll = ConsoleScroll+((ScaledMouseY()-(y+height))*consoleHeight/height+(height/2))
@@ -555,10 +565,10 @@ function UpdateConsole() {
 		let reissuePos: int
 		if (KeyHit(200)){
 			reissuePos = 0
-			if (ConsoleReissue==Null) {
+			if (!ConsoleReissue) {
 				ConsoleReissue=First (ConsoleMsg.each)
 				
-				while (ConsoleReissue!=Null) {
+				while (ConsoleReissue) {
 					if (ConsoleReissue.isCommand) {
 						break
 					}
@@ -567,7 +577,7 @@ function UpdateConsole() {
 				}
 				
 			} else {
-				cm.ConsoleMsg = First (ConsoleMsg)
+				let cm: ConsoleMsg = First (ConsoleMsg.each)
 				while (cm) {
 					if (cm==ConsoleReissue) {break}
 					reissuePos = reissuePos-15*MenuScale
@@ -655,7 +665,7 @@ function UpdateConsole() {
 		if (KeyHit(28) && ConsoleInput != "") {
 			ConsoleReissue = Null
 			ConsoleScroll = 0
-			CreateConsoleMsg(ConsoleInput,255,255,0,True)
+			CreateConsoleMsg(ConsoleInput,255,255,0,true)
 			if (Instr(ConsoleInput, " ") > 0) {
 				StrTemp = Lower(Left(ConsoleInput, Instr(ConsoleInput, " ") - 1))
 			} else {
@@ -666,9 +676,9 @@ function UpdateConsole() {
 				case "help":
 					//[Block]
 					if (Instr(ConsoleInput, " ") != 0) {
-						StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+						StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					} else {
-						StrTemp$ = ""
+						StrTemp = ""
 					}
 					ConsoleR = 0
 					ConsoleG = 255
@@ -966,25 +976,25 @@ function UpdateConsole() {
 					
 				case "spawnitem":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
-					temp = False 
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					temp = false 
 					for (itt of ItemTemplates.each) {
 						if (Lower(itt.name) == StrTemp) {
-							temp = True
+							temp = true
 							CreateConsoleMsg(itt.name + " spawned.")
-							it.Items = CreateItem(itt.name, itt.tempname, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+							it.Items = CreateItem(itt.name, itt.tempname, EntityX(Collider), EntityY(Camera,true), EntityZ(Collider))
 							EntityType(it.collider, HIT_ITEM)
 							Exit
 						} else if ((Lower(itt.tempname) = StrTemp)) {
-							temp = True
+							temp = true
 							CreateConsoleMsg(itt.name + " spawned.")
-							it.Items = CreateItem(itt.name, itt.tempname, EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+							it.Items = CreateItem(itt.name, itt.tempname, EntityX(Collider), EntityY(Camera,true), EntityZ(Collider))
 							EntityType(it.collider, HIT_ITEM)
 							Exit
 						}
 					}
 					
-					if (temp = False) {CreateConsoleMsg("Item not found.",255,150,0)}
+					if (temp = false) {CreateConsoleMsg("Item not found.",255,150,0)}
 					
 				case "wireframe":
 					//[Block]
@@ -992,9 +1002,9 @@ function UpdateConsole() {
 					
 					switch (StrTemp) {
 						case "on", "1", "true":
-							WireframeState = True							
+							WireframeState = true							
 						case "off", "0", "false":
-							WireframeState = False
+							WireframeState = false
 						default:
 							WireframeState = !WireframeState
 					}
@@ -1056,20 +1066,20 @@ function UpdateConsole() {
 					
 				case "enable173":
 					//[Block]
-					Curr173.Idle = False
+					Curr173.Idle = false
 					ShowEntity(Curr173.obj)
 					ShowEntity(Curr173.Collider)
 					
 				case "disable106":
 					//[Block]
-					Curr106.Idle = True
+					Curr106.Idle = true
 					Curr106.State = 200000
-					Contained106 = True
+					Contained106 = true
 					
 				case "enable106":
 					//[Block]
-					Curr106.Idle = False
-					Contained106 = False
+					Curr106.Idle = false
+					Contained106 = false
 					ShowEntity (Curr106.Collider)
 					ShowEntity (Curr106.obj)
 					
@@ -1101,9 +1111,9 @@ function UpdateConsole() {
 					//[Block]
 					for (i of range(1, 21)) {
 						if (Rand(2)==1) {
-							it.Items = CreateItem("Some SCP-420-J","420", EntityX(Collider,True)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,True), EntityZ(Collider,True)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
+							it.Items = CreateItem("Some SCP-420-J","420", EntityX(Collider,true)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,true), EntityZ(Collider,true)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
 						} else {
-							it.Items = CreateItem("Joint","420s", EntityX(Collider,True)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,True), EntityZ(Collider,True)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
+							it.Items = CreateItem("Joint","420s", EntityX(Collider,true)+Cos((360.0/20.0)*i)*Rnd(0.3,0.5), EntityY(Camera,true), EntityZ(Collider,true)+Sin((360.0/20.0)*i)*Rnd(0.3,0.5))
 						}
 						EntityType (it.collider, HIT_ITEM)
 					}
@@ -1115,9 +1125,9 @@ function UpdateConsole() {
 					
 					switch (StrTemp) {
 						case "on", "1", "true":
-							GodMode = True						
+							GodMode = true						
 						case "off", "0", "false":
-							GodMode = False
+							GodMode = false
 						default:
 							GodMode = !GodMode
 					}
@@ -1142,7 +1152,7 @@ function UpdateConsole() {
 					BlurTimer = 0
 					
 					FallTimer = 0
-					MenuOpen = False
+					MenuOpen = false
 					
 					GodMode = 0
 					NoClip = 0
@@ -1158,17 +1168,17 @@ function UpdateConsole() {
 					
 					switch (StrTemp) {
 						case "on", "1", "true":
-							NoClip = True
-							Playable = True
+							NoClip = true
+							Playable = true
 						case "off", "0", "false":
-							NoClip = False	
+							NoClip = false	
 							RotateEntity (Collider, 0, EntityYaw(Collider), 0)
 						default:
 							NoClip = !NoClip
 							if (!NoClip) {		
 								RotateEntity (Collider, 0, EntityYaw(Collider), 0)
 							} else {
-								Playable = True
+								Playable = true
 							}
 					}
 					
@@ -1203,9 +1213,9 @@ function UpdateConsole() {
 					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					switch (StrTemp) {
 						case "on", "1", "true":
-							DebugHUD = True
+							DebugHUD = true
 						case "off", "0", "false":
-							DebugHUD = False
+							DebugHUD = false
 						default:
 							DebugHUD = !DebugHUD
 					}
@@ -1375,7 +1385,7 @@ function UpdateConsole() {
 					}
 					
 					if (StrTemp != "") {
-						PlayCustomMusic = True
+						PlayCustomMusic = true
 						if (CustomMusic != 0) {
 							FreeSound_Strict (CustomMusic)
 							CustomMusic = 0
@@ -1424,14 +1434,14 @@ function UpdateConsole() {
 					
 					switch (StrTemp) {
 						case "on", "1", "true":
-							NoTarget = True						
+							NoTarget = true						
 						case "off", "0", "false":
-							NoTarget = False	
+							NoTarget = false	
 						default:
 							NoTarget = !NoTarget
 					}
 					
-					if (NoTarget == False) {
+					if (NoTarget == false) {
 						CreateConsoleMsg("NOTARGET OFF")
 					} else {
 						CreateConsoleMsg("NOTARGET ON")	
@@ -1439,13 +1449,13 @@ function UpdateConsole() {
 					
 				case "spawnradio":
 					//[Block]
-					it.Items = CreateItem("Radio Transceiver", "fineradio", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+					it.Items = CreateItem("Radio Transceiver", "fineradio", EntityX(Collider), EntityY(Camera,true), EntityZ(Collider))
 					EntityType(it.collider, HIT_ITEM)
 					it.state = 101
 					
 				case "spawnnvg":
 					//[Block]
-					it.Items = CreateItem("Night Vision Goggles", "nvgoggles", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+					it.Items = CreateItem("Night Vision Goggles", "nvgoggles", EntityX(Collider), EntityY(Camera,true), EntityZ(Collider))
 					EntityType(it.collider, HIT_ITEM)
 					it.state = 1000
 					
@@ -1455,7 +1465,7 @@ function UpdateConsole() {
 					
 				case "spawnnav":
 					//[Block]
-					it.Items = CreateItem("S-NAV Navigator Ultimate", "nav", EntityX(Collider), EntityY(Camera,True), EntityZ(Collider))
+					it.Items = CreateItem("S-NAV Navigator Ultimate", "nav", EntityX(Collider), EntityY(Camera,true), EntityZ(Collider))
 					EntityType(it.collider, HIT_ITEM)
 					it.state = 101
 					
@@ -1470,7 +1480,7 @@ function UpdateConsole() {
 					StrTemp$ = Piece$(args$,1," ")
 					StrTemp2$ = Piece$(args$,2," ")
 					StrTemp3$ = Piece$(args$,3," ")
-					let pl_room_found: boolean = False
+					let pl_room_found: boolean = false
 					if (StrTemp == "" || StrTemp2 == "" || StrTemp3 == "") {
 						CreateConsoleMsg("Too few parameters. This command requires 3.",255,150,0)
 					} else {
@@ -1486,7 +1496,7 @@ function UpdateConsole() {
 									e.EventState3 = Float(StrTemp3)
 								}
 								CreateConsoleMsg("Changed event states from current player room to: "+e.EventState+"|"+e.EventState2+"|"+e.EventState3)
-								pl_room_found = True
+								pl_room_found = true
 								break
 							}
 						}
@@ -1519,22 +1529,22 @@ function UpdateConsole() {
 					}
 					
 					if (Int(StrTemp)>=0 && Int(StrTemp)<MAXACHIEVEMENTS) {
-						Achievements(Int(StrTemp))=True
-						CreateConsoleMsg("Achievemt "+AchievementStrings(Int(StrTemp))+" unlocked.")
+						Achievements[Int(StrTemp)]=true
+						CreateConsoleMsg("Achievemt "+AchievementStrings[Int(StrTemp)]+" unlocked.")
 					} else {
 						CreateConsoleMsg("Achievement with ID "+Int(StrTemp)+" doesn't exist.",255,150,0)
 					}
 					
 				case "427state":
 					//[Block]
-					StrTemp$ = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
+					StrTemp = Lower(Right(ConsoleInput, Len(ConsoleInput) - Instr(ConsoleInput, " ")))
 					
 					I_427.Timer = Float(StrTemp)*70.0
 					
 				case "teleport106":
 					//[Block]
 					Curr106.State = 0
-					Curr106.Idle = False
+					Curr106.Idle = false
 					
 				case "setblinkeffect":
 					//[Block]
@@ -1566,7 +1576,7 @@ function UpdateConsole() {
 				if (TempY >= y && TempY < y + height - 20*MenuScale) {
 					if (cm=ConsoleReissue) {
 						Color (cm.r/4,cm.g/4,cm.b/4)
-						Rect (x,TempY-2*MenuScale,width-30*MenuScale,24*MenuScale,True)
+						Rect (x,TempY-2*MenuScale,width-30*MenuScale,24*MenuScale,true)
 					}
 					Color (cm.r,cm.g,cm.b)
 					if (cm.isCommand) {
@@ -1614,42 +1624,46 @@ CreateConsoleMsg("  - spawn [npc type]")
 
 //---------------------------------------------------------------------------------------------------
 
-var DebugHUD: int
+export var DebugHUD: int
 
-var BlurVolume: float, BlurTimer: float
+export var BlurVolume: float
+export var BlurTimer: float
 
-var LightBlink: float, LightFlash: float
+export var LightBlink: float
+export var LightFlash: float
 
-var BumpEnabled: int = GetINIInt("options.ini", "options", "bump mapping enabled")
-var HUDenabled: int = GetINIInt("options.ini", "options", "HUD enabled")
+export var BumpEnabled: int = GetINIInt("options.ini", "options", "bump mapping enabled")
+export var HUDenabled: int = GetINIInt("options.ini", "options", "HUD enabled")
 
-var Camera: int, CameraShake: float, CurrCameraZoom: float
+export var Camera: int
+export var CameraShake: float
+export var CurrCameraZoom: float
 
-var Brightness: int = GetINIFloat("options.ini", "options", "brightness")
-var CameraFogNear: float = GetINIFloat("options.ini", "options", "camera fog near")
-var CameraFogFar: float = GetINIFloat("options.ini", "options", "camera fog far")
+export var Brightness: int = GetINIFloat("options.ini", "options", "brightness")
+export var CameraFogNear: float = GetINIFloat("options.ini", "options", "camera fog near")
+export var CameraFogFar: float = GetINIFloat("options.ini", "options", "camera fog far")
 
-var StoredCameraFogFar: float = CameraFogFar
+export var StoredCameraFogFar: float = CameraFogFar
 
-var MouseSens: float = GetINIFloat("options.ini", "options", "mouse sensitivity")
+export var MouseSens: float = GetINIFloat("options.ini", "options", "mouse sensitivity")
 
-var EnableVRam: int = GetINIInt("options.ini", "options", "enable vram")
+export var EnableVRam: int = GetINIInt("options.ini", "options", "enable vram")
 
 import "dreamfilter.ts"
 
-var LightSpriteTex = new Array(10)
+LightSpriteTex = new Array(10) // TODO used to be global export???
 
 //----------------------------------------------  Sounds -----------------------------------------------------
 
 //[Block]
 
-var SoundEmitter: int
-var TempSounds: int[] = new Array(10)
-var TempSoundCHN: int
-var TempSoundIndex: int = 0
+export var SoundEmitter: int
+export var TempSounds: int[] = new Array(10)
+export var TempSoundCHN: int
+export var TempSoundIndex: int = 0
 
 //The Music now has to be pre-defined, as the new system uses streaming instead of the usual sound loading system Blitz3D has
-var Music: string[] = new Array(40)
+export var Music: string[] = new Array(40)
 Music[0] = "The Dread"
 Music[1] = "HeavyContainment"
 Music[2] = "EntranceZone"
@@ -1677,117 +1691,126 @@ Music[23] = "Ending"
 Music[24] = "Credits"
 Music[25] = "SaveMeFrom"
 
-var MusicVolume: float = GetINIFloat(OptionFile, "audio", "music volume")
+export var MusicVolume: float = GetINIFloat(OptionFile, "audio", "music volume")
 
-var CurrMusicStream, MusicCHN
+export var CurrMusicStream, MusicCHN
 MusicCHN = StreamSound_Strict("SFX/Music/"+Music(2)+".ogg",MusicVolume,Mode)
 
-var CurrMusicVolume: float = 1.0, NowPlaying: int=2, ShouldPlay: int=11
-var CurrMusic: int = 1
+export var CurrMusicVolume: float = 1.0, NowPlaying: int=2, ShouldPlay: int=11
+export var CurrMusic: int = 1
 
-DrawLoading(10, True)
+DrawLoading(10, true)
 
-var OpenDoorSFX: int[][] = new Array(3,3)
-var CloseDoorSFX: int [][] = new Array(3,3)
+export var OpenDoorSFX: int[][] = new Array(3,3)
+export var CloseDoorSFX: int [][] = new Array(3,3)
 
-var KeyCardSFX1 
-var KeyCardSFX2 
-var ButtonSFX2 
-var ScannerSFX1
-var ScannerSFX2 
+export var KeyCardSFX1 
+export var KeyCardSFX2 
+export var ButtonSFX2 
+export var ScannerSFX1
+export var ScannerSFX2 
 
-var OpenDoorFastSFX
-var CautionSFX: int 
+export var OpenDoorFastSFX
+export var CautionSFX: int 
 
-var NuclearSirenSFX: int
+export var NuclearSirenSFX: int
 
-var CameraSFX  
+export var CameraSFX  
 
-var StoneDragSFX: int 
+export var StoneDragSFX: int 
 
-var GunshotSFX: int
-var Gunshot2SFX: int
-var Gunshot3SFX: int
-var BullethitSFX: int
+export var GunshotSFX: int
+export var Gunshot2SFX: int
+export var Gunshot3SFX: int
+export var BullethitSFX: int
 
-var TeslaIdleSFX 
-var TeslaActivateSFX 
-var TeslaPowerUpSFX 
+export var TeslaIdleSFX 
+export var TeslaActivateSFX 
+export var TeslaPowerUpSFX 
 
-var MagnetUpSFX: int, MagnetDownSFX
-var FemurBreakerSFX: int
-var EndBreathCHN: int
-var EndBreathSFX: int
+export var MagnetUpSFX: int
+export var MagnetDownSFX
+export var FemurBreakerSFX: int
+export var EndBreathCHN: int
+export var EndBreathSFX: int
 
-var DecaySFX: int[] = new Array(5)
+export var DecaySFX: int[] = new Array(5)
 
-var BurstSFX 
+export var BurstSFX 
 
-DrawLoading(20, True)
+DrawLoading(20, true)
 
-var RustleSFX: int[] = new Array(3)
+export var RustleSFX: int[] = new Array(3)
 
-var Use914SFX: int
-var Death914SFX: int 
+export var Use914SFX: int
+export var Death914SFX: int 
 
-var DripSFX: int[] = new Array(4)
+export var DripSFX: int[] = new Array(4)
 
-var LeverSFX: int, LightSFX: int 
-var ButtGhostSFX: int 
+export var LeverSFX: int, LightSFX: int 
+export var ButtGhostSFX: int 
 
-var RadioSFX: Array[][] = new Array(5,10) 
+export var RadioSFX: any[][] = new Array(5,10) 
 
-var RadioSquelch 
-var RadioStatic 
-var RadioBuzz 
+export var RadioSquelch 
+export var RadioStatic 
+export var RadioBuzz 
 
-var ElevatorBeepSFX, ElevatorMoveSFX  
+export var ElevatorBeepSFX, ElevatorMoveSFX  
 
-var PickSFX: int[] = new Array(10)
+export var PickSFX: int[] = new Array(10)
 
-var AmbientSFXCHN: int, CurrAmbientSFX: int
-var AmbientSFXAmount: Array = new Array(6)
-//0 = light containment, 1 = heavy containment, 2 = entrance
-AmbientSFXAmount[0] = 8
-AmbientSFXAmount[1] = 11
-AmbientSFXAmount[2] = 12
-//3 = general, 4 = pre-breach
-AmbientSFXAmount[3] = 15
-AmbientSFXAmount[4] = 5
-//5 = forest
-AmbientSFXAmount[5] = 10
+export var AmbientSFXCHN: int
+export var CurrAmbientSFX: int
+export var AmbientSFXAmount: any[] = new Array(6)
 
-var AmbientSFX: int[] = new Array(6, 15)
+export enum AreaName {
+	LightContainment,
+	HeavyContainment,
+	Entrance,
+	General,
+	PreBreach,
+	Forest
+}
 
-var OldManSFX: int[] = new Array(8)
+AmbientSFXAmount[AreaName.LightContainment] = 8
+AmbientSFXAmount[AreaName.HeavyContainment] = 11
+AmbientSFXAmount[AreaName.Entrance] = 12
+AmbientSFXAmount[AreaName.General] = 15
+AmbientSFXAmount[AreaName.PreBreach] = 5
+AmbientSFXAmount[AreaName.Forest] = 10
 
-var Scp173SFX: int[] = new Array(3)
+export var AmbientSFX: int[] = new Array(6, 15)
 
-var HorrorSFX: int[] = new Array(20)
+export var OldManSFX: int[] = new Array(8)
 
+export var Scp173SFX: int[] = new Array(3)
 
-DrawLoading(25, True)
-
-var IntroSFX: int[] = new Array(20)
-
-
-var AlarmSFX: int[] = new Array(5)
-
-var CommotionState: int[] = new Array(25)
-
-var HeartBeatSFX 
-
-var VomitSFX: int
-
-var BreathSFX: Array[][] = new Array(2,5)
-var BreathCHN: int
+export var HorrorSFX: int[] = new Array(20)
 
 
-var NeckSnapSFX: Array = new Array(3)
+DrawLoading(25, true)
 
-var DamageSFX: int[] = new Array(9)
+export var IntroSFX: int[] = new Array(20)
 
-var MTFSFX: int[] = new Array(8)
+
+export var AlarmSFX: int[] = new Array(5)
+
+export var CommotionState: int[] = new Array(25)
+
+export var HeartBeatSFX 
+
+export var VomitSFX: int
+
+export var BreathSFX: Array[][] = new Array(2,5)
+export var BreathCHN: int
+
+
+export var NeckSnapSFX: Array = new Array(3)
+
+export var DamageSFX: int[] = new Array(9)
+
+export var MTFSFX: int[] = new Array(8)
 
 var CoughSFX: int[] = new Array(3)
 var CoughCHN: int, VomitCHN: int
@@ -1799,34 +1822,34 @@ var StepSFX: int[][][] = new Array(5, 2, 8) //(normal/metal, walk/run, id)
 
 var Step2SFX: Array = new Array(6)
 
-DrawLoading(30, True)
+DrawLoading(30, true)
 
 //[End block]
 
 //New Sounds and Meshes/Other things in SCP:CB 1.3 - ENDSHN
 
-var PlayCustomMusic: int = False, CustomMusic: int = 0
+var PlayCustomMusic: int = false, CustomMusic: int = 0
 
 var Monitor2, Monitor3, MonitorTexture2, MonitorTexture3, MonitorTexture4, MonitorTextureOff
 var MonitorTimer: float = 0.0, MonitorTimer2: float = 0.0, UpdateCheckpoint1: int, UpdateCheckpoint2: int
 
 //This variable is for when a camera detected the player
-	//False: Player is not seen (will be set after every call of the Main Loop
-	//True: The Player got detected by a camera
+	//false: Player is not seen (will be set after every call of the Main Loop
+	//true: The Player got detected by a camera
 var PlayerDetected: int
 var PrevInjuries: float,PrevBloodloss: float
-var NoTarget: boolean = False
+var NoTarget: boolean = false
 
 var NVGImages = LoadAnimImage("GFX/battery.png",64,64,0,2)
 MaskImage (NVGImages,255,0,255)
 
-var Wearing1499: int = False
+var Wearing1499: int = false
 var AmbientLightRoomTex: int, AmbientLightRoomVal: int
 
 var EnableUserTracks: int = GetINIInt(OptionFile, "audio", "enable user tracks")
 var UserTrackMode: int = GetINIInt(OptionFile, "audio", "user track setting")
 var UserTrackCheck: int = 0, UserTrackCheck2: int = 0
-var UserTrackMusicAmount: int = 0, CurrUserTrack: int, UserTrackFlag: int = False
+var UserTrackMusicAmount: int = 0, CurrUserTrack: int, UserTrackFlag: int = false
 var UserTrackName: string[] = new Array(256)
 
 var NTF_1499PrevX: float
@@ -1841,16 +1864,16 @@ var NTF_1499Sky: int
 var OptionsMenu: int = 0
 var QuitMSG: int = 0
 
-var InFacility: int = True
+var InFacility: int = true
 
 var PrevMusicVolume: float = MusicVolume
 var PrevSFXVolume: float = SFXVolume
-var DeafPlayer: int = False
+var DeafPlayer: int = false
 var DeafTimer: float = 0.0
 
-var IsZombie: int = False
+var IsZombie: int = false
 
-var room2gw_brokendoor: int = False
+var room2gw_brokendoor: int = false
 var room2gw_x: float = 0.0
 var room2gw_z: float = 0.0
 
@@ -1902,7 +1925,7 @@ var KeypadHUD
 
 var Panel294, Using294: int, Input294: string
 
-DrawLoading(35, True)
+DrawLoading(35, true)
 
 //----------------------------------------------  Items  -----------------------------------------------------
 
@@ -1914,11 +1937,11 @@ import "Particles.ts"
 
 //-------------------------------------  Doors --------------------------------------------------------------
 import "Doors.ts"
-DrawLoading(40,True)
+DrawLoading(40,true)
 
 import "MapSystem.ts"
 
-DrawLoading(80,True)
+DrawLoading(80,true)
 
 import "NPCs.ts"
 
@@ -1941,9 +1964,10 @@ class Events {
 	EventStr: string
 	
 	img: int
+	static each: Events[] = []
 }
 
-function CreateEvent(eventname: string, roomname: string, id: int, prob: float = 0.0): Events {
+export function CreateEvent(eventname: string, roomname: string, id: int, prob: float = 0.0): Events {
 	//roomname = the name of the room(s) you want the event to be assigned to
 	
 	//the id-variable determines which of the rooms the event is assigned to,
@@ -1955,24 +1979,24 @@ function CreateEvent(eventname: string, roomname: string, id: int, prob: float =
 	//the id-variable is ignored if prob != 0.0
 	
 	let i: int = 0
-	let temp: int
+	let temp: boolean
 	let e: Events
 	let e2: Events
 	let r: Rooms
 	
 	if (prob == 0.0) {
 		for (r of Rooms.each) {
-			if (roomname = "" || roomname == r.RoomTemplate.Name) {
-				temp = False
+			if (roomname == "" || roomname == r.RoomTemplate.Name) {
+				temp = false
 				for (e2 of Events.each) {
 					if (e2.room = r) {
-						temp = True
+						temp = true
 						Exit
 					}
 				}
 				
 				i=i+1
-				if (i >= id && temp == False) {
+				if (i >= id && temp == false) {
 					e.Events = new Events()
 					e.EventName = eventname					
 					e.room = r
@@ -1983,15 +2007,15 @@ function CreateEvent(eventname: string, roomname: string, id: int, prob: float =
 	} else {
 		for (r of Rooms.each) {
 			if (roomname = "" || roomname == r.RoomTemplate.Name) {
-				temp = False
+				temp = false
 				for (e2 of Events.each) {
 					if (e2.room = r) {
-						temp = True
+						temp = true
 						Exit
 					}
 				}
 				
-				if (Rnd(0.0, 1.0) < prob && temp == False) {
+				if (Rnd(0.0, 1.0) < prob && temp == false) {
 					e.Events = new Events()
 					e.EventName = eventname					
 					e.room = r
@@ -2099,7 +2123,7 @@ function InitEvents() {
 	CreateEvent("room3door", "room3", 0, 0.1)
 	CreateEvent("room3door", "room3tunnel", 0, 0.1)	
 	
-	if (Rand(2)=1) {
+	if (Rand(2) == 1) {
 		CreateEvent("106victim", "room3", Rand(1,2))
 		CreateEvent("106sinkhole", "room3_2", Rand(2,3))
 	} else {
@@ -2208,59 +2232,73 @@ Collisions(HIT_178, HIT_MAP, 2, 2)
 Collisions(HIT_178, HIT_178, 1, 3)
 Collisions(HIT_DEAD, HIT_MAP, 2, 2)
 
-function MilliSecs2() {
+export function MilliSecs2() {
 	let retVal: int = MilliSecs()
 	if (retVal < 0) {retVal = retVal + 2147483648}
 	return retVal
 }
 
-DrawLoading(90, True)
+DrawLoading(90, true)
 
 //----------------------------------- meshes and textures ----------------------------------------------------------------
 
-var FogTexture: int, Fog: int
-var GasMaskTexture: int, GasMaskOverlay: int
-var InfectTexture: int, InfectOverlay: int
-var DarkTexture: int, Dark: int
-var Collider: int, Head: int
+export var FogTexture: int
+export var Fog: int
+export var GasMaskTexture: int
+export var GasMaskOverlay: int
+export var InfectTexture: int
+export var InfectOverlay: int
+export var DarkTexture: int
+export var Dark: int
+export var Collider: int
+export var Head: int
 
-var FogNVTexture: int
-var NVTexture: int, NVOverlay: int
+export var FogNVTexture: int
+export var NVTexture: int
+export var NVOverlay: int
 
-var TeslaTexture: int
+export var TeslaTexture: int
 
-var LightTexture: int, Light: int
-var LightSpriteTex: int[] = new Array(5)
-var DoorOBJ: int, DoorFrameOBJ: int
+export var LightTexture: int
+export var Light: int
+export var LightSpriteTex: int[] = new Array(5)
+export var DoorOBJ: int
+export var DoorFrameOBJ: int
 
-var LeverOBJ: int, LeverBaseOBJ: int
+export var LeverOBJ: int
+export var LeverBaseOBJ: int
 
-var DoorColl: int
-var ButtonOBJ: int, ButtonKeyOBJ: int, ButtonCodeOBJ: int, ButtonScannerOBJ: int
+export var DoorColl: int
+export var ButtonOBJ: int
+export var ButtonKeyOBJ: int
+export var ButtonCodeOBJ: int
+export var ButtonScannerOBJ: int
 
-var DecalTextures: int[] = new Array(20)
+export var DecalTextures: int[] = new Array(20)
 
-var Monitor: int, MonitorTexture: int
-var CamBaseOBJ: int, CamOBJ: int
+export var Monitor: int
+export var MonitorTexture: int
+export var CamBaseOBJ: int
+export var CamOBJ: int
 
 var LiquidObj: int,MTFObj: int,GuardObj: int,ClassDObj: int
 var ApacheObj: int,ApacheRotorObj: int
 
-var UnableToMove: boolean = False
-var ShouldEntitiesFall: boolean = True
+var UnableToMove: boolean = false
+var ShouldEntitiesFall: boolean = true
 var PlayerFallingPickDistance: float = 10.0
 
-var Save_MSG$ = ""
+var Save_MSG: string = ""
 var Save_MSG_Timer: float = 0.0
 var Save_MSG_Y: float = 0.0
 
 var MTF_CameraCheckTimer: float = 0.0
-var MTF_CameraCheckDetected: boolean = False
+var MTF_CameraCheckDetected: boolean = false
 
 //---------------------------------------------------------------------------------------------------
 
 import "menu.ts"
-MainMenuOpen = True
+MainMenuOpen = true
 
 //---------------------------------------------------------------------------------------------------
 
@@ -2280,7 +2318,7 @@ var m: MEMORYSTATUS = new MEMORYSTATUS()
 FlushKeys()
 FlushMouse()
 
-DrawLoading(100, True)
+DrawLoading(100, true)
 
 LoopDelay = MilliSecs()
 
@@ -2293,8 +2331,8 @@ var Input_ResetTime: float = 0
 class SCP427 {
 	Using: int
 	Timer: float
-	Sound: Array = new Array(1)
-	SoundCHN: Array = new Array(1)
+	Sound: any[] = new Array(1)
+	SoundCHN: any[] = new Array(1)
 }
 
 var I_427: SCP427 = new SCP427()
@@ -2320,7 +2358,7 @@ while (true) {
 	FPSfactor = Max(Min(ElapsedTime * 70, 5.0), 0.2)
 	FPSfactor2 = FPSfactor
 	
-	if (MenuOpen || InvOpen || OtherOpen!=Null || ConsoleOpen || SelectedDoor != Null || SelectedScreen != Null || Using294) {
+	if (MenuOpen || InvOpen || OtherOpen || ConsoleOpen || SelectedDoor || SelectedScreen || Using294) {
 		FPSfactor = 0
 	}
 	
@@ -2341,18 +2379,18 @@ while (true) {
 	ElapsedLoops = ElapsedLoops + 1
 	
 	if (Input_ResetTime<=0.0) {
-		DoubleClick = False
+		DoubleClick = false
 		MouseHit1 = MouseHit(1)
 		if (MouseHit1) {
 			if (MilliSecs2() - LastMouseHit1 < 800) {
-				DoubleClick = True
+				DoubleClick = true
 			}
 			LastMouseHit1 = MilliSecs2()
 		}
 		
 		let prevmousedown1 = MouseDown1
 		MouseDown1 = MouseDown(1)
-		if (prevmousedown1 && MouseDown1==False) {MouseUp1 = True} else {MouseUp1 = False}
+		if (prevmousedown1 && !MouseDown1) {MouseUp1 = true} else {MouseUp1 = false}
 		
 		MouseHit2 = MouseHit(2)
 		
@@ -2383,10 +2421,10 @@ while (true) {
 		
 		ShouldPlay = Min(PlayerZone,2)
 		
-		DrawHandIcon = False
+		DrawHandIcon = false
 		
-		RestoreSanity = True
-		ShouldEntitiesFall = True
+		RestoreSanity = true
+		ShouldEntitiesFall = true
 		
 		if (FPSfactor > 0 && PlayerRoom.RoomTemplate.Name != "dimension1499") {UpdateSecurityCams()}
 		
@@ -2404,15 +2442,17 @@ while (true) {
 				
 				PositionEntity (SoundEmitter, EntityX(Camera) + Rnd(-1.0, 1.0), 0.0, EntityZ(Camera) + Rnd(-1.0, 1.0))
 				
-				if (Rand(3)=1) {PlayerZone = 3}
+				if (Rand(3) == 1) {
+					PlayerZone = AreaName.General
+				}
 				
 				if (PlayerRoom.RoomTemplate.Name = "173") {
-					PlayerZone = 4
+					PlayerZone = AreaName.PreBreach
 				} else if (PlayerRoom.RoomTemplate.Name = "room860") {
-					for (e of Events.each) {
-						if (e.EventName = "room860") {
-							if (e.EventState = 1.0) {
-								PlayerZone = 5
+					for (let e of Events.each) {
+						if (e.EventName == "room860") {
+							if (e.EventState == 1.0) {
+								PlayerZone = AreaName.Forest
 								PositionEntity (SoundEmitter, EntityX(SoundEmitter), 30.0, EntityZ(SoundEmitter))
 							}
 							
@@ -2455,10 +2495,10 @@ while (true) {
 			}
 		}
 		
-		UpdateCheckpoint1 = False
-		UpdateCheckpoint2 = False
+		UpdateCheckpoint1 = false
+		UpdateCheckpoint2 = false
 		
-		if ((!MenuOpen) && (!InvOpen) && (OtherOpen == Null) && (SelectedDoor == Null) && (ConsoleOpen == False) && (Using294 == False) && (SelectedScreen == Null) && EndingTimer >= 0) {
+		if ((!MenuOpen) && (!InvOpen) && (OtherOpen == Null) && (SelectedDoor == Null) && (ConsoleOpen == false) && (Using294 == false) && (SelectedScreen == Null) && EndingTimer >= 0) {
 			LightVolume = CurveValue(TempLightVolume, LightVolume, 50.0)
 			CameraFogRange(Camera, CameraFogNear*LightVolume,CameraFogFar*LightVolume)
 			CameraFogColor(Camera, 0,0,0)
@@ -2471,12 +2511,12 @@ while (true) {
 			AmbientLight (Brightness, Brightness, Brightness)
 			PlayerSoundVolume = CurveValue(0.0, PlayerSoundVolume, 5.0)
 			
-			CanSave = True
+			CanSave = true
 			UpdateDeafPlayer()
 			UpdateEmitters()
 			MouseLook()
 			if (PlayerRoom.RoomTemplate.Name == "dimension1499" && QuickLoadPercent > 0 && QuickLoadPercent < 100) {
-				ShouldEntitiesFall = False
+				ShouldEntitiesFall = false
 			}
 			MovePlayer()
 			InFacility = CheckForPlayerInFacility()
@@ -2617,14 +2657,14 @@ while (true) {
 			}
 			
 			if (KillTimer < 0) {
-				InvOpen = False
+				InvOpen = false
 				SelectedItem = Null
 				SelectedScreen = Null
 				SelectedMonitor = Null
 				BlurTimer = Abs(KillTimer*5)
 				KillTimer=KillTimer-(FPSfactor*0.8)
 				if (KillTimer < -360) {
-					MenuOpen = True 
+					MenuOpen = true 
 					if (SelectedEnding != "") {EndingTimer = Min(KillTimer,-0.1)}
 				}
 				darkA = Max(darkA, Min(Abs(KillTimer / 400.0), 1.0))
@@ -2638,7 +2678,7 @@ while (true) {
 						}
 					}
 				}
-				InvOpen = False
+				InvOpen = false
 				SelectedItem = Null
 				SelectedScreen = Null
 				SelectedMonitor = Null
@@ -2733,8 +2773,8 @@ while (true) {
 						}
 					} else {
 						if (SelectedScreen != Null) {
-							GameSaved = False
-							Playable = True
+							GameSaved = false
+							Playable = true
 							DropSpeed = 0
 						}
 						SaveGame(SavePath + CurrSave + "\\")
@@ -2756,7 +2796,7 @@ while (true) {
 		if (KeyHit(KEY_CONSOLE)) {
 			if (CanOpenConsole) {
 				if (ConsoleOpen) {
-					UsedConsole = True
+					UsedConsole = true
 					ResumeSounds()
 					MouseXSpeed()
 					MouseYSpeed()
@@ -2798,31 +2838,31 @@ while (true) {
 		}
 		
 		if (MsgTimer > 0) {
-			let temp: boolean = False
+			let temp: boolean = false
 			if (!InvOpen) {
 				if (SelectedItem != Null) {
 					if (SelectedItem.itemtemplate.tempname == "paper" || SelectedItem.itemtemplate.tempname == "oldpaper") {
-						temp = True
+						temp = true
 					}
 				}
 			}
 			
 			if (!temp) {
 				Color (0,0,0)
-				AAText((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
+				AAText((GraphicWidth / 2)+1, (GraphicHeight / 2) + 201, Msg, true, false, Min(MsgTimer / 2, 255)/255.0)
 				Color (255,255,255)
 				if (Left(Msg,14)="Blitz3D Error!") {
 					Color(255,0,0)
 				}
-				AAText((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
+				AAText((GraphicWidth / 2), (GraphicHeight / 2) + 200, Msg, true, false, Min(MsgTimer / 2, 255)/255.0)
 			} else {
 				Color(0,0,0)
-				AAText((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
+				AAText((GraphicWidth / 2)+1, (GraphicHeight * 0.94) + 1, Msg, true, false, Min(MsgTimer / 2, 255)/255.0)
 				Color(255,255,255)
 				if (Left(Msg,14)="Blitz3D Error!") {
 					Color(255,0,0)
 				}
-				AAText((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, True, False, Min(MsgTimer / 2, 255)/255.0)
+				AAText((GraphicWidth / 2), (GraphicHeight * 0.94), Msg, true, false, Min(MsgTimer / 2, 255)/255.0)
 			}
 			MsgTimer=MsgTimer-FPSfactor2 
 		}
@@ -2936,25 +2976,25 @@ function QuickLoadEvents() {
 					}
 				} else if (e.EventStr = "load2") {
 					//For SCP-049
-					let skip = False
+					let skip = false
 					if (e.room.NPC[0]=Null) {
 						for (n of NPCs.each) {
 							if (n.NPCtype = NPCtype049) {
-								skip = True
+								skip = true
 								break
 							}
 						}
 						
 						if (!skip) {
-							e.room.NPC[0] = CreateNPC(NPCtype049,EntityX(e.room.Objects[7],True),EntityY(e.room.Objects[7],True)+5,EntityZ(e.room.Objects[7],True))
-							e.room.NPC[0].HideFromNVG = True
-							PositionEntity (e.room.NPC[0].Collider,EntityX(e.room.Objects[7],True),EntityY(e.room.Objects[7],True)+5,EntityZ(e.room.Objects[7],True))
+							e.room.NPC[0] = CreateNPC(NPCtype049,EntityX(e.room.Objects[7],true),EntityY(e.room.Objects[7],true)+5,EntityZ(e.room.Objects[7],true))
+							e.room.NPC[0].HideFromNVG = true
+							PositionEntity (e.room.NPC[0].Collider,EntityX(e.room.Objects[7],true),EntityY(e.room.Objects[7],true)+5,EntityZ(e.room.Objects[7],true))
 							ResetEntity (e.room.NPC[0].Collider)
 							RotateEntity (e.room.NPC[0].Collider,0,e.room.angle+180,0)
 							e.room.NPC[0].State = 0
 							e.room.NPC[0].PrevState = 2
 							
-							DebugLog(EntityX(e.room.Objects[7],True)+", "+EntityY(e.room.Objects[7],True)+", "+EntityZ(e.room.Objects[7],True))
+							DebugLog(EntityX(e.room.Objects[7],true)+", "+EntityY(e.room.Objects[7],true)+", "+EntityZ(e.room.Objects[7],true))
 						} else {
 							DebugLog("Skipped 049 spawning in room2sl")
 						}
@@ -2976,7 +3016,7 @@ function QuickLoadEvents() {
 				if (e.EventStr == "load0") {
 					QuickLoadPercent = 10
 					if (e.room.NPC[0] == Null) {
-						e.room.NPC[0] = CreateNPC(NPCtypeD, EntityX(e.room.Objects[0],True),EntityY(e.room.Objects[0],True),EntityZ(e.room.Objects[0],True))
+						e.room.NPC[0] = CreateNPC(NPCtypeD, EntityX(e.room.Objects[0],true),EntityY(e.room.Objects[0],true),EntityZ(e.room.Objects[0],true))
 					}
 					
 					ChangeNPCTextureID(e.room.NPC[0],4)
@@ -2992,7 +3032,7 @@ function QuickLoadEvents() {
 				} else if (e.EventStr == "load3") {
 					QuickLoadPercent = 55
 					if (e.room.NPC[1] == Null) {
-						e.room.NPC[1] = CreateNPC(NPCtypeD, EntityX(e.room.Objects[1],True),EntityY(e.room.Objects[1],True),EntityZ(e.room.Objects[1],True))
+						e.room.NPC[1] = CreateNPC(NPCtypeD, EntityX(e.room.Objects[1],true),EntityY(e.room.Objects[1],true),EntityZ(e.room.Objects[1],true))
 					}
 					
 					ChangeNPCTextureID(e.room.NPC[1],2)
@@ -3031,13 +3071,13 @@ function QuickLoadEvents() {
 			//[Block]
 			if (e.EventState = 0) {
 				if (e.EventStr = "load0") {
-					n.NPCs = CreateNPC(NPCtypeZombie, EntityX(e.room.Objects[4],True),EntityY(e.room.Objects[4],True),EntityZ(e.room.Objects[4],True))
+					n.NPCs = CreateNPC(NPCtypeZombie, EntityX(e.room.Objects[4],true),EntityY(e.room.Objects[4],true),EntityZ(e.room.Objects[4],true))
 					PointEntity(n.Collider, e.room.obj)
 					TurnEntity(n.Collider, 0, 190, 0)
 					QuickLoadPercent = 20
 					e.EventStr = "load1"
 				} else if (e.EventStr = "load1") {
-					n.NPCs = CreateNPC(NPCtypeZombie, EntityX(e.room.Objects[5],True),EntityY(e.room.Objects[5],True),EntityZ(e.room.Objects[5],True))
+					n.NPCs = CreateNPC(NPCtypeZombie, EntityX(e.room.Objects[5],true),EntityY(e.room.Objects[5],true),EntityZ(e.room.Objects[5],true))
 					PointEntity(n.Collider, e.room.obj)
 					TurnEntity(n.Collider, 0, 20, 0)
 					QuickLoadPercent = 60
@@ -3048,18 +3088,18 @@ function QuickLoadEvents() {
 							e.room.NPC[0]=n
 							e.room.NPC[0].State = 2
 							e.room.NPC[0].Idle = 1
-							e.room.NPC[0].HideFromNVG = True
-							PositionEntity (e.room.NPC[0].Collider,EntityX(e.room.Objects[4],True),EntityY(e.room.Objects[4],True)+3,EntityZ(e.room.Objects[4],True))
+							e.room.NPC[0].HideFromNVG = true
+							PositionEntity (e.room.NPC[0].Collider,EntityX(e.room.Objects[4],true),EntityY(e.room.Objects[4],true)+3,EntityZ(e.room.Objects[4],true))
 							ResetEntity (e.room.NPC[0].Collider)
 							break
 						}
 					}
 					if (e.room.NPC[0]=Null) {
-						n.NPCs = CreateNPC(NPCtype049, EntityX(e.room.Objects[4],True), EntityY(e.room.Objects[4],True)+3, EntityZ(e.room.Objects[4],True))
+						n.NPCs = CreateNPC(NPCtype049, EntityX(e.room.Objects[4],true), EntityY(e.room.Objects[4],true)+3, EntityZ(e.room.Objects[4],true))
 						PointEntity (n.Collider, e.room.obj)
 						n.State = 2
 						n.Idle = 1
-						n.HideFromNVG = True
+						n.HideFromNVG = true
 						e.room.NPC[0]=n
 					}
 					QuickLoadPercent = 100
@@ -3091,9 +3131,9 @@ function QuickLoadEvents() {
 					e.EventStr = "load5"
 				} else if (e.EventStr == "load5") {
 					for (i of range(3, 7)) {
-						PositionEntity(e.room.Objects[i], EntityX(e.room.Objects[0],True), EntityY(e.room.Objects[0],True), EntityZ(e.room.Objects[0],True), True)
-						RotateEntity(e.room.Objects[i], -90, EntityYaw(e.room.Objects[0],True), 0, True)
-						ScaleEntity(e.room.Objects[i], 0.05, 0.05, 0.05, True)
+						PositionEntity(e.room.Objects[i], EntityX(e.room.Objects[0],true), EntityY(e.room.Objects[0],true), EntityZ(e.room.Objects[0],true), true)
+						RotateEntity(e.room.Objects[i], -90, EntityYaw(e.room.Objects[0],true), 0, true)
+						ScaleEntity(e.room.Objects[i], 0.05, 0.05, 0.05, true)
 					}
 					QuickLoadPercent = 70
 					e.EventStr = "load6"
@@ -3139,11 +3179,11 @@ function QuickLoadEvents() {
 				e.EventState2 = e.EventState2+FPSfactor
 				if (e.EventState2>30) {
 					if (e.EventStr = "") {
-						CreateNPC(NPCtype966, EntityX(e.room.Objects[0],True), EntityY(e.room.Objects[0],True), EntityZ(e.room.Objects[0],True))
+						CreateNPC(NPCtype966, EntityX(e.room.Objects[0],true), EntityY(e.room.Objects[0],true), EntityZ(e.room.Objects[0],true))
 						QuickLoadPercent = 50
 						e.EventStr = "load0"
 					} else if (e.EventStr = "load0") {
-						CreateNPC(NPCtype966, EntityX(e.room.Objects[2],True), EntityY(e.room.Objects[2],True), EntityZ(e.room.Objects[2],True))
+						CreateNPC(NPCtype966, EntityX(e.room.Objects[2],true), EntityY(e.room.Objects[2],true), EntityZ(e.room.Objects[2],true))
 						QuickLoadPercent = 100
 						e.EventState=2
 					}
@@ -3180,10 +3220,10 @@ function QuickLoadEvents() {
 						z = EntityZ(e.room.obj)
 						let ch: Chunk
 						for (i of range(-1, 0, 2)) {
-							ch = CreateChunk(-1,x*(i*2.5),EntityY(e.room.obj),z,True)
+							ch = CreateChunk(-1,x*(i*2.5),EntityY(e.room.obj),z,true)
 						}
 						for (i of range(-1, 0, 2)) {
-							ch = CreateChunk(-1,x*(i*2.5),EntityY(e.room.obj),z-40,True)
+							ch = CreateChunk(-1,x*(i*2.5),EntityY(e.room.obj),z-40,true)
 						}
 						e.EventState = 2.0
 						e.EventStr = 18
@@ -3215,7 +3255,7 @@ function Kill() {
 		
 		KillTimer = Min(-1, KillTimer)
 		ShowEntity (Head)
-		PositionEntity(Head, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True), True)
+		PositionEntity(Head, EntityX(Camera, true), EntityY(Camera, true), EntityZ(Camera, true), true)
 		ResetEntity (Head)
 		RotateEntity(Head, 0, EntityYaw(Camera), 0)		
 	}
@@ -3306,7 +3346,7 @@ function DrawEnding() {
 				
 				Color(255, 255, 255)
 				AASetFont(Font2)
-				AAText(x + width / 2 + 40*MenuScale, y + 20*MenuScale, "THE END", True)
+				AAText(x + width / 2 + 40*MenuScale, y + 20*MenuScale, "THE END", true)
 				AASetFont(Font1)
 				
 				if (AchievementsMenu=0) { 
@@ -3348,11 +3388,11 @@ function DrawEnding() {
 					x = x+width/2
 					y = y+height-100*MenuScale
 					
-					if (DrawButton(x-145*MenuScale,y-200*MenuScale,390*MenuScale,60*MenuScale,"ACHIEVEMENTS", True)) {
+					if (DrawButton(x-145*MenuScale,y-200*MenuScale,390*MenuScale,60*MenuScale,"ACHIEVEMENTS", true)) {
 						AchievementsMenu = 1
 					}
 										
-					if (DrawButton(x-145*MenuScale,y-100*MenuScale,390*MenuScale,60*MenuScale,"MAIN MENU", True)) {
+					if (DrawButton(x-145*MenuScale,y-100*MenuScale,390*MenuScale,60*MenuScale,"MAIN MENU", true)) {
 						ShouldPlay = 24
 						NowPlaying = ShouldPlay
 						for (i of range(10)) {
@@ -3440,20 +3480,20 @@ function DrawCredits() {
 		cl.id = id
 		if (Left(cl.txt,1)="*") {
 			SetFont (CreditsFont2)
-			if (cl.stay=False) {
-				Text(GraphicWidth/2,credits_Y+(24*cl.id*MenuScale),Right(cl.txt,Len(cl.txt)-1),True)
+			if (cl.stay=false) {
+				Text(GraphicWidth/2,credits_Y+(24*cl.id*MenuScale),Right(cl.txt,Len(cl.txt)-1),true)
 			}
 		} else if (Left(cl.txt,1)="/") {
 			LastCreditLine = Before(cl)
 		} else {
 			SetFont (CreditsFont)
-			if (cl.stay=False) {
-				Text(GraphicWidth/2,credits_Y+(24*cl.id*MenuScale),cl.txt,True)
+			if (cl.stay=false) {
+				Text(GraphicWidth/2,credits_Y+(24*cl.id*MenuScale),cl.txt,true)
 			}
 		}
 		if (LastCreditLine != Null) {
 			if (cl.id>LastCreditLine.id) {
-				cl.stay = True
+				cl.stay = true
 			}
 		}
 		if (cl.stay) {
@@ -3483,9 +3523,9 @@ function DrawCredits() {
 			if (cl.stay) {
 				SetFont (CreditsFont)
 				if (Left(cl.txt,1)="/") {
-					Text (GraphicWidth/2,(GraphicHeight/2)+(endlinesamount/2)+(24*cl.id*MenuScale),Right(cl.txt,Len(cl.txt)-1),True)
+					Text (GraphicWidth/2,(GraphicHeight/2)+(endlinesamount/2)+(24*cl.id*MenuScale),Right(cl.txt,Len(cl.txt)-1),true)
 				} else {
-					Text (GraphicWidth/2,(GraphicHeight/2)+(24*(cl.id-LastCreditLine.id)*MenuScale)-((endlinesamount/2)*24*MenuScale),cl.txt,True)
+					Text (GraphicWidth/2,(GraphicHeight/2)+(24*(cl.id-LastCreditLine.id)*MenuScale)-((endlinesamount/2)*24*MenuScale),cl.txt,true)
 				}
 			}
 		}
@@ -3501,11 +3541,11 @@ function DrawCredits() {
 		FreeImage(EndingScreen)
 		EndingScreen = 0
 		Delete(CreditsLine.each)
-        NullGame(False)
+        NullGame(false)
         StopStream_Strict(MusicCHN)
         ShouldPlay = 21
-        MenuOpen = False
-        MainMenuOpen = True
+        MenuOpen = false
+        MainMenuOpen = true
         MainMenuTab = 0
         CurrSave = ""
         FlushKeys()
@@ -3563,7 +3603,7 @@ function MovePlayer() {
 			if (Stamina < 5) {
 				temp = 0
 				if (WearingGasMask>0 || Wearing1499>0) {temp=1}
-				if (ChannelPlaying(BreathCHN)=False) {BreathCHN = PlaySound_Strict(BreathSFX((temp), 0))}
+				if (ChannelPlaying(BreathCHN)=false) {BreathCHN = PlaySound_Strict(BreathSFX((temp), 0))}
 			} else if (Stamina < 50) {
 				if (BreathCHN=0) {
 					temp = 0
@@ -3571,7 +3611,7 @@ function MovePlayer() {
 					BreathCHN = PlaySound_Strict(BreathSFX((temp), Rand(1,3)))
 					ChannelVolume (BreathCHN, Min((70.0-Stamina)/70.0,1.0)*SFXVolume)
 				} else {
-					if (ChannelPlaying(BreathCHN)=False) {
+					if (ChannelPlaying(BreathCHN)=false) {
 						temp = 0
 						if (WearingGasMask>0 || Wearing1499>0) {temp=1}
 						BreathCHN = PlaySound_Strict(BreathSFX((temp), Rand(1,3)))
@@ -3593,7 +3633,7 @@ function MovePlayer() {
 		Sanity = Max(-850, Sanity)
 	}
 	
-	if (IsZombie) {Crouch = False}
+	if (IsZombie) {Crouch = false}
 	
 	if (Abs(CrouchState-Crouch)<0.001) {
 		CrouchState = Crouch
@@ -3699,37 +3739,37 @@ function MovePlayer() {
 			temp2 = temp2*Min((Sin(Shake/2)+1.2),1.0)
 		}
 		
-		temp = False
+		temp = false
 		if (!IsZombie) {
 			if (KeyDown(KEY_DOWN) && Playable) {
-				temp = True 
+				temp = true 
 				angle = 180
 				if (KeyDown(KEY_LEFT)) {angle = 135}
 				if (KeyDown(KEY_RIGHT)) {angle = -135}
 			} else if (KeyDown(KEY_UP) && Playable) {
-				temp = True
+				temp = true
 				angle = 0
 				if (KeyDown(KEY_LEFT)) {angle = 45}
 				if (KeyDown(KEY_RIGHT)) {angle = -45}
 			} else if (ForceMove>0) {
-				temp=True
+				temp=true
 				angle = ForceAngle
 			 } else if (Playable) {
 				if (KeyDown(KEY_LEFT)) {
 					angle = 90
-					temp = True
+					temp = true
 				}
 				if (KeyDown(KEY_RIGHT)) {
 					angle = -90
-					temp = True 
+					temp = true 
 				}
 			}
 		} else {
-			temp=True
+			temp=true
 			angle = ForceAngle
 		}
 		
-		angle = WrapAngle(EntityYaw(Collider,True)+angle+90.0)
+		angle = WrapAngle(EntityYaw(Collider,true)+angle+90.0)
 		
 		if (temp) {
 			CurrSpeed = CurveValue(temp2, CurrSpeed, 20.0)
@@ -3738,12 +3778,12 @@ function MovePlayer() {
 		}
 		
 		if (!UnableToMove) {
-			TranslateEntity (Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, True)
+			TranslateEntity (Collider, Cos(angle)*CurrSpeed * FPSfactor, 0, Sin(angle)*CurrSpeed * FPSfactor, true)
 		}
 		
-		let CollidedFloor: boolean = False
+		let CollidedFloor: boolean = false
 		for (i of range(1, CountCollisions(Collider) + 1)) {
-			if (CollisionY(Collider, i) < EntityY(Collider) - 0.25) {CollidedFloor = True}
+			if (CollisionY(Collider, i) < EntityY(Collider) - 0.25) {CollidedFloor = true}
 		}
 		
 		if (CollidedFloor) {
@@ -3777,7 +3817,7 @@ function MovePlayer() {
 		if ((!UnableToMove) && ShouldEntitiesFall) {TranslateEntity (Collider, 0, DropSpeed * FPSfactor, 0)}
 	}
 	
-	ForceMove = False
+	ForceMove = false
 	
 	if (Injuries > 1.0) {
 		temp2 = Bloodloss
@@ -3813,7 +3853,7 @@ function MovePlayer() {
 		
 		CurrCameraZoom = Max(CurrCameraZoom, (Sin(Float(MilliSecs2())/20.0)+1.0)*Bloodloss*0.2)
 		
-		if (Bloodloss > 60) {Crouch = True}
+		if (Bloodloss > 60) {Crouch = true}
 		if (Bloodloss => 100) { 
 			Kill()
 			HeartBeatVolume = 0.0
@@ -3872,7 +3912,7 @@ function MouseLook() {
 		let Nan1: float = 0.0 / Zero
 		if (Int(EntityX(Collider))=Int(Nan1)) {
 			
-			PositionEntity (Collider, EntityX(Camera, True), EntityY(Camera, True) - 0.5, EntityZ(Camera, True), True)
+			PositionEntity (Collider, EntityX(Camera, true), EntityY(Camera, true) - 0.5, EntityZ(Camera, true), true)
 			Msg = "EntityX(Collider) = NaN, RESETTING COORDINATES    -    New coordinates: "+EntityX(Collider)
 			MsgTimer = 300				
 		}
@@ -3927,9 +3967,9 @@ function MouseLook() {
 		HideEntity(Collider)
 		PositionEntity(Camera, EntityX(Head), EntityY(Head), EntityZ(Head))
 		
-		let CollidedFloor: boolean = False
+		let CollidedFloor: boolean = false
 		for (i of range(1, CountCollisions(Head) + 1)) {
-			if (CollisionY(Head, i) < EntityY(Head) - 0.01) {CollidedFloor = True}
+			if (CollisionY(Head, i) < EntityY(Head) - 0.01) {CollidedFloor = true}
 		}
 		
 		if (CollidedFloor) {
@@ -3961,7 +4001,7 @@ function MouseLook() {
 	if (ParticleAmount=2) {
 		if (Rand(35) = 1) {
 			let pvt: int = CreatePivot()
-			PositionEntity(pvt, EntityX(Camera, True), EntityY(Camera, True), EntityZ(Camera, True))
+			PositionEntity(pvt, EntityX(Camera, true), EntityY(Camera, true), EntityZ(Camera, true))
 			RotateEntity(pvt, 0, Rnd(360), 0)
 			if (Rand(2) = 1) {
 				MoveEntity(pvt, 0, Rnd(-0.5, 0.5), Rnd(0.5, 1.0))
@@ -4185,7 +4225,7 @@ function DrawGUI() {
 		}
 	}
 	
-	if (ClosestButton != 0 && SelectedDoor == Null && InvOpen == False && MenuOpen == False && OtherOpen == Null) {
+	if (ClosestButton != 0 && SelectedDoor == Null && InvOpen == false && MenuOpen == false && OtherOpen == Null) {
 		temp = CreatePivot()
 		PositionEntity(temp, EntityX(Camera), EntityY(Camera), EntityZ(Camera))
 		PointEntity(temp, ClosestButton)
@@ -4201,13 +4241,13 @@ function DrawGUI() {
 		DrawImage(HandIcon, GraphicWidth / 2 + Sin(yawvalue) * (GraphicWidth / 3) - 32, GraphicHeight / 2 - Sin(pitchvalue) * (GraphicHeight / 3) - 32)
 		
 		if (MouseUp1) {
-			MouseUp1 = False
+			MouseUp1 = false
 			if (ClosestDoor != Null) { 
 				if (ClosestDoor.Code != "") {
 					SelectedDoor = ClosestDoor
 				} else if (Playable) {
 					PlaySound2(ButtonSFX, Camera, ClosestButton)
-					UseDoor(ClosestDoor,True)				
+					UseDoor(ClosestDoor,true)				
 				}
 			}
 		}
@@ -4243,7 +4283,7 @@ function DrawGUI() {
 			Color (0, 0, 0)
 			Rect(x + 4, y + 4, 64 - 8, 64 - 8)
 			DrawImage(ArrowIMG(i), x + 21, y + 21)
-			DrawArrowIcon(i) = False
+			DrawArrowIcon(i) = false
 		}
 	}
 	
@@ -4256,7 +4296,7 @@ function DrawGUI() {
 		y = GraphicHeight - 95
 		
 		Color (255, 255, 255)
-		Rect (x, y, width, height, False)
+		Rect (x, y, width, height, false)
 		for (i of range(1, Int(((width - 2) * (BlinkTimer / (BLINKFREQ))) / 10) + 1)) {
 			DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 		}	
@@ -4269,13 +4309,13 @@ function DrawGUI() {
 		}
 		
 		Color (255, 255, 255)
-		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, false)
 		
 		DrawImage (BlinkIcon, x - 50, y)
 		
 		y = GraphicHeight - 55
 		Color (255, 255, 255)
-		Rect (x, y, width, height, False)
+		Rect (x, y, width, height, false)
 		for (i of range(1, Int(((width - 2) * (Stamina / 100.0)) / 10) + 1)) {
 			DrawImage(StaminaMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 		}
@@ -4284,7 +4324,7 @@ function DrawGUI() {
 		Rect(x - 50, y, 30, 30)
 		
 		Color (255, 255, 255)
-		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, False)
+		Rect(x - 50 - 1, y - 1, 30 + 2, 30 + 2, false)
 		if (Crouch) {
 			DrawImage(CrouchIcon, x - 50, y)
 		} else {
@@ -4378,29 +4418,29 @@ function DrawGUI() {
 			FreeImage (SelectedScreen.img)
 			SelectedScreen.img = 0
 			SelectedScreen = Null
-			MouseUp1 = False
+			MouseUp1 = false
 		}
 	}
 	
 	let PrevInvOpen: int = InvOpen
 	let MouseSlot: int = 66
 	
-	let shouldDrawHUD: boolean = True
+	let shouldDrawHUD: boolean = true
 	if (SelectedDoor != Null) {
 		SelectedItem = Null
 		
 		if (shouldDrawHUD) {
 			pvt = CreatePivot()
-			PositionEntity (pvt, EntityX(ClosestButton,True),EntityY(ClosestButton,True),EntityZ(ClosestButton,True))
-			RotateEntity (pvt, 0, EntityYaw(ClosestButton,True)-180,0)
+			PositionEntity (pvt, EntityX(ClosestButton,true),EntityY(ClosestButton,true),EntityZ(ClosestButton,true))
+			RotateEntity (pvt, 0, EntityYaw(ClosestButton,true)-180,0)
 			MoveEntity (pvt, 0,0,0.22)
 			PositionEntity (Camera, EntityX(pvt),EntityY(pvt),EntityZ(pvt))
 			PointEntity (Camera, ClosestButton)
 			FreeEntity (pvt)	
 			
-			CameraProject(Camera, EntityX(ClosestButton,True),EntityY(ClosestButton,True)+MeshHeight(ButtonOBJ)*0.015,EntityZ(ClosestButton,True))
+			CameraProject(Camera, EntityX(ClosestButton,true),EntityY(ClosestButton,true)+MeshHeight(ButtonOBJ)*0.015,EntityZ(ClosestButton,true))
 			projY = ProjectedY()
-			CameraProject(Camera, EntityX(ClosestButton,True),EntityY(ClosestButton,True)-MeshHeight(ButtonOBJ)*0.015,EntityZ(ClosestButton,True))
+			CameraProject(Camera, EntityX(ClosestButton,true),EntityY(ClosestButton,true)-MeshHeight(ButtonOBJ)*0.015,EntityZ(ClosestButton,true))
 			scale = (ProjectedY()-projy)/462.0
 			
 			x = GraphicWidth/2-ImageWidth(KeypadHUD)*scale/2
@@ -4410,7 +4450,7 @@ function DrawGUI() {
 			if (KeypadMSG != "") {
 				KeypadTimer = KeypadTimer-FPSfactor2
 				
-				if ((KeypadTimer % 70) < 35) {AAText (GraphicWidth/2, y+124*scale, KeypadMSG, True,True)}
+				if ((KeypadTimer % 70) < 35) {AAText (GraphicWidth/2, y+124*scale, KeypadMSG, true,true)}
 				if (KeypadTimer <= 0) {
 					KeypadMSG = ""
 					SelectedDoor = Null
@@ -4421,9 +4461,9 @@ function DrawGUI() {
 					mouse_y_speed_1 =0.0
 				}
 			} else {
-				AAText (GraphicWidth/2, y+70*scale, "ACCESS CODE: ",True,True	)
+				AAText (GraphicWidth/2, y+70*scale, "ACCESS CODE: ",true,true	)
 				AASetFont (Font4)
-				AAText (GraphicWidth/2, y+124*scale, KeypadInput,True,True	)
+				AAText (GraphicWidth/2, y+124*scale, KeypadInput,true,true	)
 			}
 			
 			x = x+44*scale
@@ -4434,7 +4474,7 @@ function DrawGUI() {
 					xtemp = x+Int(58.5*scale*n)
 					ytemp = y+(67*scale)*i
 					
-					temp = False
+					temp = false
 					if (MouseOn(xtemp,ytemp, 54*scale,65*scale) && KeypadMSG == "") {
 						if (MouseUp1) {
 							PlaySound_Strict (ButtonSFX)
@@ -4457,7 +4497,7 @@ function DrawGUI() {
 										}
 										
 										SelectedDoor.locked = 0
-										UseDoor(SelectedDoor,True)
+										UseDoor(SelectedDoor,true)
 										SelectedDoor = Null
 										MouseXSpeed()
 										MouseYSpeed()
@@ -4480,7 +4520,7 @@ function DrawGUI() {
 						}
 						
 					} else {
-						temp = False
+						temp = false
 					}
 					
 				}
@@ -4572,7 +4612,7 @@ function DrawGUI() {
 			}
 		}
 		
-		InvOpen = False
+		InvOpen = false
 		SelectedDoor = Null
 		let tempX: int = 0
 		
@@ -4585,10 +4625,10 @@ function DrawGUI() {
 		
 		ItemAmount = 0
 		for (n of range(OtherSize)) {
-			isMouseOn = False
+			isMouseOn = false
 			if (ScaledMouseX() > x && ScaledMouseX() < x + width) {
 				if (ScaledMouseY() > y && ScaledMouseY() < y + height) {
-					isMouseOn = True
+					isMouseOn = true
 				}
 			}
 			
@@ -4612,20 +4652,20 @@ function DrawGUI() {
 			
 				if (isMouseOn) {
 					Color (255, 255, 255)
-					AAText(x + width / 2, y + height + spacing - 15, OtherOpen.SecondInv[n].itemtemplate.name, True)				
+					AAText(x + width / 2, y + height + spacing - 15, OtherOpen.SecondInv[n].itemtemplate.name, true)				
 					if (SelectedItem = Null) {
 						if (MouseHit1) {
 							SelectedItem = OtherOpen.SecondInv[n]
-							MouseHit1 = False
+							MouseHit1 = false
 							
 							if (DoubleClick) {
 								if (OtherOpen.SecondInv[n].itemtemplate.sound != 66) {
 									PlaySound_Strict(PickSFX(OtherOpen.SecondInv[n].itemtemplate.sound))
 								}
 								OtherOpen = Null
-								closedInv=True
-								InvOpen = False
-								DoubleClick = False
+								closedInv=true
+								InvOpen = false
+								DoubleClick = false
 							}
 							
 						}
@@ -4675,19 +4715,19 @@ function DrawGUI() {
 					
 					SelectedItem.DropSpeed = 0.0
 					
-					SelectedItem.Picked = False
+					SelectedItem.Picked = false
 					for (z of range(OtherSize)) {
 						if (OtherOpen.SecondInv[z] = SelectedItem) {OtherOpen.SecondInv[z] = Null}
 					}
 					
-					isEmpty=True
+					isEmpty=true
 					if (OtherOpen.itemtemplate.tempname = "wallet") {
 						if (!isEmpty) {
 							for (z of range(OtherSize)) {
 								if (OtherOpen.SecondInv[z]!=Null) {
 									let name: string = OtherOpen.SecondInv[z].itemtemplate.tempname
 									if (name$!="25ct" && name$!="coin" && name$!="key" && name$!="scp860" && name$!="scp714") {
-										isEmpty=False
+										isEmpty=false
 										break
 									}
 								}
@@ -4696,7 +4736,7 @@ function DrawGUI() {
 					} else {
 						for (z of range(OtherSize)) {
 							if (OtherOpen.SecondInv[z]!=Null) {
-								isEmpty = False
+								isEmpty = false
 								break
 							}
 						}
@@ -4714,7 +4754,7 @@ function DrawGUI() {
 					
 					SelectedItem = Null
 					OtherOpen = Null
-					closedInv=True
+					closedInv=true
 					
 					MoveMouse (viewport_center_x, viewport_center_y)
 				} else {
@@ -4777,10 +4817,10 @@ function DrawGUI() {
 		
 		ItemAmount = 0
 		for (n of range(MaxItemAmount)) {
-			isMouseOn = False
+			isMouseOn = false
 			if (ScaledMouseX() > x && ScaledMouseX() < x + width) {
 				if (ScaledMouseY() > y && ScaledMouseY() < y + height) {
-					isMouseOn = True
+					isMouseOn = true
 				}
 			}
 			
@@ -4841,7 +4881,7 @@ function DrawGUI() {
 					if (SelectedItem = Null) {
 						if (MouseHit1) {
 							SelectedItem = Inventory(n)
-							MouseHit1 = False
+							MouseHit1 = false
 							
 							if (DoubleClick) {
 								if (WearingHazmat > 0 && Instr(SelectedItem.itemtemplate.tempname,"hazmatsuit") == 0) {
@@ -4853,17 +4893,17 @@ function DrawGUI() {
 								if (Inventory(n).itemtemplate.sound != 66) {
 									PlaySound_Strict(PickSFX(Inventory(n).itemtemplate.sound))
 								}
-								InvOpen = False
-								DoubleClick = False
+								InvOpen = false
+								DoubleClick = false
 							}
 							
 						}
 						
 						AASetFont(Font1)
 						Color(0,0,0)
-						AAText(x + width / 2 + 1, y + height + spacing - 15 + 1, Inventory(n).name, True)							
+						AAText(x + width / 2 + 1, y + height + spacing - 15 + 1, Inventory(n).name, true)							
 						Color(255, 255, 255	)
-						AAText(x + width / 2, y + height + spacing - 15, Inventory(n).name, True)	
+						AAText(x + width / 2, y + height + spacing - 15, Inventory(n).name, true)	
 						
 					}
 				}
@@ -4905,12 +4945,12 @@ function DrawGUI() {
 							} else {
 								DropItem(SelectedItem)
 								SelectedItem = Null
-								InvOpen = False
+								InvOpen = false
 							}
 						default:
 							DropItem(SelectedItem)
 							SelectedItem = Null
-							InvOpen = False
+							InvOpen = false
 					}
 					
 					MoveMouse(viewport_center_x, viewport_center_y)
@@ -5104,7 +5144,7 @@ function DrawGUI() {
 		
 		if (Fullscreen) {DrawImage(CursorIMG, ScaledMouseX(),ScaledMouseY())}
 		
-		if (InvOpen = False) {
+		if (InvOpen = false) {
 			ResumeSounds() 
 			MouseXSpeed()
 			MouseYSpeed()
@@ -5112,7 +5152,7 @@ function DrawGUI() {
 			mouse_x_speed_1 = 0.0
 			mouse_y_speed_1 = 0.0
 		}
-	} else { //invopen = False
+	} else { //invopen = false
 		
 		if (SelectedItem != Null) {
 			switch (SelectedItem.itemtemplate.tempname) {
@@ -5189,9 +5229,9 @@ function DrawGUI() {
 					//[Block]
 					if (Wearing714=2) {
 						Msg = "You removed the ring."
-						Wearing714 = False
+						Wearing714 = false
 					} else {
-						//Achievements(Achv714)=True
+						//Achievements(Achv714)=true
 						Msg = "You put on the ring."
 						Wearing714 = 2
 					}
@@ -5227,7 +5267,7 @@ function DrawGUI() {
 					
 				case "battery":
 					//[Block]
-					//InvOpen = True
+					//InvOpen = true
 					{}
 					
 				case "key1", "key2", "key3", "key4", "key5", "key6", "keyomni", "scp860", "hand", "hand2", "25ct":
@@ -5246,7 +5286,7 @@ function DrawGUI() {
 					
 				case "scp500":
 					//[Block]
-					if (CanUseItem(False, False, True)) {
+					if (CanUseItem(false, false, true)) {
 						GiveAchievement(Achv500)
 						
 						if (Infect > 0) {
@@ -5273,7 +5313,7 @@ function DrawGUI() {
 					
 				case "veryfinefirstaid":
 					//[Block]
-					if (CanUseItem(False, False, True)) {
+					if (CanUseItem(false, false, true)) {
 						switch (Rand(5)) {
 							case 1:
 								Injuries = 3.5
@@ -5329,9 +5369,9 @@ function DrawGUI() {
 						MsgTimer = 70*5
 						SelectedItem = Null
 					} else {
-						if (CanUseItem(False, True, True)) {
+						if (CanUseItem(false, true, true)) {
 							CurrSpeed = CurveValue(0, CurrSpeed, 5.0)
-							Crouch = True
+							Crouch = true
 							
 							DrawImage(SelectedItem.itemtemplate.invimg, GraphicWidth / 2 - ImageWidth(SelectedItem.itemtemplate.invimg) / 2, GraphicHeight / 2 - ImageHeight(SelectedItem.itemtemplate.invimg) / 2)
 							
@@ -5339,7 +5379,7 @@ function DrawGUI() {
 							height = 20
 							x = GraphicWidth / 2 - width / 2
 							y = GraphicHeight / 2 + 80
-							Rect(x, y, width+4, height, False)
+							Rect(x, y, width+4, height, false)
 							for (i of range(1, Int((width - 2) * (SelectedItem.state / 100.0) / 10) + 1)) {
 								DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 							}
@@ -5384,7 +5424,7 @@ function DrawGUI() {
 									if (SelectedItem.itemtemplate.tempname = "firstaid2") {
 										switch (Rand(6)) {
 											case 1:
-												SuperMan = True
+												SuperMan = true
 												Msg = "You have becomed overwhelmedwithadrenalineholyshitWOOOOOO~!"
 											case 2:
 												InvertMouse = !InvertMouse
@@ -5414,7 +5454,7 @@ function DrawGUI() {
 					
 				case "eyedrops":
 					//[Block]
-					if (CanUseItem(False,False,False)) {
+					if (CanUseItem(false,false,false)) {
 						if (!(Wearing714=1)) { //wtf is this
 							BlinkEffect = 0.6
 							BlinkEffectTimer = Rand(20,30)
@@ -5425,7 +5465,7 @@ function DrawGUI() {
 					
 				case "fineeyedrops":
 					//[Block]
-					if (CanUseItem(False,False,False)) {
+					if (CanUseItem(false,false,false)) {
 						if (!(Wearing714=1)) {
 							BlinkEffect = 0.4
 							BlinkEffectTimer = Rand(30,40)
@@ -5437,7 +5477,7 @@ function DrawGUI() {
 					
 				case "supereyedrops":
 					//[Block]
-					if (CanUseItem(False,False,False)) {
+					if (CanUseItem(false,false,false)) {
 						if (!(Wearing714 = 1)) {
 							BlinkEffect = 0.0
 							BlinkEffectTimer = 60
@@ -5455,7 +5495,7 @@ function DrawGUI() {
 								SelectedItem.itemtemplate.img = LoadImage_Strict("GFX/items/bn.it")
 								SetBuffer(ImageBuffer(SelectedItem.itemtemplate.img))
 								Color(0,0,0)
-								AAText(277, 469, AccessCode, True, True)
+								AAText(277, 469, AccessCode, true, true)
 								Color(255,255,255)
 								SetBuffer(BackBuffer())
 							case "Document SCP-372":
@@ -5467,7 +5507,7 @@ function DrawGUI() {
 								AASetFont(Font5)
 								temp = ((Int(AccessCode)*3) % 10000)
 								if (temp < 1000) {temp = temp+1000}
-								AAText(383*MenuScale, 734*MenuScale, temp, True, True)
+								AAText(383*MenuScale, 734*MenuScale, temp, true, true)
 								Color(255,255,255)
 								SetBuffer(BackBuffer())
 							case "Movie Ticket":
@@ -5509,7 +5549,7 @@ function DrawGUI() {
 					
 				case "cup":
 					//[Block]
-					if (CanUseItem(False,False,True)) {
+					if (CanUseItem(false,false,true)) {
 						SelectedItem.name = Trim(Lower(SelectedItem.name))
 						if (Left(SelectedItem.name, Min(6,Len(SelectedItem.name))) = "cup of") {
 							SelectedItem.name = Right(SelectedItem.name, Len(SelectedItem.name)-7)
@@ -5561,7 +5601,7 @@ function DrawGUI() {
 							MsgTimer = 70*6		
 						} else {
 							it.Items = CreateItem("Empty Cup", "emptycup", 0,0,0)
-							it.Picked = True
+							it.Picked = true
 							for (i of range(MaxItemAmount)) {
 								if (Inventory(i)=SelectedItem) {
 									Inventory(i) = it
@@ -5578,7 +5618,7 @@ function DrawGUI() {
 					
 				case "syringe":
 					//[Block]
-					if (CanUseItem(False,True,True)) {
+					if (CanUseItem(false,true,true)) {
 						HealTimer = 30
 						StaminaEffect = 0.5
 						StaminaEffectTimer = 20
@@ -5591,7 +5631,7 @@ function DrawGUI() {
 					
 				case "finesyringe":
 					//[Block]
-					if (CanUseItem(False,True,True)) {
+					if (CanUseItem(false,true,true)) {
 						HealTimer = Rnd(20, 40)
 						StaminaEffect = Rnd(0.5, 0.8)
 						StaminaEffectTimer = Rnd(20, 30)
@@ -5604,7 +5644,7 @@ function DrawGUI() {
 					
 				case "veryfinesyringe":
 					//[Block]
-					if (CanUseItem(False,True,True)) {
+					if (CanUseItem(false,true,true)) {
 						switch (Rand(3)) {
 							case 1:
 								HealTimer = Rnd(40, 60)
@@ -5612,7 +5652,7 @@ function DrawGUI() {
 								StaminaEffectTimer = 30
 								Msg = "You injected yourself with the syringe and feel a huge adrenaline rush."
 							case 2:
-								SuperMan = True
+								SuperMan = true
 								Msg = "You injected yourself with the syringe and feel a humongous adrenaline rush."
 							case 3:
 								VomitTimer = 30
@@ -5655,19 +5695,19 @@ function DrawGUI() {
 					if (SelectedItem.state > 0) {
 						if (PlayerRoom.RoomTemplate.Name = "pocketdimension" || CoffinDistance < 4.0) {
 							ResumeChannel(RadioCHN(5))
-							if (ChannelPlaying(RadioCHN(5)) = False) {RadioCHN(5) = PlaySound_Strict(RadioStatic)}
+							if (ChannelPlaying(RadioCHN(5)) = false) {RadioCHN(5) = PlaySound_Strict(RadioStatic)}
 						} else {
 							switch (Int(SelectedItem.state2)) {
 								case 0: //randomkanava:
 									ResumeChannel(RadioCHN(0))
 									strtemp = "        USER TRACK PLAYER - "
 									if (!EnableUserTracks) {
-										if (ChannelPlaying(RadioCHN(0)) = False) {
+										if (ChannelPlaying(RadioCHN(0)) = false) {
 											RadioCHN(0) = PlaySound_Strict(RadioStatic)
 										}
 										strtemp = strtemp + "NOT ENABLED     "
 									} else if (UserTrackMusicAmount<1) {
-										if (ChannelPlaying(RadioCHN(0)) = False) {
+										if (ChannelPlaying(RadioCHN(0)) = false) {
 											RadioCHN(0) = PlaySound_Strict(RadioStatic)
 										}
 										strtemp = strtemp + "NO TRACKS FOUND     "
@@ -5680,7 +5720,7 @@ function DrawGUI() {
 													} else {
 														RadioState(0) = 0
 													}
-													UserTrackFlag = True
+													UserTrackFlag = true
 												} else {
 													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 												}
@@ -5695,7 +5735,7 @@ function DrawGUI() {
 											DebugLog(UserTrackName$(RadioState(0)))
 										} else {
 											strtemp = strtemp + Upper(UserTrackName$(RadioState(0))) + "          "
-											UserTrackFlag = False
+											UserTrackFlag = false
 										}
 										
 										if (KeyHit(2)) {
@@ -5707,7 +5747,7 @@ function DrawGUI() {
 													} else {
 														RadioState(0) = 0
 													}
-													UserTrackFlag = True
+													UserTrackFlag = true
 												} else {
 													RadioState(0) = Rand(0,UserTrackMusicAmount-1)
 												}
@@ -5727,7 +5767,7 @@ function DrawGUI() {
 									
 									ResumeChannel(RadioCHN(1))
 									strtemp = "        WARNING - CONTAINMENT BREACH          "
-									if (ChannelPlaying(RadioCHN(1)) = False) {
+									if (ChannelPlaying(RadioCHN(1)) = false) {
 										
 										if (RadioState(1) >= 5) {
 											RadioCHN(1) = PlaySound_Strict(RadioSFX(1,1))	
@@ -5742,7 +5782,7 @@ function DrawGUI() {
 								case 2: //scp-radio:
 									ResumeChannel(RadioCHN(2))
 									strtemp = "        SCP Foundation On-Site Radio          "
-									if (ChannelPlaying(RadioCHN(2)) = False) {
+									if (ChannelPlaying(RadioCHN(2)) = false) {
 										RadioState(2)=RadioState(2)+1
 										if (RadioState(2) = 17) {RadioState(2) = 1}
 										if (Floor(RadioState(2)/2)=Ceil(RadioState(2)/2)) { //parillinen, soitetaan normiviesti
@@ -5754,7 +5794,7 @@ function DrawGUI() {
 								case 3:
 									ResumeChannel(RadioCHN(3))
 									strtemp = "             EMERGENCY CHANNEL - RESERVED FOR COMMUNICATION IN THE EVENT OF A CONTAINMENT BREACH         "
-									if (ChannelPlaying(RadioCHN(3)) = False) {RadioCHN(3) = PlaySound_Strict(RadioStatic)}
+									if (ChannelPlaying(RadioCHN(3)) = false) {RadioCHN(3) = PlaySound_Strict(RadioStatic)}
 									
 									if (MTFtimer > 0) { 
 										RadioState(3)=RadioState(3)+Max(Rand(-10,1),0)
@@ -5763,55 +5803,55 @@ function DrawGUI() {
 												if (!RadioState3(0)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random1.ogg"))
 													RadioState(3) = RadioState(3)+1	
-													RadioState3(0) = True	
+													RadioState3(0) = true	
 												}											
 											case 400:
 												if (!RadioState3(1)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random2.ogg"))
 													RadioState(3) = RadioState(3)+1	
-													RadioState3(1) = True	
+													RadioState3(1) = true	
 												}	
 											case 800:
 												if (!RadioState3(2)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random3.ogg"))
 													RadioState(3) = RadioState(3)+1	
-													RadioState3(2) = True
+													RadioState3(2) = true
 												}													
 											case 1200:
 												if (!RadioState3(3)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random4.ogg"))	
 													RadioState(3) = RadioState(3)+1	
-													RadioState3(3) = True
+													RadioState3(3) = true
 												}
 											case 1600:
 												if (!RadioState3(4)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random5.ogg"))	
 													RadioState(3) = RadioState(3)+1
-													RadioState3(4) = True
+													RadioState3(4) = true
 												}
 											case 2000:
 												if (!RadioState3(5)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random6.ogg"))	
 													RadioState(3) = RadioState(3)+1
-													RadioState3(5) = True
+													RadioState3(5) = true
 												}
 											case 2400:
 												if (!RadioState3(6)) {
 													RadioCHN(3) = PlaySound_Strict(LoadTempSound("SFX/Character/MTF/Random7.ogg"))	
 													RadioState(3) = RadioState(3)+1
-													RadioState3(6) = True
+													RadioState3(6) = true
 												}
 										}
 									}
 								case 4:
 									ResumeChannel(RadioCHN(6)) //taustalle kohinaa
-									if (ChannelPlaying(RadioCHN(6)) = False) {RadioCHN(6) = PlaySound_Strict(RadioStatic)}
+									if (ChannelPlaying(RadioCHN(6)) = false) {RadioCHN(6) = PlaySound_Strict(RadioStatic)}
 									
 									ResumeChannel(RadioCHN(4))
-									if (ChannelPlaying(RadioCHN(4)) = False) {
-										if (RemoteDoorOn = False && RadioState(8) == False) {
+									if (ChannelPlaying(RadioCHN(4)) = false) {
+										if (RemoteDoorOn = false && RadioState(8) == false) {
 											RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/Chatter3.ogg"))	
-											RadioState(8) = True
+											RadioState(8) = true
 										} else {
 											RadioState(4)=RadioState(4)+Max(Rand(-10,1),0)
 											
@@ -5821,62 +5861,62 @@ function DrawGUI() {
 														if (!RadioState4(0)) {
 															RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/OhGod.ogg"))
 															RadioState(4) = RadioState(4)+1
-															RadioState4(0) = True
+															RadioState4(0) = true
 														}
 													}
 												case 100:
 													if (!RadioState4(1)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/Chatter2.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState4(1) = True
+														RadioState4(1) = true
 													}		
 												case 158:
 													if (MTFtimer = 0 && (!RadioState4(2))) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/franklin1.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState(2) = True
+														RadioState(2) = true
 													}
 												case 200:
 													if (!RadioState4(3)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/Chatter4.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState4(3) = True
+														RadioState4(3) = true
 													}		
 												case 260:
 													if (!RadioState4(4)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/SCP/035/RadioHelp1.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState4(4) = True
+														RadioState4(4) = true
 													}		
 												case 300:
 													if (!RadioState4(5)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/Chatter1.ogg"))	
 														RadioState(4) = RadioState(4)+1	
-														RadioState4(5) = True
+														RadioState4(5) = true
 													}		
 												case 350:
 													if (!RadioState4(6)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/franklin2.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState4(6) = True
+														RadioState4(6) = true
 													}		
 												case 400:
 													if (!RadioState4(7)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/SCP/035/RadioHelp2.ogg"))
 														RadioState(4) = RadioState(4)+1
-														RadioState4(7) = True
+														RadioState4(7) = true
 													}		
 												case 450:
 													if (!RadioState4(8)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/franklin3.ogg"))	
 														RadioState(4) = RadioState(4)+1		
-														RadioState4(8) = True
+														RadioState4(8) = true
 													}		
 												case 600:
 													if (!RadioState4(9)) {
 														RadioCHN(4) = PlaySound_Strict(LoadTempSound("SFX/radio/franklin4.ogg"))	
 														RadioState(4) = RadioState(4)+1	
-														RadioState4(9) = True
+														RadioState4(9) = true
 													}		
 											}
 										}
@@ -5885,7 +5925,7 @@ function DrawGUI() {
 									
 								case 5:
 									ResumeChannel(RadioCHN(5))
-									if (ChannelPlaying(RadioCHN(5)) = False) {
+									if (ChannelPlaying(RadioCHN(5)) = false) {
 										RadioCHN(5) = PlaySound_Strict(RadioStatic)
 									}
 							}
@@ -5906,7 +5946,7 @@ function DrawGUI() {
 							
 							if (SelectedItem.itemtemplate.tempname = "veryfineradio") { //"KOODIKANAVA"
 								ResumeChannel(RadioCHN(0))
-								if (ChannelPlaying(RadioCHN(0)) = False) {
+								if (ChannelPlaying(RadioCHN(0)) = false) {
 									RadioCHN(0) = PlaySound_Strict(RadioStatic)
 								}
 								
@@ -5934,7 +5974,7 @@ function DrawGUI() {
 								}
 								
 								AASetFont (Font4)
-								AAText(x+97, y+16, Rand(0,9),True,True)
+								AAText(x+97, y+16, Rand(0,9),true,true)
 								
 							} else {
 								for (i of range(2, 7)) {
@@ -5954,7 +5994,7 @@ function DrawGUI() {
 								}
 								
 								AASetFont (Font4)
-								AAText(x+97, y+16, Int(SelectedItem.state2+1),True,True)
+								AAText(x+97, y+16, Int(SelectedItem.state2+1),true,true)
 							}
 							
 							AASetFont (Font3)
@@ -5971,7 +6011,7 @@ function DrawGUI() {
 					
 				case "cigarette":
 					//[Block]
-					if (CanUseItem(False,False,True)) {
+					if (CanUseItem(false,false,true)) {
 						if (SelectedItem.state = 0) {
 							switch (Rand(6)) {
 								case 1:
@@ -5999,7 +6039,7 @@ function DrawGUI() {
 					
 				case "420":
 					//[Block]
-					if (CanUseItem(False,False,True)) {
+					if (CanUseItem(false,false,true)) {
 						if (Wearing714=1) {
 							Msg = Chr(34) + "DUDE WTF THIS SHIT DOESN'T EVEN WORK" + Chr(34)
 						} else {
@@ -6015,7 +6055,7 @@ function DrawGUI() {
 					
 				case "420s":
 					//[Block]
-					if (CanUseItem(False,False,True)) {
+					if (CanUseItem(false,false,true)) {
 						if (Wearing714=1) {
 							Msg = Chr(34) + "DUDE WTF THIS SHIT DOESN'T EVEN WORK" + Chr(34)
 						} else {
@@ -6033,11 +6073,11 @@ function DrawGUI() {
 					//[Block]
 					if (Wearing714=1) {
 						Msg = "You removed the ring."
-						Wearing714 = False
+						Wearing714 = false
 					} else {
 						GiveAchievement(Achv714)
 						Msg = "You put on the ring."
-						Wearing714 = True
+						Wearing714 = true
 					}
 					MsgTimer = 70 * 5
 					SelectedItem = Null	
@@ -6053,7 +6093,7 @@ function DrawGUI() {
 						height = 20
 						x = GraphicWidth / 2 - width / 2
 						y = GraphicHeight / 2 + 80
-						Rect(x, y, width+4, height, False)
+						Rect(x, y, width+4, height, false)
 						for (i of range(1, Int((width - 2) * (SelectedItem.state / 100.0) / 10) + 1)) {
 							DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 						}
@@ -6063,7 +6103,7 @@ function DrawGUI() {
 						if (SelectedItem.state=100) {
 							if (WearingHazmat>0) {
 								Msg = "You removed the hazmat suit."
-								WearingHazmat = False
+								WearingHazmat = false
 								DropItem(SelectedItem)
 							} else {
 								if (SelectedItem.itemtemplate.tempname="hazmatsuit") {
@@ -6102,7 +6142,7 @@ function DrawGUI() {
 					height = 20
 					x = GraphicWidth / 2 - width / 2
 					y = GraphicHeight / 2 + 80
-					Rect(x, y, width+4, height, False)
+					Rect(x, y, width+4, height, false)
 					for (i of range(1, Int((width - 2) * (SelectedItem.state / 100.0) / 10) + 1)) {
 						DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 					}
@@ -6112,7 +6152,7 @@ function DrawGUI() {
 					if (SelectedItem.state=100) {
 						if (WearingVest>0) {
 							Msg = "You removed the vest."
-							WearingVest = False
+							WearingVest = false
 							DropItem(SelectedItem)
 						} else {
 							if (SelectedItem.itemtemplate.tempname="vest") {
@@ -6186,14 +6226,14 @@ function DrawGUI() {
 					
 					AASetFont (Font3)
 					
-					let NavWorks: boolean = True
+					let NavWorks: boolean = true
 					if (PlayerRoom.RoomTemplate.Name == "pocketdimension" || PlayerRoom.RoomTemplate.Name == "dimension1499") {
-						NavWorks = False
+						NavWorks = false
 					} else if (PlayerRoom.RoomTemplate.Name$ = "room860") {
 						for (e of Events.each) {
 							if (e.EventName = "room860") {
 								if (e.EventState = 1.0) {
-									NavWorks = False
+									NavWorks = false
 								}
 								break
 							}
@@ -6203,8 +6243,8 @@ function DrawGUI() {
 					if (!NavWorks) {
 						if ((MilliSecs2() % 1000) > 300) {
 							Color(200, 0, 0)
-							AAText(x, y + height / 2 - 80, "ERROR 06", True)
-							AAText(x, y + height / 2 - 60, "LOCATION UNKNOWN", True)						
+							AAText(x, y + height / 2 - 80, "ERROR 06", true)
+							AAText(x, y + height / 2 - 60, "LOCATION UNKNOWN", true)						
 						}
 					} else {
 						
@@ -6228,28 +6268,28 @@ function DrawGUI() {
 											let drawx: int = x + (PlayerX - 1 - x2) * 24 , drawy: int = y - (PlayerZ - 1 - z2) * 24
 											
 											if (x2+1<=MapWidth) {
-												if (MapTemp(x2+1,z2)=False) {
+												if (MapTemp(x2+1,z2)=false) {
 													DrawImage(NavImages(3),drawx-12,drawy-12)
 												}
 											} else {
 												DrawImage(NavImages(3),drawx-12,drawy-12)
 											}
 											if (x2-1>=0) {
-												if (MapTemp(x2-1,z2)=False) {
+												if (MapTemp(x2-1,z2)=false) {
 													DrawImage(NavImages(1),drawx-12,drawy-12)
 												}
 											} else {
 												DrawImage(NavImages(1),drawx-12,drawy-12)
 											}
 											if (z2-1>=0) {
-												if (MapTemp(x2,z2-1)=False) {
+												if (MapTemp(x2,z2-1)=false) {
 													DrawImage(NavImages(0),drawx-12,drawy-12)
 												}
 											} else {
 												DrawImage(NavImages(0),drawx-12,drawy-12)
 											}
 											if (z2+1<=MapHeight) {
-												if (MapTemp(x2,z2+1)=False) {
+												if (MapTemp(x2,z2+1)=false) {
 													DrawImage(NavImages(2),drawx-12,drawy-12)
 												}
 											} else {
@@ -6267,7 +6307,7 @@ function DrawGUI() {
 							if (SelectedItem.itemtemplate.name = "S-NAV Navigator") {
 								Color(100, 0, 0)
 							}
-							Rect (xx+80,yy+70,270,230,False)
+							Rect (xx+80,yy+70,270,230,false)
 							
 							x = GraphicWidth - ImageWidth(SelectedItem.itemtemplate.img)*0.5+20
 							y = GraphicHeight - ImageHeight(SelectedItem.itemtemplate.img)*0.4-85
@@ -6302,7 +6342,7 @@ function DrawGUI() {
 									dist = Ceil(dist / 8.0) * 8.0
 									if (dist < 8.0 * 4) {
 										Color (100, 0, 0)
-										Oval(x - dist * 3, y - 7 - dist * 3, dist * 3 * 2, dist * 3 * 2, False)
+										Oval(x - dist * 3, y - 7 - dist * 3, dist * 3 * 2, dist * 3 * 2, false)
 										AAText(x - width / 2 + 10, y - height / 2 + 30, "SCP-173")
 										SCPs_found = SCPs_found + 1
 									}
@@ -6311,7 +6351,7 @@ function DrawGUI() {
 									dist = EntityDistance(Camera, Curr106.obj)
 									if (dist < 8.0 * 4) {
 										Color (100, 0, 0)
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, false)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-106")
 										SCPs_found = SCPs_found + 1
 									}
@@ -6320,7 +6360,7 @@ function DrawGUI() {
 									dist = EntityDistance(Camera, Curr096.obj)
 									if (dist < 8.0 * 4) {
 										Color (100, 0, 0)
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, false)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-096")
 										SCPs_found = SCPs_found + 1
 									}
@@ -6331,7 +6371,7 @@ function DrawGUI() {
 										if (dist < 8.0 * 4) {
 											if (!np.HideFromNVG) {
 												Color (100, 0, 0)
-												Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+												Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, false)
 												AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-049")
 												SCPs_found = SCPs_found + 1
 											}
@@ -6343,7 +6383,7 @@ function DrawGUI() {
 									if (CoffinDistance < 8.0) {
 										dist = Rnd(4.0, 8.0)
 										Color (100, 0, 0)
-										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, False)
+										Oval(x - dist * 1.5, y - 7 - dist * 1.5, dist * 3, dist * 3, false)
 										AAText(x - width / 2 + 10, y - height / 2 + 30 + (20*SCPs_found), "SCP-895")
 									}
 								}
@@ -6356,7 +6396,7 @@ function DrawGUI() {
 							if (SelectedItem.state <= 100) {
 								xtemp = x - width/2 + 196
 								ytemp = y - height/2 + 10
-								Rect (xtemp,ytemp,80,20,False)
+								Rect (xtemp,ytemp,80,20,false)
 								
 								for (i of range(1, Ceil(SelectedItem.state / 10.0) + 1)) {
 									DrawImage (NavImages(4),xtemp+i*8-6,ytemp+4)
@@ -6386,7 +6426,7 @@ function DrawGUI() {
 					height = 20
 					x = GraphicWidth / 2 - width / 2
 					y = GraphicHeight / 2 + 80
-					Rect(x, y, width+4, height, False)
+					Rect(x, y, width+4, height, false)
 					for (i of range(1, Int((width - 2) * (SelectedItem.state / 100.0) / 10) + 1)) {
 						DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 					}
@@ -6396,7 +6436,7 @@ function DrawGUI() {
 					if (SelectedItem.state=100) {
 						if (Wearing1499>0) {
 							//Msg = "1499remove."
-							Wearing1499 = False
+							Wearing1499 = false
 							//DropItem(SelectedItem)
 							if (SelectedItem.itemtemplate.sound != 66) {
 								PlaySound_Strict(PickSFX(SelectedItem.itemtemplate.sound))
@@ -6428,7 +6468,7 @@ function DrawGUI() {
 									
 									if (NTF_1499X == 0.0 && NTF_1499Y == 0.0 && NTF_1499Z == 0.0) {
 										PositionEntity (Collider, r.x+6086.0*RoomScale, r.y+304.0*RoomScale, r.z+2292.5*RoomScale)
-										RotateEntity (Collider,0,90,0,True)
+										RotateEntity (Collider,0,90,0,true)
 									} else {
 										PositionEntity (Collider, NTF_1499X, NTF_1499Y+0.05, NTF_1499Z)
 									}
@@ -6538,18 +6578,18 @@ function DrawGUI() {
 					//[Block]
 					if (I_427.Using=1) {
 						Msg = "You closed the locket."
-						I_427.Using = False
+						I_427.Using = false
 					} else {
 						GiveAchievement(Achv427)
 						Msg = "You opened the locket."
-						I_427.Using = True
+						I_427.Using = true
 					}
 					MsgTimer = 70 * 5
 					SelectedItem = Null
 					
 				case "pill":
 					//[Block]
-					if (CanUseItem(False, False, True)) {
+					if (CanUseItem(false, false, true)) {
 						Msg = "You swallowed the pill."
 						MsgTimer = 70*7
 						
@@ -6559,7 +6599,7 @@ function DrawGUI() {
 					
 				case "scp500death":
 					//[Block]
-					if (CanUseItem(False, False, True)) {
+					if (CanUseItem(false, false, true)) {
 						Msg = "You swallowed the pill."
 						MsgTimer = 70*7
 						
@@ -6621,12 +6661,12 @@ function DrawGUI() {
 				} else if (IN == "vest" || IN == "finevest") {
 					SelectedItem.state = 0
 					if (!WearingVest) {
-						DropItem(SelectedItem,False)
+						DropItem(SelectedItem,false)
 					}
 				} else if (IN == "hazmatsuit" || IN == "hazmatsuit2" || IN == "hazmatsuit3") {
 					SelectedItem.state = 0
 					if (!WearingHazmat) {
-						DropItem(SelectedItem,False)
+						DropItem(SelectedItem,false)
 					}
 				} else if (IN == "scp1499" || IN == "super1499") {
 					SelectedItem.state = 0
@@ -6676,7 +6716,7 @@ function DrawMenu() {
 
 	if (api_GetFocus() = 0) { //Game is out of focus -> pause the game
 		if (!Using294) {
-			MenuOpen = True
+			MenuOpen = true
 			PauseSounds()
 		}
         Delay (1000) //Reduce the CPU take while game is not in focus
@@ -6696,14 +6736,14 @@ function DrawMenu() {
 						PlaySound_Strict(HorrorSFX(15))
 						Msg = "STOP HIDING"
 						MsgTimer = 6*70
-						MenuOpen = False
+						MenuOpen = false
 						return
 					}
 				}
 			}
 		}
 		
-		InvOpen = False
+		InvOpen = false
 		
 		width = ImageWidth(PauseMenuIMG)
 		height = ImageHeight(PauseMenuIMG)
@@ -6723,23 +6763,23 @@ function DrawMenu() {
 		
 		if (AchievementsMenu > 0) {
 			AASetFont(Font2)
-			AAText(x, y-(122-45)*MenuScale, "ACHIEVEMENTS",False,True)
+			AAText(x, y-(122-45)*MenuScale, "ACHIEVEMENTS",false,true)
 			AASetFont(Font1)
 		} else if (OptionsMenu > 0) {
 			AASetFont(Font2)
-			AAText(x, y-(122-45)*MenuScale, "OPTIONS",False,True)
+			AAText(x, y-(122-45)*MenuScale, "OPTIONS",false,true)
 			AASetFont(Font1)
 		} else if (QuitMSG > 0) {
 			AASetFont(Font2)
-			AAText(x, y-(122-45)*MenuScale, "QUIT?",False,True)
+			AAText(x, y-(122-45)*MenuScale, "QUIT?",false,true)
 			AASetFont(Font1)
 		} else if (KillTimer >= 0) {
 			AASetFont(Font2)
-			AAText(x, y-(122-45)*MenuScale, "PAUSED",False,True)
+			AAText(x, y-(122-45)*MenuScale, "PAUSED",false,true)
 			AASetFont(Font1)
 		} else {
 			AASetFont(Font2)
-			AAText(x, y-(122-45)*MenuScale, "YOU DIED",False,True)
+			AAText(x, y-(122-45)*MenuScale, "YOU DIED",false,true)
 			AASetFont(Font1)
 		}	
 		
@@ -6758,7 +6798,7 @@ function DrawMenu() {
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0
-				MouseHit1 = False
+				MouseHit1 = false
 				SaveOptionsINI()
 				
 				AntiAlias (Opt_AntiAlias)
@@ -6767,19 +6807,19 @@ function DrawMenu() {
 			
 			Color (0,255,0)
 			if (OptionsMenu = 1) {
-				Rect(x-10*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,True)
+				Rect(x-10*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,true)
 			} else if (OptionsMenu = 2) {
-				Rect(x+100*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,True)
+				Rect(x+100*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,true)
 			} else if (OptionsMenu = 3) {
-				Rect(x+210*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,True)
+				Rect(x+210*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,true)
 			} else if (OptionsMenu = 4) {
-				Rect(x+320*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,True)
+				Rect(x+320*MenuScale,y-5*MenuScale,110*MenuScale,40*MenuScale,true)
 			}
 			
-			if (DrawButton(x-5*MenuScale,y,100*MenuScale,30*MenuScale,"GRAPHICS",False)) {OptionsMenu = 1}
-			if (DrawButton(x+105*MenuScale,y,100*MenuScale,30*MenuScale,"AUDIO",False)) {OptionsMenu = 2}
-			if (DrawButton(x+215*MenuScale,y,100*MenuScale,30*MenuScale,"CONTROLS",False)) {OptionsMenu = 3}
-			if (DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"ADVANCED",False)) {OptionsMenu = 4}
+			if (DrawButton(x-5*MenuScale,y,100*MenuScale,30*MenuScale,"GRAPHICS",false)) {OptionsMenu = 1}
+			if (DrawButton(x+105*MenuScale,y,100*MenuScale,30*MenuScale,"AUDIO",false)) {OptionsMenu = 2}
+			if (DrawButton(x+215*MenuScale,y,100*MenuScale,30*MenuScale,"CONTROLS",false)) {OptionsMenu = 3}
+			if (DrawButton(x+325*MenuScale,y,100*MenuScale,30*MenuScale,"ADVANCED",false)) {OptionsMenu = 4}
 			
 			let tx: float = (GraphicWidth/2)+(width/2)
 			let ty: float = y
@@ -6795,7 +6835,7 @@ function DrawMenu() {
 					
 					Color (100,100,100)
 					AAText(x, y, "Enable bump mapping:")	
-					BumpEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, BumpEnabled, True)
+					BumpEnabled = DrawTick(x + 270 * MenuScale, y + MenuScale, BumpEnabled, true)
 					if (MouseOn(x + 270 * MenuScale, y + MenuScale, 20*MenuScale,20*MenuScale) && OnSliderID == 0) {
 						DrawOptionsTooltip(tx,ty,tw,th,"bump")
 					}
@@ -6872,7 +6912,7 @@ function DrawMenu() {
 					y=y+50*MenuScale
 					Color(100,100,100)
 					AAText(x, y, "Save textures in the VRAM:")	
-					EnableVRam = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableVRam, True)
+					EnableVRam = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableVRam, true)
 					if (MouseOn(x + 270 * MenuScale, y + MenuScale, 20*MenuScale,20*MenuScale) && OnSliderID == 0) {
 						DrawOptionsTooltip(tx,ty,tw,th,"vram")
 					}
@@ -6906,7 +6946,7 @@ function DrawMenu() {
 					
 					Color (100,100,100)
 					AAText (x, y, "Sound auto-release:")
-					EnableSFXRelease = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableSFXRelease,True)
+					EnableSFXRelease = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableSFXRelease,true)
 					if (MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)) {
 						DrawOptionsTooltip(tx,ty,tw,th+220*MenuScale,"sfxautorelease")
 					}
@@ -6915,7 +6955,7 @@ function DrawMenu() {
 					
 					Color (100,100,100)
 					AAText (x, y, "Enable user tracks:")
-					EnableUserTracks = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableUserTracks,True)
+					EnableUserTracks = DrawTick(x + 270 * MenuScale, y + MenuScale, EnableUserTracks,true)
 					if (MouseOn(x+270*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)) {
 						DrawOptionsTooltip(tx,ty,tw,th,"usertrack")
 					}
@@ -7135,17 +7175,17 @@ function DrawMenu() {
 			let QuitButton: int = 60 
 			if (SelectedDifficulty.saveType == SAVEONQUIT || SelectedDifficulty.saveType == SAVEANYWHERE) {
 				let RN: string = PlayerRoom.RoomTemplate.Name$
-				let AbleToSave: boolean = True
-				if (RN == "173" || RN == "exit1" || RN == "gatea") {AbleToSave = False}
-				if (!CanSave) {AbleToSave = False}
+				let AbleToSave: boolean = true
+				if (RN == "173" || RN == "exit1" || RN == "gatea") {AbleToSave = false}
+				if (!CanSave) {AbleToSave = false}
 				if (AbleToSave) {
 					QuitButton = 140
 					if (DrawButton(x, y + 60*MenuScale, 390*MenuScale, 60*MenuScale, "Save & Quit")) {
 						DropSpeed = 0
 						SaveGame(SavePath + CurrSave + "/")
 						NullGame()
-						MenuOpen = False
-						MainMenuOpen = True
+						MenuOpen = false
+						MainMenuOpen = true
 						MainMenuTab = 0
 						CurrSave = ""
 						FlushKeys()
@@ -7155,8 +7195,8 @@ function DrawMenu() {
 			
 			if (DrawButton(x, y + QuitButton*MenuScale, 390*MenuScale, 60*MenuScale, "Quit")) {
 				NullGame()
-				MenuOpen = False
-				MainMenuOpen = True
+				MenuOpen = false
+				MainMenuOpen = true
 				MainMenuTab = 0
 				CurrSave = ""
 				FlushKeys()
@@ -7166,14 +7206,14 @@ function DrawMenu() {
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0
-				MouseHit1 = False
+				MouseHit1 = false
 			}
 		} else {
 			if (DrawButton(x+101*MenuScale, y + 344*MenuScale, 230*MenuScale, 60*MenuScale, "Back")) {
 				AchievementsMenu = 0
 				OptionsMenu = 0
 				QuitMSG = 0
-				MouseHit1 = False
+				MouseHit1 = false
 			}
 			
 			if (AchievementsMenu>0) {
@@ -7217,8 +7257,8 @@ function DrawMenu() {
 				
 				y = y+ 72*MenuScale
 				
-				if (DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Resume", True, True)) {
-					MenuOpen = False
+				if (DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Resume", true, true)) {
+					MenuOpen = false
 					ResumeSounds()
 					MouseXSpeed()
 					MouseYSpeed()
@@ -7233,7 +7273,7 @@ function DrawMenu() {
 						if (DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Load Game")) {
 							DrawLoading(0)
 							
-							MenuOpen = False
+							MenuOpen = false
 							LoadGameQuick(SavePath + CurrSave + "/")
 							
 							MoveMouse (viewport_center_x,viewport_center_y)
@@ -7242,7 +7282,7 @@ function DrawMenu() {
 							
 							FlushKeys()
 							FlushMouse()
-							Playable=True
+							Playable=true
 							
 							UpdateRooms()
 							
@@ -7274,7 +7314,7 @@ function DrawMenu() {
 						DrawFrame(x,y,390*MenuScale, 60*MenuScale)
 						Color (100, 100, 100)
 						AASetFont (Font2)
-						AAText(x + (390*MenuScale) / 2, y + (60*MenuScale) / 2, "Load Game", True, True)
+						AAText(x + (390*MenuScale) / 2, y + (60*MenuScale) / 2, "Load Game", true, true)
 					}
 					y = y + 75*MenuScale
 				}
@@ -7289,7 +7329,7 @@ function DrawMenu() {
 					if (DrawButton(x, y, 390*MenuScale, 60*MenuScale, "Load Game")) {
 						DrawLoading(0)
 						
-						MenuOpen = False
+						MenuOpen = false
 						LoadGameQuick(SavePath + CurrSave + "/")
 						
 						MoveMouse (viewport_center_x,viewport_center_y)
@@ -7298,7 +7338,7 @@ function DrawMenu() {
 						
 						FlushKeys()
 						FlushMouse()
-						Playable=True
+						Playable=true
 						
 						UpdateRooms()
 						
@@ -7329,12 +7369,12 @@ function DrawMenu() {
 				} else {
 					DrawButton(x, y, 390*MenuScale, 60*MenuScale, "")
 					Color (50,50,50)
-					AAText(x + 185*MenuScale, y + 30*MenuScale, "Load Game", True, True)
+					AAText(x + 185*MenuScale, y + 30*MenuScale, "Load Game", true, true)
 				}
 				if (DrawButton(x, y + 80*MenuScale, 390*MenuScale, 60*MenuScale, "Quit to Menu")) {
 					NullGame()
-					MenuOpen = False
-					MainMenuOpen = True
+					MenuOpen = false
+					MainMenuOpen = true
 					MainMenuTab = 0
 					CurrSave = ""
 					FlushKeys()
@@ -7364,10 +7404,10 @@ function DrawMenu() {
 function MouseOn(x: int, y: int, width: int, height: int): int {
 	if (ScaledMouseX() > x & ScaledMouseX() < x + width) {
 		if (ScaledMouseY() > y & ScaledMouseY() < y + height) {
-			return True
+			return true
 		}
 	}
-	return False
+	return false
 }
 
 //----------------------------------------------------------------------------------------------
@@ -7795,9 +7835,9 @@ function LoadEntities() {
 	SetTemplateTexture(ParticleEffect[0], "GFX/Spark.png", 2, 3)
 	SetTemplateOffset(ParticleEffect[0], -0.1, 0.1, -0.1, 0.1, -0.1, 0.1)
 	SetTemplateVelocity(ParticleEffect[0], -0.0375, 0.0375, -0.0375, 0.0375, -0.0375, 0.0375)
-	SetTemplateAlignToFall(ParticleEffect[0], True, 45)
+	SetTemplateAlignToFall(ParticleEffect[0], true, 45)
 	SetTemplateGravity(ParticleEffect[0], 0.001)
-	SetTemplateAlphaVel(ParticleEffect[0], True)
+	SetTemplateAlphaVel(ParticleEffect[0], true)
 	//SetTemplateSize(ParticleEffect[0], 0.0625, 0.125, 0.7, 1)
 	SetTemplateSize(ParticleEffect[0], 0.03125, 0.0625, 0.7, 1)
 	SetTemplateColors(ParticleEffect[0], $0000FF, $6565FF)
@@ -7814,7 +7854,7 @@ function LoadEntities() {
 	SetTemplateOffset(ParticleEffect[1], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 	//SetTemplateVelocity(ParticleEffect[1], -.04, .04, .1, .2, -.04, .04)
 	SetTemplateVelocity(ParticleEffect[1], 0.0, 0.0, 0.02, 0.025, 0.0, 0.0)
-	SetTemplateAlphaVel(ParticleEffect[1], True)
+	SetTemplateAlphaVel(ParticleEffect[1], true)
 	//SetTemplateSize(ParticleEffect[1], 3, 3, .5, 1.5)
 	SetTemplateSize(ParticleEffect[1], 0.4, 0.4, 0.5, 1.5)
 	SetTemplateSizeVel(ParticleEffect[1], .01, 1.01)
@@ -7828,7 +7868,7 @@ function LoadEntities() {
 	SetTemplateTexture(ParticleEffect[2], "GFX/smoke.png", 2, 1)
 	SetTemplateOffset(ParticleEffect[2], -0.1, 0.1, -0.1, 0.1, -0.1, 0.1)
 	SetTemplateVelocity(ParticleEffect[2], -0.005, 0.005, 0.0, -0.03, -0.005, 0.005)
-	SetTemplateAlphaVel(ParticleEffect[2], True)
+	SetTemplateAlphaVel(ParticleEffect[2], true)
 	SetTemplateSize(ParticleEffect[2], 0.4, 0.4, 0.5, 1.5)
 	SetTemplateSizeVel(ParticleEffect[2], .01, 1.01)
 	SetTemplateGravity(ParticleEffect[2], 0.005)
@@ -7840,7 +7880,7 @@ function LoadEntities() {
 	SetTemplateTexture(t0, "GFX/smoke2.png", 2, 1)
 	SetTemplateOffset(t0, -0.1, 0.1, -0.1, 0.1, -0.1, 0.1)
 	SetTemplateVelocity(t0, -0.005, 0.005, 0.0, -0.03, -0.005, 0.005)
-	SetTemplateAlphaVel(t0, True)
+	SetTemplateAlphaVel(t0, true)
 	SetTemplateSize(t0, 0.4, 0.4, 0.5, 1.5)
 	SetTemplateSizeVel(t0, .01, 1.01)
 	SetTemplateGravity(ParticleEffect[2], 0.005)
@@ -7940,22 +7980,22 @@ function InitNewGame() {
 			}
 		}
 		
-		if (r.RoomTemplate.Name == "start" && IntroEnabled == False) {
+		if (r.RoomTemplate.Name == "start" && IntroEnabled == false) {
 			PositionEntity (Collider, EntityX(r.obj)+3584*RoomScale, 704*RoomScale, EntityZ(r.obj)+1024*RoomScale)
 			PlayerRoom = r
 			it = CreateItem("Class D Orientation Leaflet", "paper", 1, 1, 1)
-			it.Picked = True
+			it.Picked = true
 			it.Dropped = -1
-			it.itemtemplate.found=True
+			it.itemtemplate.found=true
 			Inventory(0) = it
 			HideEntity(it.collider)
 			EntityType (it.collider, HIT_ITEM)
 			EntityParent(it.collider, 0)
 			ItemAmount = ItemAmount + 1
 			it = CreateItem("Document SCP-173", "paper", 1, 1, 1)
-			it.Picked = True
+			it.Picked = true
 			it.Dropped = -1
-			it.itemtemplate.found=True
+			it.itemtemplate.found=true
 			Inventory(1) = it
 			HideEntity(it.collider)
 			EntityType (it.collider, HIT_ITEM)
@@ -8106,7 +8146,7 @@ function InitLoadGame() {
 					ch = CreateChunk(-1,x*(i*2.5),EntityY(e.room.obj),z)
 				}
 				DrawLoading(98)
-				UpdateChunks(e.room,15,False)
+				UpdateChunks(e.room,15,false)
 				
 				DebugLog ("Loaded dimension1499 successful")
 				
@@ -8127,7 +8167,7 @@ function InitLoadGame() {
 	
 }
 
-function NullGame(playbuttonsfx: boolean = True) {
+function NullGame(playbuttonsfx: boolean = true) {
 	CatchErrors("Uncaught (NullGame)")
 	let i: int, x: int, y: int, lvl
 	let itt: ItemTemplates, s: Screens, lt: LightTemplates, d: Doors, m: Materials
@@ -8140,9 +8180,9 @@ function NullGame(playbuttonsfx: boolean = True) {
 	
 	ClearTextureCache
 	
-	DebugHUD = False
+	DebugHUD = false
 	
-	UnableToMove = False
+	UnableToMove = false
 	
 	QuickLoadPercent = -1
 	QuickLoadPercent_DisplayTimer = 0
@@ -8152,7 +8192,7 @@ function NullGame(playbuttonsfx: boolean = True) {
 	
 	SelectedMap = ""
 	
-	UsedConsole = False
+	UsedConsole = false
 	
 	DoorTempID = 0
 	RoomTempID = 0
@@ -8171,7 +8211,7 @@ function NullGame(playbuttonsfx: boolean = True) {
 	}
 	
 	for (itt of  ItemTemplates.each) {
-		itt.found = False
+		itt.found = false
 	}
 	
 	DropSpeed = 0
@@ -8220,12 +8260,12 @@ function NullGame(playbuttonsfx: boolean = True) {
 	
 	ForceMove = 0.0
 	ForceAngle = 0.0	
-	Playable = True
+	Playable = true
 	
 	CoffinDistance = 100
 	
-	Contained106 = False
-	if (Curr173 != Null) {Curr173.Idle = False}
+	Contained106 = false
+	if (Curr173 != Null) {Curr173.Idle = false}
 	
 	MTFtimer = 0
 	for (i of range(10)) {
@@ -8247,7 +8287,7 @@ function NullGame(playbuttonsfx: boolean = True) {
 	RefinedItems = 0
 	
 	ConsoleInput = ""
-	ConsoleOpen = False
+	ConsoleOpen = false
 	
 	EyeIrritation = 0
 	EyeStuck = 0
@@ -8258,21 +8298,21 @@ function NullGame(playbuttonsfx: boolean = True) {
 	FallTimer = 0
 	Stamina = 100
 	BlurTimer = 0
-	SuperMan = False
+	SuperMan = false
 	SuperManTimer = 0
 	Sanity = 0
-	RestoreSanity = True
-	Crouch = False
+	RestoreSanity = true
+	Crouch = false
 	CrouchState = 0.0
 	LightVolume = 0.0
-	Vomit = False
+	Vomit = false
 	VomitTimer = 0.0
-	SecondaryLightOn = True
-	PrevSecondaryLightOn = True
-	RemoteDoorOn = True
-	SoundTransmission = False
+	SecondaryLightOn = true
+	PrevSecondaryLightOn = true
+	RemoteDoorOn = true
+	SoundTransmission = false
 	
-	InfiniteStamina = False
+	InfiniteStamina = false
 	
 	Msg = ""
 	MsgTimer = 0
@@ -8374,14 +8414,14 @@ function NullGame(playbuttonsfx: boolean = True) {
 	NTF_1499X = 0.0
 	NTF_1499Y = 0.0
 	NTF_1499Z = 0.0
-	Wearing1499 = False
+	Wearing1499 = false
 	DeleteChunks()
 	
 	DeleteElevatorObjects()
 	
 	DeleteDevilEmitters()
 	
-	NoTarget = False
+	NoTarget = false
 	
 	OptionsMenu = -1
 	QuitMSG = -1
@@ -8389,10 +8429,10 @@ function NullGame(playbuttonsfx: boolean = True) {
 	
 	MusicVolume = PrevMusicVolume
 	SFXVolume = PrevSFXVolume
-	DeafPlayer = False
+	DeafPlayer = false
 	DeafTimer = 0.0
 	
-	IsZombie = False
+	IsZombie = false
 	
 	Delete(AchievementMsg.each)
 	CurrAchvMSGID = 0
@@ -8417,7 +8457,7 @@ import { Asc, Instr, Left, Len, Lower, Mid, Right, Str, StringHeight, Trim, Uppe
 import { AALoadFont, AASetFont, AAText, InitAAFont } from "./AAText.ts"
 import { MAXACHIEVEMENTS, Achievements, Achv055, AchvConsole, AchvKeter, AchvMaynard, AchvHarp, Achv500, Achv1025, Achv420, Achv714, Achv1499, Achv427, AchievementsMenu, AchievementStrings, AchievementTooltip, AchvMSGenabled, GiveAchievement, UsedConsole } from "./Achievements.ts"
 import { TextureName, CurrentDir, ReadLine, Eof, ReadFile, CloseFile, WriteFile, WriteLine, FilePos, FileSize } from "./Helper/Files.ts"
-import { EntityX, EntityY, EntityZ, EntityPitch, EntityYaw, EntityRoll, GetSurface, GetSurfaceBrush, GetBrushTexture, FreeEntity, CountSurfaces, FreeBrush, CountVertices, VertexX, VertexY, VertexZ, TFormedX, TFormedY, TFormedZ, CreateMesh, CreateSurface, AddVertex, AddTriangle, MoveEntity, RotateEntity } from "./Helper/Mesh.ts"
+import { EntityX, EntityY, EntityZ, EntityPitch, EntityYaw, EntityRoll, GetSurface, GetSurfaceBrush, GetBrushTexture, FreeEntity, CountSurfaces, FreeBrush, CountVertices, VertexX, VertexY, VertexZ, TFormedX, TFormedY, TFormedZ, CreateMesh, CreateSurface, AddVertex, AddTriangle, MoveEntity, RotateEntity, Delete } from "./Helper/Mesh.ts"
 import { LoadSound } from "./Helper/sounds.ts"
 import { DrawImage, FreeTexture, ImageBuffer, TextureBlend } from "./Helper/textures.ts"
 import { TFormVector } from "./Helper/vector.ts"
@@ -8429,7 +8469,7 @@ import { PeekByte, FreeBank, CreateBank, PokeByte } from "./Helper/bank.ts"
 import { Chr, RuntimeError, int, FileType, float, DebugLog, Float, range, SeedRnd, AppTitle, Int, Color, KeyHit, First, Exit, PositionEntity, EntityTexture, Collisions, FlushKeys, Delay, ChannelPlaying, FreeSound, EntityFX, ScaleEntity, ImageWidth, SetFont, CopyEntity, GetParent, Graphics3D } from "./Helper/bbhelper.ts"
 import { CameraRange, CameraZoom, CreateCamera, CameraViewport, CameraProjMode, CameraClsMode } from "./Helper/camera.ts"
 import { Abs, Rand, Sin, Sqr } from "./Helper/math.ts"
-import { EASY, NORMAL, HARD, SAVEANYWHERE, SAVEONSCREENS, SAVEONQUIT } from "./Difficulty.ts"
+import { EASY, NORMAL, HARD, SAVEANYWHERE, SAVEONSCREENS, SAVEONQUIT, SelectedDifficulty } from "./Difficulty.ts"
 import { SetAnimTime } from "./Helper/animation.ts"
 import { Items, Update294, InitItemTemplates } from "./Items.ts"
 import { BlitzMovie_Open, BlitzMovie_GetWidth, BlitzMovie_GetHeight, BlitzMovie_Close, BlitzMovie_OpenDecodeToImage, BlitzMovie_Play, BlitzMovie_Stop } from "./lib/BlitzMovie.ts"
@@ -8553,14 +8593,14 @@ function PauseSounds() {
 			if (!e.soundchn_isstream) {
 				if (ChannelPlaying(e.soundchn)) {PauseChannel(e.soundchn)}
 			} else {
-				SetStreamPaused_Strict(e.soundchn,True)
+				SetStreamPaused_Strict(e.soundchn,true)
 			}
 		}
 		if (e.soundchn2 != 0) {
 			if (!e.soundchn2_isstream) {
 				if (ChannelPlaying(e.soundchn2)) {PauseChannel(e.soundchn2)}
 			} else {
-				SetStreamPaused_Strict(e.soundchn2,True)
+				SetStreamPaused_Strict(e.soundchn2,true)
 			}
 		}		
 	}
@@ -8570,8 +8610,8 @@ function PauseSounds() {
 			if (!n.soundchn_isstream) {
 				if (ChannelPlaying(n.soundchn)) {PauseChannel(n.soundchn)}
 			} else {
-				if (n.soundchn_isstream=True) {
-					SetStreamPaused_Strict(n.soundchn,True)
+				if (n.soundchn_isstream=true) {
+					SetStreamPaused_Strict(n.soundchn,true)
 				}
 			}
 		}
@@ -8579,8 +8619,8 @@ function PauseSounds() {
 			if (!n.soundchn2_isstream) {
 				if (ChannelPlaying(n.soundchn2)) {PauseChannel(n.soundchn2)}
 			} else {
-				if (n.soundchn2_isstream=True) {
-					SetStreamPaused_Strict(n.soundchn2,True)
+				if (n.soundchn2_isstream=true) {
+					SetStreamPaused_Strict(n.soundchn2,true)
 				}
 			}
 		}
@@ -8607,7 +8647,7 @@ function PauseSounds() {
 	}
 	
 	if (IntercomStreamCHN != 0) {
-		SetStreamPaused_Strict(IntercomStreamCHN,True)
+		SetStreamPaused_Strict(IntercomStreamCHN,true)
 	}
 }
 
@@ -8617,14 +8657,14 @@ function ResumeSounds() {
 			if (!e.soundchn_isstream) {
 				if (ChannelPlaying(e.soundchn)) {ResumeChannel(e.soundchn)}
 			} else {
-				SetStreamPaused_Strict(e.soundchn,False)
+				SetStreamPaused_Strict(e.soundchn,false)
 			}
 		}
 		if (e.soundchn2 != 0) {
 			if (!e.soundchn2_isstream) {
 				if (ChannelPlaying(e.soundchn2)) {ResumeChannel(e.soundchn2)}
 			} else {
-				SetStreamPaused_Strict(e.soundchn2,False)
+				SetStreamPaused_Strict(e.soundchn2,false)
 			}
 		}	
 	}
@@ -8634,8 +8674,8 @@ function ResumeSounds() {
 			if (!n.soundchn_isstream) {
 				if (ChannelPlaying(n.soundchn)) {ResumeChannel(n.soundchn)}
 			} else {
-				if (n.soundchn_isstream=True) {
-					SetStreamPaused_Strict(n.soundchn,False)
+				if (n.soundchn_isstream=true) {
+					SetStreamPaused_Strict(n.soundchn,false)
 				}
 			}
 		}
@@ -8643,8 +8683,8 @@ function ResumeSounds() {
 			if (!n.soundchn2_isstream) {
 				if (ChannelPlaying(n.soundchn2)) {ResumeChannel(n.soundchn2)}
 			} else {
-				if (n.soundchn2_isstream=True) {
-					SetStreamPaused_Strict(n.soundchn2,False)
+				if (n.soundchn2_isstream=true) {
+					SetStreamPaused_Strict(n.soundchn2,false)
 				}
 			}
 		}
@@ -8671,7 +8711,7 @@ function ResumeSounds() {
 	}
 	
 	if (IntercomStreamCHN != 0) {
-		SetStreamPaused_Strict(IntercomStreamCHN,False)
+		SetStreamPaused_Strict(IntercomStreamCHN,false)
 	}
 }
 
@@ -8860,7 +8900,7 @@ function f2s(n: float, count: int): string {
 	return Left(n, Len(Int(n))+count+1)
 }
 
-function AnimateNPC(n: NPCs, start: float, quit: float, speed: float, loop=True) {
+function AnimateNPC(n: NPCs, start: float, quit: float, speed: float, loop=true) {
 	let newTime: float
 	
 	if (speed > 0.0) {
@@ -8900,7 +8940,7 @@ function SetNPCFrame(n: NPCs, frame: float) {
 	n.Frame = frame
 }
 
-function Animate2(entity: int, curr: float, start: int, quit: int, speed: float, loop=True): float {
+function Animate2(entity: int, curr: float, start: int, quit: int, speed: float, loop=true): float {
 	
 	let newTime: float
 	
@@ -9057,11 +9097,11 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 				case "1:1", "fine", "very fine":
 					it2 = Null
 					for (it of Items.each) {
-						if (it!=item && it.collider != 0 && it.Picked == False) {
-							if (Distance(EntityX(it.collider,True), EntityZ(it.collider,True), EntityX(item.collider, True), EntityZ(item.collider, True)) < (180.0 * RoomScale)) {
+						if (it!=item && it.collider != 0 && it.Picked == false) {
+							if (Distance(EntityX(it.collider,true), EntityZ(it.collider,true), EntityX(item.collider, true), EntityZ(item.collider, true)) < (180.0 * RoomScale)) {
 								it2 = it
 								break
-							} else if (Distance(EntityX(it.collider,True), EntityZ(it.collider,True), x,z) < (180.0 * RoomScale)) {
+							} else if (Distance(EntityX(it.collider,true), EntityZ(it.collider,true), x,z) < (180.0 * RoomScale)) {
 								it2 = it
 								break
 							}
@@ -9211,7 +9251,7 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 						case "Level 5 Key Card":
 							let CurrAchvAmount: int = 0
 							for (i of range(MAXACHIEVEMENTS)) {
-								if (Achievements(i)=True) {
+								if (Achievements(i)=true) {
 									CurrAchvAmount=CurrAchvAmount+1
 								}
 							}
@@ -9242,7 +9282,7 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 				case "very fine":
 					CurrAchvAmount = 0
 					for (i of range(MAXACHIEVEMENTS)) {
-						if (Achievements(i)=True) {
+						if (Achievements(i)=true) {
 							CurrAchvAmount=CurrAchvAmount+1
 						}
 					}
@@ -9489,10 +9529,10 @@ function Use914(item: Items, setting: string, x: float, y: float, z: float) {
 					it2 = CreateItem("Pill", "pill", x, y, z)
 					RemoveItem(item)
 				case "fine":
-					let no427Spawn: boolean = False
+					let no427Spawn: boolean = false
 					for (it3 of Items.each) {
 						if (it3.itemtemplate.tempname = "scp427") {
-							no427Spawn = True
+							no427Spawn = true
 							break
 						}
 					}
@@ -9589,10 +9629,10 @@ function Use294() {
 	DrawImage (Panel294, x, y)
 	if (Fullscreen) {DrawImage (CursorIMG, ScaledMouseX(),ScaledMouseY())}
 	
-	temp = True
-	if (PlayerRoom.SoundCHN!=0) {temp = False}
+	temp = true
+	if (PlayerRoom.SoundCHN!=0) {temp = false}
 	
-	AAText (x+907, y+185, Input294, True,True)
+	AAText (x+907, y+185, Input294, true,true)
 	
 	if (temp) {
 		if (MouseHit1) {
@@ -9605,7 +9645,7 @@ function Use294() {
 			
 			strtemp = ""
 			
-			temp = False
+			temp = false
 			
 			switch (ytemp) {
 				case 0:
@@ -9654,7 +9694,7 @@ function Use294() {
 						case 8:
 							strtemp = "L"
 						case 9: //dispense
-							temp = True
+							temp = true
 					}
 				case 3:
 					switch (xtemp) {
@@ -9707,7 +9747,7 @@ function Use294() {
 						PlayerRoom.SoundCHN = PlaySound_Strict (LoadTempSound(strtemp))
 					}
 					
-					if (GetINIInt2("DATA/SCP-294.ini", loc, "explosion")=True) {
+					if (GetINIInt2("DATA/SCP-294.ini", loc, "explosion")=true) {
 						ExplosionTimer = 135
 						DeathMSG = GetINIString2("DATA/SCP-294.ini", loc, "deathmessage")
 					}
@@ -9725,7 +9765,7 @@ function Use294() {
 					//If alpha = 0 Then alpha = 1.0
 					if (glow) {alpha = -alpha}
 					
-					it.items = CreateItem("Cup", "cup", EntityX(PlayerRoom.Objects[1],True),EntityY(PlayerRoom.Objects[1],True),EntityZ(PlayerRoom.Objects[1],True), r,g,b,alpha)
+					it.items = CreateItem("Cup", "cup", EntityX(PlayerRoom.Objects[1],true),EntityY(PlayerRoom.Objects[1],true),EntityZ(PlayerRoom.Objects[1],true), r,g,b,alpha)
 					it.name = "Cup of "+Input294
 					EntityType (it.collider, HIT_ITEM)
 					
@@ -9741,7 +9781,7 @@ function Use294() {
 		
 		if (MouseHit2 || (!Using294)) {
 			HidePointer()
-			Using294 = False
+			Using294 = false
 			Input294 = ""
 			MouseXSpeed()
 			MouseYSpeed()
@@ -9756,7 +9796,7 @@ function Use294() {
 		if (!ChannelPlaying(PlayerRoom.SoundCHN)) {
 			if (Input294 != "OUT OF RANGE") {
 				HidePointer()
-				Using294 = False
+				Using294 = false
 				MouseXSpeed()
 				MouseYSpeed()
 				MouseZSpeed()
@@ -9782,7 +9822,7 @@ function Use427() {
 	let prevI427Timer: float = I_427.Timer
 	
 	if (I_427.Timer < 70*360) {
-		if (I_427.Using=True) {
+		if (I_427.Using=true) {
 			I_427.Timer = I_427.Timer + FPSfactor
 			if (Injuries > 0.0) {
 				Injuries = Max(Injuries - 0.0005 * FPSfactor,0.0)
@@ -9867,7 +9907,7 @@ function Use427() {
 			Kill()
 			DeathMSG = Chr(34)+"Requesting support from MTF Nu-7. We need more firepower to take this thing down."+Chr(34)
 		} else if (I_427.Timer >= 70*390) {
-			Crouch = True
+			Crouch = true
 		}
 	}
 	
@@ -9966,21 +10006,21 @@ function UpdateMTF(): int {
 function UpdateInfect() {
 	let temp: float, i: int, r: Rooms
 	
-	let teleportForInfect: int = True
+	let teleportForInfect: int = true
 	
 	if (PlayerRoom.RoomTemplate.Name = "room860") {
 		for (e of Events.each) {
 			if (e.EventName = "room860") {
 				if (e.EventState = 1.0) {
-					teleportForInfect = False
+					teleportForInfect = false
 				}
 				Exit
 			}
 		}
 	} else if (PlayerRoom.RoomTemplate.Name == "dimension1499" || PlayerRoom.RoomTemplate.Name == "pocketdimension" || PlayerRoom.RoomTemplate.Name == "gatea") {
-		teleportForInfect = False
+		teleportForInfect = false
 	} else if (PlayerRoom.RoomTemplate.Name = "exit1" && EntityY(Collider)>1040.0*RoomScale) {
-		teleportForInfect = False
+		teleportForInfect = false
 	}
 	
 	if (Infect>0) {
@@ -10019,15 +10059,15 @@ function UpdateInfect() {
 				MsgTimer = 70*6
 			} else if (Infect >= 91.5) {
 				BlinkTimer = Max(Min(-10*(Infect-91.5),BlinkTimer),-10)
-				IsZombie = True
-				UnableToMove = True
+				IsZombie = true
+				UnableToMove = true
 				if (Infect >= 92.7 && temp < 92.7) {
 					if (teleportForInfect) {
 						for (r of Rooms.each) {
 							if (r.RoomTemplate.Name="008") {
-								PositionEntity (Collider, EntityX(r.Objects[7],True),EntityY(r.Objects[7],True),EntityZ(r.Objects[7],True),True)
+								PositionEntity (Collider, EntityX(r.Objects[7],true),EntityY(r.Objects[7],true),EntityZ(r.Objects[7],true),true)
 								ResetEntity (Collider)
-								r.NPC[0] = CreateNPC(NPCtypeD, EntityX(r.Objects[6],True),EntityY(r.Objects[6],True)+0.2,EntityZ(r.Objects[6],True))
+								r.NPC[0] = CreateNPC(NPCtypeD, EntityX(r.Objects[6],true),EntityY(r.Objects[6],true)+0.2,EntityZ(r.Objects[6],true))
 								r.NPC[0].Sound = LoadSound_Strict("SFX/SCP/008/KillScientist1.ogg")
 								r.NPC[0].SoundChn = PlaySound_Strict(r.NPC[0].Sound)
 								tex = LoadTexture_Strict("GFX/npcs/scientist2.jpg")
@@ -10035,7 +10075,7 @@ function UpdateInfect() {
 								FreeTexture (tex)
 								r.NPC[0].State=6
 								PlayerRoom = r
-								UnableToMove = False
+								UnableToMove = false
 								break
 							}
 						}
@@ -10061,7 +10101,7 @@ function UpdateInfect() {
 					ForceMove = 0.75
 					Injuries = 2.5
 					Bloodloss = 0
-					UnableToMove = False
+					UnableToMove = false
 					
 					Animate2(PlayerRoom.NPC[0].obj, AnimTime(PlayerRoom.NPC[0].obj), 357, 381, 0.3)
 				} else if (Infect < 98.5) {
@@ -10070,7 +10110,7 @@ function UpdateInfect() {
 					BlurTimer = 950
 					
 					ForceMove = 0.0
-					UnableToMove = True
+					UnableToMove = true
 					PointEntity (Camera, PlayerRoom.NPC[0].Collider)
 					
 					if (temp < 94.7) {
@@ -10091,7 +10131,7 @@ function UpdateInfect() {
 					}
 					
 					if (PlayerRoom.NPC[0].State2=0) {
-						Animate2(PlayerRoom.NPC[0].obj, AnimTime(PlayerRoom.NPC[0].obj), 13, 19, 0.3,False)
+						Animate2(PlayerRoom.NPC[0].obj, AnimTime(PlayerRoom.NPC[0].obj), 13, 19, 0.3,false)
 						if (AnimTime(PlayerRoom.NPC[0].obj) >= 19) {PlayerRoom.NPC[0].State2=1}
 					} else {
 						Animate2(PlayerRoom.NPC[0].obj, AnimTime(PlayerRoom.NPC[0].obj), 19, 13, -0.3)
@@ -10109,8 +10149,8 @@ function UpdateInfect() {
 						}
 					}
 					
-					PositionEntity(Head, EntityX(PlayerRoom.NPC[0].Collider,True), EntityY(PlayerRoom.NPC[0].Collider,True)+0.65,EntityZ(PlayerRoom.NPC[0].Collider,True),True)
-					RotateEntity(Head, (1.0+Sin(MilliSecs2()/5.0))*15, PlayerRoom.angle-180, 0, True)
+					PositionEntity(Head, EntityX(PlayerRoom.NPC[0].Collider,true), EntityY(PlayerRoom.NPC[0].Collider,true)+0.65,EntityZ(PlayerRoom.NPC[0].Collider,true),true)
+					RotateEntity(Head, (1.0+Sin(MilliSecs2()/5.0))*15, PlayerRoom.angle-180, 0, true)
 					MoveEntity(Head, 0,0,-0.4)
 					TurnEntity(Head, 80+(Sin(MilliSecs2()/5.0))*30,(Sin(MilliSecs2()/5.0))*40,0)
 				}
@@ -10167,7 +10207,7 @@ function CurveValue(number: float, old: float, smooth: float): float {
 	}
 }
 
-function CurveAngle(val: float, old: float, smooth: float): float {
+export function CurveAngle(val: float, old: float, smooth: float): float {
 	if (FPSfactor = 0) {return old}
 	
    let diff: float = WrapAngle(val) - WrapAngle(old)
@@ -10176,7 +10216,7 @@ function CurveAngle(val: float, old: float, smooth: float): float {
    return WrapAngle(old + diff * (1.0 / smooth * FPSfactor))
 }
 
-function WrapAngle(angle: float): float {
+export function WrapAngle(angle: float): float {
 	if (angle = INFINITY) {return 0.0}
 	while (angle < 0) {
 		angle = angle + 360
@@ -10187,26 +10227,17 @@ function WrapAngle(angle: float): float {
 	return angle
 }
 
-function GetAngle(x1: float, y1: float, x2: float, y2: float): float {
+export function GetAngle(x1: float, y1: float, x2: float, y2: float): float {
 	return ATan2( y2 - y1, x2 - x1 )
 }
 
-function CircleToLineSegIsect(cx: float, cy: float, r: float, l1x: float, l1y: float, l2x: float, l2y: float): int {
-	
-	//Palauttaa:
-	//  True (1) kun:
-	//      Ympyrä [keskipiste = (cx, cy): säde = r]
-	//      leikkaa janan, joka kulkee pisteiden (l1x, l1y) & (l2x, l2y) kaitta
-	//  False (0) muulloin
-	
-	//Ympyrän keskipisteen ja (ainakin toisen) janan päätepisteen etäisyys < r
-	//-> leikkaus
+export function CircleToLineSegIsect(cx: float, cy: float, r: float, l1x: float, l1y: float, l2x: float, l2y: float): int {
 	if (Distance(cx, cy, l1x, l1y) <= r) {
-		return True
+		return true
 	}
 	
 	if (Distance(cx, cy, l2x, l2y) <= r) {
-		return True
+		return true
 	}	
 	
 	//Vektorit (janan vektori ja vektorit janan päätepisteistä ympyrän keskipisteeseen)
@@ -10223,10 +10254,8 @@ function CircleToLineSegIsect(cx: float, cy: float, r: float, l1x: float, l1y: f
 	let dp1: float = SegVecX * PntVec1X + SegVecY * PntVec1Y
 	let dp2: float = -SegVecX * PntVec2X - SegVecY * PntVec2Y
 	
-	if (dp1 == 0 || dp2 == 0) {
-	} else if ((dp1 > 0 && dp2 > 0) || (dp1 < 0 && dp2 < 0)) {
-	} else {
-		return False
+	if (!(dp1 == 0 || dp2 == 0 || (dp1 > 0 && dp2 > 0) || (dp1 < 0 && dp2 < 0))) {
+		return false
 	}
 	
 	//Janan päätepisteiden kautta kulkevan suoran //yhtälö// (ax + by + c = 0)
@@ -10239,14 +10268,14 @@ function CircleToLineSegIsect(cx: float, cy: float, r: float, l1x: float, l1y: f
 	
 	//Ympyrä on liian kaukana
 	//-> ei leikkausta
-	if (d > r) {return False}
+	if (d > r) {return false}
 	
 	
 	//Jos päästään tänne saakka, ympyrä ja jana leikkaavat (tai ovat sisäkkäin)
-	return True
+	return true
 }
 
-function Min(a: float, b: float): float {
+export function Min(a: float, b: float): float {
 	if (a < b) {
 		return a
 	} else {
@@ -10254,7 +10283,7 @@ function Min(a: float, b: float): float {
 	}
 }
 
-function Max(a: float, b: float): float {
+export function Max(a: float, b: float): float {
 	if (a > b) {
 		return a
 	} else {
@@ -10262,21 +10291,21 @@ function Max(a: float, b: float): float {
 	}
 }
 
-function point_direction(x1: float,z1: float,x2: float,z2: float): float {
+export function point_direction(x1: float,z1: float,x2: float,z2: float): float {
 	let dx: float, dz: float
 	dx = x1 - x2
 	dz = z1 - z2
 	return ATan2(dz,dx)
 }
 
-function point_distance(x1: float,z1: float,x2: float,z2: float): float {
+export function point_distance(x1: float,z1: float,x2: float,z2: float): float {
 	let dx: float,dy: float
 	dx = x1 - x2
 	dy = z1 - z2
 	return Sqr((dx*dx)+(dy*dy)) 
 }
 
-function angleDist(a0: float,a1: float): float {
+export function angleDist(a0: float,a1: float): float {
 	let b: float = a0-a1
 	let bb: float
 	if (b<-180.0) {
@@ -10289,11 +10318,11 @@ function angleDist(a0: float,a1: float): float {
 	return bb
 }
 
-function Inverse(number: float): float {
+export function Inverse(number: float): float {
 	return Float(1.0-number)
 }
 
-function Rnd_Array(numb1: float,numb2: float,Array1: float,Array2: float): float {
+export function Rnd_Array(numb1: float,numb2: float,Array1: float,Array2: float): float {
 	let whatarray: int = Rand(1,2)
 	
 	if (whatarray = 1) {
@@ -10305,7 +10334,7 @@ function Rnd_Array(numb1: float,numb2: float,Array1: float,Array2: float): float
 
 //--------------------------------------- decals -------------------------------------------------------
 
-class Decals {
+export class Decals {
 	obj: int
 	SizeChange: float
 	Size: float
@@ -10327,7 +10356,7 @@ class Decals {
 	roll: float
 }
 
-function CreateDecal(id: int, x: float, y: float, z: float, pitch: float, yaw: float, roll: float): Decals {
+export function CreateDecal(id: int, x: float, y: float, z: float, pitch: float, yaw: float, roll: float): Decals {
 	let d: Decals = new Decals()
 	
 	d.x = x
@@ -10357,7 +10386,7 @@ function CreateDecal(id: int, x: float, y: float, z: float, pitch: float, yaw: f
 	return d
 }
 
-function UpdateDecals() {
+export function UpdateDecals() {
 	let d: Decals
 	for (d of Decals.each) {
 		if (d.SizeChange != 0) {
@@ -10404,16 +10433,16 @@ function UpdateDecals() {
 
 //--------------------------------------- INI-functions -------------------------------------------------------
 
-class INIFile {
+export class INIFile {
 	name: string
 	bank: int
 	bankOffset: int = 0
 	size: int
 }
 
-function ReadINILine$(file: INIFile) {
+export function ReadINILine(file: INIFile) : string {
 	let rdbyte: int
-	let firstbyte: int = True
+	let firstbyte: int = true
 	let offset: int = file.bankOffset
 	let bank: int = file.bank
 	let retStr: string = ""
@@ -10421,7 +10450,7 @@ function ReadINILine$(file: INIFile) {
 	while (((firstbyte) || ((rdbyte!=13) && (rdbyte!=10))) && (offset<file.size)) {
 		rdbyte = PeekByte(bank,offset)
 		if ((rdbyte!=13) && (rdbyte!=10)) {
-			firstbyte = False
+			firstbyte = false
 			retStr=retStr+Chr(rdbyte)
 		}
 		offset=offset+1
@@ -10430,7 +10459,7 @@ function ReadINILine$(file: INIFile) {
 	return retStr
 }
 
-function UpdateINIFile$(filename: string) {
+export function UpdateINIFile(filename: string) : string {
 	let file: INIFile = Null
 	for (k of INIFile.each) {
 		if (k.name = Lower(filename)) {
@@ -10455,17 +10484,17 @@ function UpdateINIFile$(filename: string) {
 	CloseFile(f)
 }
 
-function GetINIString(file: string, section: string, parameter: string, defaultvalue: string=""): string {
-	let TemporaryString$ = ""
+export function GetINIString(file: string, section: string, parameter: string, defaultvalue: string=""): string {
+	let TemporaryString: string = ""
 	
-	let lfile: INIFile = Null
+	let lfile: INIFile
 	for (k of INIFile.each) {
 		if (k.name = Lower(file)) {
 			lfile = k
 		}
 	}
 	
-	if (lfile = Null) {
+	if (lfile == Null) {
 		DebugLog ("CREATE BANK FOR "+file)
 		lfile = new INIFile()
 		lfile.name = Lower(file)
@@ -10500,7 +10529,7 @@ function GetINIString(file: string, section: string, parameter: string, defaultv
 	return defaultvalue
 }
 
-function GetINIInt(file: string, section: string, parameter: string, defaultvalue: int = 0): int {
+export function GetINIInt(file: string, section: string, parameter: string, defaultvalue: int = 0): int {
 	let txt: string = GetINIString(file$, section$, parameter$, defaultvalue)
 	if (Lower(txt) = "true") {
 		return 1
@@ -10511,12 +10540,12 @@ function GetINIInt(file: string, section: string, parameter: string, defaultvalu
 	}
 }
 
-function GetINIFloat(file: string, section: string, parameter: string, defaultvalue: float = 0.0): float {
+export function GetINIFloat(file: string, section: string, parameter: string, defaultvalue: float = 0.0): float {
 	return Float(GetINIString(file, section, parameter, defaultvalue))
 }
 
 
-function GetINIString2(file: string, start: int, parameter: string, defaultvalue: string=""): string {
+export function GetINIString2(file: string, start: int, parameter: string, defaultvalue: string=""): string {
 	let TemporaryString: string = ""
 	let f: int = ReadFile(file)
 	
@@ -10542,7 +10571,7 @@ function GetINIString2(file: string, start: int, parameter: string, defaultvalue
 	return defaultvalue
 }
 
-function GetINIInt2(file: string, start: int, parameter: string, defaultvalue: string=""): int {
+export function GetINIInt2(file: string, start: int, parameter: string, defaultvalue: string=""): int {
 	let txt: string = GetINIString2(file, start, parameter, defaultvalue)
 	if (Lower(txt) = "true") {
 		return 1
@@ -10554,7 +10583,7 @@ function GetINIInt2(file: string, start: int, parameter: string, defaultvalue: s
 }
 
 
-function GetINISectionLocation(file: string, section: string): int {
+export function GetINISectionLocation(file: string, section: string): int {
 	let Temp: int
 	let f: int = ReadFile(file)
 	
@@ -10579,9 +10608,9 @@ function GetINISectionLocation(file: string, section: string): int {
 	CloseFile (f)
 }
 
-function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_sValue: string): int {
+export function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_sValue: string): int {
 	
-	// Returns: True (Success) Or False (Failed)
+	// Returns: true (Success) Or false (Failed)
 	
 	INI_sSection = "[" + Trim$(INI_sSection) + "]"
 	let INI_sUpperSection: string = Upper(INI_sSection)
@@ -10595,12 +10624,12 @@ function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_s
 	
 		// (Re)Create the INI file updating/adding the SECTION, KEY && VALUE
 	
-	let INI_bWrittenKey: int = False
-	let INI_bSectionFound: int = False
+	let INI_bWrittenKey: int = false
+	let INI_bSectionFound: int = false
 	let INI_sCurrentSection$ = ""
 	
 	let INI_lFileHandle: int = WriteFile(INI_sFilename)
-	if (INI_lFileHandle = 0) {return False} // Create file failed!
+	if (INI_lFileHandle = 0) {return false} // Create file failed!
 	
 	let INI_lOldPos: int = 1
 	let INI_lPos: int = Instr(INI_sContents, Chr$(0))
@@ -10615,11 +10644,11 @@ function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_s
 				
 					// Process SECTION
 				
-				if ((INI_sCurrentSection = INI_sUpperSection) && (INI_bWrittenKey = False)) {
+				if ((INI_sCurrentSection = INI_sUpperSection) && (INI_bWrittenKey = false)) {
 					INI_bWrittenKey = INI_CreateKey(INI_lFileHandle, INI_sKey, INI_sValue)
 				}
 				INI_sCurrentSection = Upper$(INI_CreateSection(INI_lFileHandle, INI_sTemp))
-				if (INI_sCurrentSection = INI_sUpperSection) {INI_bSectionFound = True}
+				if (INI_sCurrentSection = INI_sUpperSection) {INI_bSectionFound = true}
 				
 			} else {
 				if (Left(INI_sTemp, 1) = ":") {
@@ -10630,7 +10659,7 @@ function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_s
 					if (lEqualsPos != 0) {
 						if ((INI_sCurrentSection = INI_sUpperSection) && (Upper$(Trim$(Left$(INI_sTemp, (lEqualsPos - 1)))) = Upper$(INI_sKey))) {
 							if (INI_sValue != "") {INI_CreateKey (INI_lFileHandle, INI_sKey, INI_sValue)}
-							INI_bWrittenKey = True
+							INI_bWrittenKey = true
 						} else {
 							WriteLine (INI_lFileHandle, INI_sTemp)
 						}
@@ -10650,18 +10679,18 @@ function PutINIValue(file: string, INI_sSection: string, INI_sKey: string, INI_s
 	
 		// KEY wasn//t found in the INI file - Append a New SECTION If required && create our KEY=VALUE Line
 	
-	if (INI_bWrittenKey = False) {
-		if (INI_bSectionFound = False) {INI_CreateSection (INI_lFileHandle, INI_sSection)}
+	if (INI_bWrittenKey = false) {
+		if (INI_bSectionFound = false) {INI_CreateSection (INI_lFileHandle, INI_sSection)}
 		INI_CreateKey (INI_lFileHandle, INI_sKey, INI_sValue)
 	}
 	
 	CloseFile (INI_lFileHandle)
 	
-	return True // Success
+	return true // Success
 	
 }
 
-function INI_FileToString(INI_sFilename: string): string {
+export function INI_FileToString(INI_sFilename: string): string {
 	
 	let INI_sString: string = ""
 	let INI_lFileHandle: int = ReadFile(INI_sFilename)
@@ -10675,7 +10704,7 @@ function INI_FileToString(INI_sFilename: string): string {
 	
 }
 
-function INI_CreateSection(INI_lFileHandle: int, INI_sNewSection: string): string {
+export function INI_CreateSection(INI_lFileHandle: int, INI_sNewSection: string): string {
 	
 	if (FilePos(INI_lFileHandle) != 0) {WriteLine (INI_lFileHandle, "")} // Blank Line between sections
 	WriteLine (INI_lFileHandle, INI_sNewSection)
@@ -10683,13 +10712,13 @@ function INI_CreateSection(INI_lFileHandle: int, INI_sNewSection: string): strin
 	
 }
 
-function INI_CreateKey(INI_lFileHandle: int, INI_sKey: string, INI_sValue: string): int {
+export function INI_CreateKey(INI_lFileHandle: int, INI_sKey: string, INI_sValue: string): int {
 	WriteLine (INI_lFileHandle, INI_sKey + " = " + INI_sValue)
-	return True
+	return true
 }
 
 //Save options to .ini.
-function SaveOptionsINI() {
+export function SaveOptionsINI() {
 	
 	PutINIValue(OptionFile, "options", "mouse sensitivity", MouseSens)
 	PutINIValue(OptionFile, "options", "invert mouse y", InvertMouse)
@@ -10734,7 +10763,7 @@ function SaveOptionsINI() {
 
 // Create a collision box For a mesh entity taking into account entity scale
 // (will not work in non-uniform scaled space)
-function MakeCollBox(mesh: int) {
+export function MakeCollBox(mesh: int) {
 	let sx: float = EntityScaleX(mesh, 1)
 	let sy: float = Max(EntityScaleY(mesh, 1), 0.001)
 	let sz: float = EntityScaleZ(mesh, 1)
@@ -10743,7 +10772,7 @@ function MakeCollBox(mesh: int) {
 }
 
 // Find mesh extents
-function GetMeshExtents(Mesh: int) {
+export function GetMeshExtents(Mesh: int) {
 	let s: int
 	let surf: int
 	let surfs: int
@@ -10791,31 +10820,28 @@ function GetMeshExtents(Mesh: int) {
 	
 }
 
-function EntityScaleX(entity: int, globl: int = False): float {
+export function EntityScaleX(entity: int, globl: int = false): float {
 	if (globl) {TFormVector (1, 0, 0, entity, 0)} else {TFormVector (1, 0, 0, entity, GetParent(entity))}
 	return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
 } 
 
-function EntityScaleY(entity: int, globl: int = False): float {
+export function EntityScaleY(entity: int, globl: int = false): float {
 	if (globl) {TFormVector( 0, 1, 0, entity, 0)} else {TFormVector (0, 1, 0, entity, GetParent(entity))}
 	return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
 } 
 
-function EntityScaleZ(entity: int, globl: int = False): float {
+export function EntityScaleZ(entity: int, globl: int = false): float {
 	if (globl) {TFormVector (0, 0, 1, entity, 0)} else {TFormVector (0, 0, 1, entity, GetParent(entity))}
 	return Sqr(TFormedX() * TFormedX() + TFormedY() * TFormedY() + TFormedZ() * TFormedZ())
 } 
 
-function Graphics3DExt(width: int, height: int, depth: int= 32,mode: int= 2): int {
-	//If FE_InitExtFlag = 1 Then DeInitExt() //prevent FastExt from breaking itself
+export function Graphics3DExt(width: int, height: int, depth: int= 32,mode: int= 2): int {
 	Graphics3D (width,height,depth,mode)
 	InitFastResize()
-	//InitExt()
 	AntiAlias (GetINIInt(OptionFile,"options","antialias"))
-	//TextureAnisotropy% (GetINIInt(OptionFile,"options","anisotropy"),-1)
 }
 
-function ResizeImage2(image: int,width: int,height: int) {
+export function ResizeImage2(image: int,width: int,height: int) {
     img = CreateImage(width,height)
 	
 	oldWidth = ImageWidth(image)
@@ -10831,7 +10857,7 @@ function ResizeImage2(image: int,width: int,height: int) {
     return img
 }
 
-function RenderWorld2() {
+export function RenderWorld2() {
 	CameraProjMode(ark_blur_cam,0)
 	CameraProjMode(Camera,1)
 	
@@ -10845,7 +10871,7 @@ function RenderWorld2() {
 		}
 	}
 	
-	IsNVGBlinking = False
+	IsNVGBlinking = false
 	HideEntity (NVBlink)
 	
 	CameraViewport (Camera,0,0,GraphicWidth,GraphicHeight)
@@ -10881,7 +10907,7 @@ function RenderWorld2() {
 	CurrTrisAmount = TrisRendered()
 
 	if (hasBattery == 0 && WearingNightVision! == 3) {
-		IsNVGBlinking = True
+		IsNVGBlinking = true
 		ShowEntity (NVBlink)
 	}
 	
@@ -10891,11 +10917,11 @@ function RenderWorld2() {
 			
 			if (NVTimer<=0.0) {
 				for (np of NPCs.each) {
-					np.NVX = EntityX(np.Collider,True)
-					np.NVY = EntityY(np.Collider,True)
-					np.NVZ = EntityZ(np.Collider,True)
+					np.NVX = EntityX(np.Collider,true)
+					np.NVY = EntityY(np.Collider,true)
+					np.NVZ = EntityZ(np.Collider,true)
 				}
-				IsNVGBlinking = True
+				IsNVGBlinking = true
 				ShowEntity (NVBlink)
 				if (NVTimer<=-10) {
 					NVTimer = 600.0
@@ -10909,10 +10935,10 @@ function RenderWorld2() {
 			let plusY: int = 0
 			if (hasBattery=1) {plusY = 40}
 			
-			AAText (GraphicWidth/2,(20+plusY)*MenuScale,"REFRESHING DATA IN",True,False)
+			AAText (GraphicWidth/2,(20+plusY)*MenuScale,"REFRESHING DATA IN",true,false)
 			
-			AAText (GraphicWidth/2,(60+plusY)*MenuScale,Max(f2s(NVTimer/60.0,1),0.0),True,False)
-			AAText (GraphicWidth/2,(100+plusY)*MenuScale,"SECONDS",True,False)
+			AAText (GraphicWidth/2,(60+plusY)*MenuScale,Max(f2s(NVTimer/60.0,1),0.0),true,false)
+			AAText (GraphicWidth/2,(100+plusY)*MenuScale,"SECONDS",true,false)
 			
 			temp = CreatePivot()
 			temp2 = CreatePivot()
@@ -10946,8 +10972,8 @@ function RenderWorld2() {
 						}
 						
 						if (!IsNVGBlinking) {
-							AAText(GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2),np.NVName,True,True)
-							AAText(GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * MenuScale,f2s(dist,1)+" m",True,True)
+							AAText(GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2),np.NVName,true,true)
+							AAText(GraphicWidth / 2 + xvalue * (GraphicWidth / 2),GraphicHeight / 2 - yvalue * (GraphicHeight / 2) + 30.0 * MenuScale,f2s(dist,1)+" m",true,true)
 						}
 					}
 				}
@@ -10958,11 +10984,11 @@ function RenderWorld2() {
 			
 			Color(0,0,55)
 			for (k of range(11)) {
-				Rect (45,GraphicHeight*0.5-(k*20),54,10,True)
+				Rect (45,GraphicHeight*0.5-(k*20),54,10,true)
 			}
 			Color(0,0,255)
 			for (l of range(Floor((power%+50)*0.01) + 1)) {
-				Rect (45,GraphicHeight*0.5-(l*20),54,10,True)
+				Rect (45,GraphicHeight*0.5-(l*20),54,10,true)
 			}
 			DrawImage (NVGImages,40,GraphicHeight*0.5+30,1)
 			
@@ -10970,11 +10996,11 @@ function RenderWorld2() {
 		} else if (WearingNightVision=1 && hasBattery!=0) {
 			Color(0,55,0)
 			for (k of range(11)) {
-				Rect(45,GraphicHeight*0.5-(k*20),54,10,True)
+				Rect(45,GraphicHeight*0.5-(k*20),54,10,true)
 			}
 			Color(0,255,0)
 			for (l of range(Floor((power%+50)*0.01) + 1)) {
-				Rect(45,GraphicHeight*0.5-(l*20),54,10,True)
+				Rect(45,GraphicHeight*0.5-(l*20),54,10,true)
 			}
 			DrawImage (NVGImages,40,GraphicHeight*0.5+30,0)
 		}
@@ -10991,14 +11017,14 @@ function RenderWorld2() {
 			Color (255,0,0)
 			AASetFont (Font3)
 			
-			AAText (GraphicWidth/2,20*MenuScale,"WARNING: LOW BATTERY",True,False)
+			AAText (GraphicWidth/2,20*MenuScale,"WARNING: LOW BATTERY",true,false)
 			Color (255,255,255)
 		}
 	}
 }
 
 
-function ScaleRender(x: float,y: float,hscale: float=1.0,vscale: float=1.0) {
+export function ScaleRender(x: float,y: float,hscale: float=1.0,vscale: float=1.0) {
 	if (Camera!=0) {HideEntity (Camera)}
 	WireFrame (0)
 	ShowEntity (fresize_image)
@@ -11012,7 +11038,7 @@ function ScaleRender(x: float,y: float,hscale: float=1.0,vscale: float=1.0) {
 	if (Camera!=0) {ShowEntity (Camera)}
 }
 
-function InitFastResize() {
+export function InitFastResize() {
     //Create Camera
 	let cam: int = CreateCamera()
 	CameraProjMode (cam, 2)
@@ -11059,8 +11085,11 @@ function InitFastResize() {
 
 //--------------------------------------- Some new 1.3 -functions -------------------------------------------------------
 
-function UpdateLeave1499() {
-	let r: Rooms, it: Items,r2: Rooms,i: int
+export function UpdateLeave1499() {
+	let r: Rooms
+	let it: Items
+	let r2: Rooms
+	let i: int
 	let r1499: Rooms
 	
 	if ((!Wearing1499) && PlayerRoom.RoomTemplate.Name$ == "dimension1499") {
@@ -11079,7 +11108,7 @@ function UpdateLeave1499() {
 					if (EntityY(Collider)<-4600*RoomScale) {
 						for (i of range(3)) {
 							PlayerRoom.NPC[i].State = 2
-							PositionEntity(PlayerRoom.NPC[i].Collider, EntityX(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],True),EntityY(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],True)+0.2,EntityZ(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],True))
+							PositionEntity(PlayerRoom.NPC[i].Collider, EntityX(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],true),EntityY(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],true)+0.2,EntityZ(PlayerRoom.Objects[PlayerRoom.NPC[i].State2],true))
 							ResetEntity (PlayerRoom.NPC[i].Collider)
 							PlayerRoom.NPC[i].State2 = PlayerRoom.NPC[i].State2 + 1
 							if (PlayerRoom.NPC[i].State2 > PlayerRoom.NPC[i].PrevState) {
@@ -11108,7 +11137,7 @@ function UpdateLeave1499() {
 					}
 				}
 				r1499 = Null
-				ShouldEntitiesFall = False
+				ShouldEntitiesFall = false
 				PlaySound_Strict (LoadTempSound("SFX/SCP/1499/Exit.ogg"))
 				NTF_1499PrevX = 0.0
 				NTF_1499PrevY = 0.0
@@ -11121,13 +11150,13 @@ function UpdateLeave1499() {
 	
 }
 
-function CheckForPlayerInFacility() {
-	//False (=0): NPC is not in facility (mostly meant for "dimension1499")
-	//True (=1): NPC is in facility
+export function CheckForPlayerInFacility() {
+	//false (=0): NPC is not in facility (mostly meant for "dimension1499")
+	//true (=1): NPC is in facility
 	//2: NPC is in tunnels (maintenance tunnels/049 tunnels/939 storage room, etc...)
 	
 	if (EntityY(Collider)>100.0) {
-		return False
+		return false
 	}
 	if (EntityY(Collider)< -10.0) {
 		return 2
@@ -11136,32 +11165,32 @@ function CheckForPlayerInFacility() {
 		return 2
 	}
 	
-	return True
+	return true
 }
 
-function IsItemGoodFor1162(itt: ItemTemplates) {
+export function IsItemGoodFor1162(itt: ItemTemplates) {
 	let IN: string = itt.tempname
 	
 	switch (itt.tempname) {
 		case "key1", "key2", "key3":
-			return True
+			return true
 		case "misc", "420", "cigarette":
-			return True
+			return true
 		case "vest", "finevest","gasmask":
-			return True
+			return true
 		case "radio","18vradio":
-			return True
+			return true
 		case "clipboard","eyedrops","nvgoggles":
-			return True
+			return true
 		case "drawing":
 			if (itt.img!=0) {FreeImage (itt.img)}
 			itt.img = LoadImage_Strict("GFX/items/1048/1048_"+Rand(1,20)+".jpg") //Gives a random drawing.
-			return True
+			return true
 		default:
 			if (itt.tempname != "paper") {
-				return False
+				return false
 			} else if (Instr(itt.name, "Leaflet")) {
-				return False
+				return false
 			} else {
 				//if the item is a paper, only allow spawning it if the name contains the word "note" or "log"
 				//(because those are items created recently, which D-9341 has most likely never seen)
@@ -11170,7 +11199,7 @@ function IsItemGoodFor1162(itt: ItemTemplates) {
 	}
 }
 
-function ControlSoundVolume() {
+export function ControlSoundVolume() {
 	let snd: Sound,i
 	
 	for (snd of Sound.each) {
@@ -11181,7 +11210,7 @@ function ControlSoundVolume() {
 	
 }
 
-function UpdateDeafPlayer() {
+export function UpdateDeafPlayer() {
 	
 	if (DeafTimer > 0) {
 		DeafTimer = DeafTimer-FPSfactor
@@ -11194,13 +11223,13 @@ function UpdateDeafPlayer() {
 		DeafTimer = 0
 		SFXVolume = PrevSFXVolume
 		if (DeafPlayer) {ControlSoundVolume()}
-		DeafPlayer = False
+		DeafPlayer = false
 		//EndIf
 	}
 	
 }
 
-function CheckTriggers(): string {
+export function CheckTriggers(): string {
 	let i: int,sx: float,sy: float,sz: float
 	let inside: int = -1
 	
@@ -11235,15 +11264,15 @@ function CheckTriggers(): string {
 	
 }
 
-function ScaledMouseX(): int {
+export function ScaledMouseX(): int {
 	return Float(MouseX()-(RealGraphicWidth*0.5*(1.0-AspectRatioRatio)))*Float(GraphicWidth)/Float(RealGraphicWidth*AspectRatioRatio)
 }
 
-function ScaledMouseY(): int {
+export function ScaledMouseY(): int {
 	return Float(MouseY())*Float(GraphicHeight)/Float(RealGraphicHeight)
 }
 
-function CatchErrors(location: string) {
+export function CatchErrors(location: string) {
 	let errStr: string = ErrorLog()
 	let errF: int
 	if (Len(errStr)>0) {
@@ -11262,12 +11291,12 @@ function CatchErrors(location: string) {
 			WriteLine(errF,"")
 			WriteLine(errF,"Error(s):")
 		} else {
-			let canwriteError: int = True
+			let canwriteError: int = true
 			errF = OpenFile(ErrorFile)
 			while (!Eof(errF)) {
 				let l: string = ReadLine(errF)
 				if (Left(l,Len(location))=location) {
-					canwriteError = False
+					canwriteError = false
 					break
 				}
 			}
@@ -11289,7 +11318,7 @@ function CatchErrors(location: string) {
 	}
 }
 
-function Create3DIcon(width: int,height: int,modelpath: string,modelX: float=0,modelY: float=0,modelZ: float=0,modelPitch: float=0,modelYaw: float=0,modelRoll: float=0,modelscaleX: float=1,modelscaleY: float=1,modelscaleZ: float=1,withfog: boolean = False) {
+export function Create3DIcon(width: int,height: int,modelpath: string,modelX: float=0,modelY: float=0,modelZ: float=0,modelPitch: float=0,modelYaw: float=0,modelRoll: float=0,modelscaleX: float=1,modelscaleY: float=1,modelscaleZ: float=1,withfog: boolean = false) {
 	let img: int = CreateImage(width,height)
 	let cam: int = CreateCamera()
 	let model: int
@@ -11319,7 +11348,7 @@ function Create3DIcon(width: int,height: int,modelpath: string,modelX: float=0,m
 	return img
 }
 
-function PlayAnnouncement(file: string) { //This function streams the announcement currently playing
+export function PlayAnnouncement(file: string) { //This function streams the announcement currently playing
 	
 	if (IntercomStreamCHN != 0) {
 		StopStream_Strict(IntercomStreamCHN)
@@ -11330,7 +11359,7 @@ function PlayAnnouncement(file: string) { //This function streams the announceme
 	
 }
 
-function UpdateStreamSounds() {
+export function UpdateStreamSounds() {
 	let e: Events
 	
 	if (FPSfactor > 0) {
@@ -11376,7 +11405,7 @@ function UpdateStreamSounds() {
 	
 }
 
-function TeleportEntity(entity: int,x: float,y: float,z: float,customradius: float=0.3,isglobal: int=False,pickrange: float=2.0,dir: int=0) {
+export function TeleportEntity(entity: int,x: float,y: float,z: float,customradius: float=0.3,isglobal: int=false,pickrange: float=2.0,dir: int=0) {
 	let pvt,pick
 	//dir = 0 - towards the floor (default)
 	//dir = 1 - towrads the ceiling (mostly for PD decal after leaving dimension)
@@ -11406,7 +11435,7 @@ function TeleportEntity(entity: int,x: float,y: float,z: float,customradius: flo
 	
 }
 
-function PlayStartupVideos() {
+export function PlayStartupVideos() {
 	
 	if (GetINIInt("options.ini","options","play startup video")=0) {return}
 	
@@ -11436,7 +11465,7 @@ function PlayStartupVideos() {
 	let movieh = BlitzMovie_GetHeight()
 	BlitzMovie_Close()
 	let image = CreateImage(moview, movieh)
-	let SplashScreenVideo = BlitzMovie_OpenDecodeToImage(moviefile$+".avi", image, False)
+	let SplashScreenVideo = BlitzMovie_OpenDecodeToImage(moviefile$+".avi", image, false)
 	SplashScreenVideo = BlitzMovie_Play()
 	let SplashScreenAudio = StreamSound_Strict(moviefile$+".ogg",SFXVolume,0)
 	do {
@@ -11458,7 +11487,7 @@ function PlayStartupVideos() {
 	movieh = BlitzMovie_GetHeight()
 	BlitzMovie_Close()
 	image = CreateImage(moview, movieh)
-	SplashScreenVideo = BlitzMovie_OpenDecodeToImage(moviefile$+".avi", image, False)
+	SplashScreenVideo = BlitzMovie_OpenDecodeToImage(moviefile$+".avi", image, false)
 	SplashScreenVideo = BlitzMovie_Play()
 	SplashScreenAudio = StreamSound_Strict(moviefile$+".ogg",SFXVolume,0)
 	do {
@@ -11479,7 +11508,7 @@ function PlayStartupVideos() {
 	
 }
 
-function ProjectImage(img, w: float, h: float, Quad: int, Texture: int) {
+export function ProjectImage(img, w: float, h: float, Quad: int, Texture: int) {
 	
 	let img_w: float = ImageWidth(img)
 	let img_h: float = ImageHeight(img)
@@ -11504,7 +11533,7 @@ function ProjectImage(img, w: float, h: float, Quad: int, Texture: int) {
 	
 }
 
-function CreateQuad() {
+export function CreateQuad() {
 	
 	mesh = CreateMesh()
 	surf = CreateSurface(mesh)
@@ -11519,23 +11548,23 @@ function CreateQuad() {
 	
 }
 
-function CanUseItem(canUseWithHazmat: int, canUseWithGasMask: int, canUseWithEyewear: int) {
-	if (canUseWithHazmat = False && WearingHazmat) {
+export function CanUseItem(canUseWithHazmat: int, canUseWithGasMask: int, canUseWithEyewear: int) {
+	if (canUseWithHazmat = false && WearingHazmat) {
 		Msg = "You can't use that item while wearing a hazmat suit."
 		MsgTimer = 70*5
-		return False
-	} else if (canUseWithGasMask = False && (WearingGasMask || Wearing1499)) {
+		return false
+	} else if (canUseWithGasMask = false && (WearingGasMask || Wearing1499)) {
 		Msg = "You can't use that item while wearing a gas mask."
 		MsgTimer = 70*5
-		return False
-	} else if (canUseWithEyewear = False && (WearingNightVision)) {
+		return false
+	} else if (canUseWithEyewear = false && (WearingNightVision)) {
 		Msg = "You can't use that item while wearing headgear."
 	}
 	
-	return True
+	return true
 }
 
-function ResetInput() {
+export function ResetInput() {
 	
 	FlushKeys()
 	FlushMouse()
@@ -11551,7 +11580,7 @@ function ResetInput() {
 	
 }
 
-function Update096ElevatorEvent(e: Events,EventState: float,d: Doors,elevatorobj: int): float {
+export function Update096ElevatorEvent(e: Events,EventState: float,d: Doors,elevatorobj: int): float {
 	let prevEventState: float = EventState
 	
 	if (EventState < 0) {
@@ -11559,11 +11588,11 @@ function Update096ElevatorEvent(e: Events,EventState: float,d: Doors,elevatorobj
 		prevEventState = 0
 	}
 	
-	if (d.openstate == 0 && d.open == False) {
-		if (Abs(EntityX(Collider)-EntityX(elevatorobj,True))<=280.0*RoomScale+(0.015*FPSfactor)) {
-			if (Abs(EntityZ(Collider)-EntityZ(elevatorobj,True))<=280.0*RoomScale+(0.015*FPSfactor)) {
-				if (Abs(EntityY(Collider)-EntityY(elevatorobj,True))<=280.0*RoomScale+(0.015*FPSfactor)) {
-					d.locked = True
+	if (d.openstate == 0 && d.open == false) {
+		if (Abs(EntityX(Collider)-EntityX(elevatorobj,true))<=280.0*RoomScale+(0.015*FPSfactor)) {
+			if (Abs(EntityZ(Collider)-EntityZ(elevatorobj,true))<=280.0*RoomScale+(0.015*FPSfactor)) {
+				if (Abs(EntityY(Collider)-EntityY(elevatorobj,true))<=280.0*RoomScale+(0.015*FPSfactor)) {
+					d.locked = true
 					if (EventState = 0) {
 						TeleportEntity(Curr096.Collider,EntityX(d.frameobj),EntityY(d.frameobj)+1.0,EntityZ(d.frameobj),Curr096.CollRadius)
 						PointEntity (Curr096.Collider,elevatorobj)
@@ -11593,8 +11622,8 @@ function Update096ElevatorEvent(e: Events,EventState: float,d: Doors,elevatorobj
 			CameraShake = 1
 		} else if (EventState > 70*7.25 && EventState < 70*7.3+FPSfactor) {
 			CameraShake = 1
-			d.fastopen = True
-			d.open = True
+			d.fastopen = true
+			d.open = true
 			Curr096.State = 4
 			Curr096.LastSeen = 1
 		} else if (EventState > 70*8.1 && EventState < 70*8.15+FPSfactor) {
@@ -11610,7 +11639,7 @@ function Update096ElevatorEvent(e: Events,EventState: float,d: Doors,elevatorobj
 	
 }
 
-function RotateEntity90DegreeAngles(entity: int) {
+export function RotateEntity90DegreeAngles(entity: int) {
 	let angle = WrapAngle(entity)
 	
 	if (angle < 45.0) {

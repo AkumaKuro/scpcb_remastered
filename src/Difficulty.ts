@@ -1,7 +1,7 @@
 import { BColor, int } from "./Helper/bbhelper"
 
 
-class Difficulty {
+export class Difficulty {
 	name: string
 	description: string
 	permaDeath: boolean
@@ -14,15 +14,15 @@ class Difficulty {
 	customizable: boolean
 }
 
-var difficulties: Difficulty[] = new Array(4)
+export var difficulties: Difficulty[] = new Array(4)
 
-var SelectedDifficulty: Difficulty
+export var SelectedDifficulty: Difficulty
 
 export const SAFE=0
 export const EUCLID=1
 export const KETER=2
 export const CUSTOM=3
-enum DifficultyLevel {
+export enum DifficultyLevel {
 	SAFE,
 	EUCLID,
 	KETER,
@@ -32,7 +32,7 @@ enum DifficultyLevel {
 export const SAVEANYWHERE = 0
 export const SAVEONQUIT=1
 export const SAVEONSCREENS=2
-enum SaveSetting {
+export enum SaveSetting {
 	SAVE_ANYWHERE,
 	SAVE_ON_QUIT,
 	SAVE_ON_SCREENS
@@ -41,7 +41,7 @@ enum SaveSetting {
 export const EASY = 0
 export const NORMAL = 1
 export const HARD = 2
-enum DifficultySetting {
+export enum DifficultySetting {
 	EASY,
 	NORMAL,
 	HARD

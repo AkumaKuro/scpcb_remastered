@@ -25,3 +25,18 @@ export function ScaleTexture (texture: int,u_scale: float,v_scale: float) {}
 export function PositionTexture (texture: int,u_position: float,v_position: float) {}
 
 export function DrawImage (image: int, x: int,y: int ,frame: int = -1) {}
+
+export function CreateTexture ( width: int,height: int,flags: TextureFlags = TextureFlags.Color,frames: int = 1 ) : int {return 0}
+
+export enum TextureFlags {
+    Color = 1,
+    Alpha = 2,
+    Masked = 4,
+    Mipmapped = 8,
+    ClampU = 16,
+    ClampV = 32,
+    SphereMap = 64,
+    CubeMap = 128,
+    StoreVRam = 256,
+    ForceHighColor = 512
+}

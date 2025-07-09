@@ -13,3 +13,5 @@ export function Rand (low_value: int, high_value: int = -1) : int {
 }
 
 export function Abs (number: int) : int {return 0}
+
+export function Sgn (number: number) : int {return 0}

@@ -4,7 +4,7 @@ export function SetBuffer (buffer: int) {}
 export function BackBuffer() : int {return 0}
 export function CountGfxModes3D() : int {return 0}
 
-export function BBText (x: int,y: int,string: string,center_x: int = 0,center_y: int = 0) {}
+export function BBText (x: int,y: int,string: string,center_x: boolean = false,center_y: boolean = false) {}
 export function ReadPixelFast (x: int,y: int,buffer: int = 0) : int {return 0}
 export function WritePixelFast (x: int,y: int,rgb: int,buffer: int = 0) {}
 

@@ -126,4 +126,4 @@ export function FlushKeys() {}
 
 export function Input(prompt: string) : string {return ''}
 
-export function First(type_variable) {}
+export function First<T>(type_variable: T[]) : T {return type_variable[0]}

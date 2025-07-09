@@ -253,11 +253,11 @@ Function Button%(x,y,width,height,txt$, disabled%=False)
 		Line x,(y+height-1),(x+width-1),(y+height-1)
 		Line (x+width-1),y,(x+width-1),(y+height-1)
 	Else
-		Rect x,y,width,height
-		Color 133,130,125
-		Rect x,y,(width-1),(height-1),False	
-		Color 250,250,250
-		Rect x,y,width,height,False
+		Rect(x,y,width,height)
+		Color(133,130,125)
+		Rect(x,y,(width-1),(height-1),False	)
+		Color(250,250,250)
+		Rect(x,y,width,height,False)
 		Color 10,10,10
 		Line x,(y+height-1),(x+width-1),(y+height-1)
 		Line (x+width-1),y,(x+width-1),(y+height-1)		
@@ -292,7 +292,7 @@ Function CurveValue#(number#, old#, smooth#)
 	EndIf
 End Function
 
-Function SlideBar#(x%, y%, width%, value#, min_p%=0, max_p%=100)
+function SlideBar(x: int, y: int, width: int, value: float, min_p: int=0, max_p: int=100) : float {
 	If MouseDown1 And OnSliderID=0
 		If MouseX() >= x And MouseX() <= x + width + 14 And MouseY() >= y And MouseY() <= y + 20 Then
 			value = Min(Max((MouseX() - x) * 100 / width, 0), 100)
@@ -323,17 +323,17 @@ Function GetTime$(numb%)
 		EndIf
 		Return "00:"+secstring$
 	Else
-		mins% = Int(numb%/60)
-		secs = numb-(mins%*60)
-		If Len(Int(Max(mins%,0)))<2
-			minstring$ = "0"+Int(Max(mins%,0))
+		mins% = Int(numb/60)
+		secs = numb-(mins*60)
+		If Len(Int(Max(mins,0)))<2
+			minstring$ = "0"+Int(Max(mins,0))
 		Else
-			minstring$ = Int(Max(mins%,0))
+			minstring$ = Int(Max(mins,0))
 		EndIf
-		If Len(Int(Max(secs%,0)))<2
-			secstring$ = "0"+Int(Max(secs%,0))
+		If Len(Int(Max(secs,0)))<2
+			secstring$ = "0"+Int(Max(secs,0))
 		Else
-			secstring$ = Int(Max(secs%,0))
+			secstring$ = Int(Max(secs,0))
 		EndIf
 		Return minstring$+":"+secstring$
 	EndIf
@@ -350,7 +350,7 @@ Function ShortLine$(txt$,amount%)
 	
 End Function
 
-Function UpdateMusic()
+function UpdateMusic() {
 	
 	If CurrMusic > -1
 		If CurrMusic <> MusicPlaying Then

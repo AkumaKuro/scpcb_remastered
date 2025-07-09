@@ -1,7 +1,8 @@
 import { EntityFX, EntityTexture, Float, float, int, PositionEntity, ScaleEntity } from "./Helper/bbhelper"
 import { CreateCamera, CameraZoom, CameraClsMode, CameraRange, CameraViewport, CameraProjMode, CameraProjectionMode } from "./Helper/camera"
 import { BackBuffer, TextureBuffer } from "./Helper/graphics"
-import { CreateMesh, CreateSurface, AddVertex, AddTriangle, MoveEntity } from "./Helper/Mesh"
+import { CreateMesh, CreateSurface, AddVertex, AddTriangle, MoveEntity, EntityAlpha } from "./Helper/Mesh"
+import { CreateTexture, TextureFlags } from "./Helper/textures"
 import { GraphicWidth, GraphicHeight } from "./Main"
 
 export var ark_blur_image: int
@@ -41,7 +42,7 @@ export function CreateBlurImage() {
 	ark_blur_image = spr
 	
 	//Create blur texture
-	ark_blur_texture = CreateTexture(2048, 2048, 256)
+	ark_blur_texture = CreateTexture(2048, 2048, TextureFlags.StoreVRam)
 	EntityTexture(spr, ark_blur_texture)
 }
 

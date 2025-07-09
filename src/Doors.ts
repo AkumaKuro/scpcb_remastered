@@ -1,18 +1,18 @@
 import { int, float, CopyEntity, ScaleEntity, Exit, PositionEntity, range, EntityFX, Chr } from "./Helper/bbhelper"
-import { Rand, Sin } from "./Helper/math"
-import { EntityX, EntityZ, EntityY, FreeEntity, RotateEntity, MoveEntity } from "./Helper/Mesh"
+import { Abs, Rand, Sin } from "./Helper/math"
+import { EntityX, EntityZ, EntityY, FreeEntity, RotateEntity, MoveEntity, CreatePivot, Delete, EntityAlpha, EntityOrder } from "./Helper/Mesh"
 import { Instr } from "./Helper/strings"
-import { PlayerRoom, FPSfactor, GrabbedEntity, Wearing714, MsgTimer } from "./Main"
+import { PlayerRoom, FPSfactor, GrabbedEntity, Wearing714, MsgTimer, ButtonCodeOBJ, ButtonKeyOBJ, ButtonOBJ, ButtonScannerOBJ, ButtonSFX2, Camera, CautionSFX, CloseDoorSFX, Collider, DebugHUD, DoorColl, DoorFrameOBJ, DoorOBJ, HIT_MAP, HorrorSFX, KeyCardSFX1, KeyCardSFX2, Max, Min, Msg, OpenDoorSFX, ScannerSFX1, ScannerSFX2 } from "./Main"
 import { Rooms, RoomScale, HideDistance, RemoteDoorOn } from "./MapSystem"
 
 
-var ClosestButton: int
-var ClosestDoor: Doors
-var SelectedDoor: Doors
-var UpdateDoorsTimer: float
-var DoorTempID: int
+export var ClosestButton: int
+export var ClosestDoor: Doors
+export var SelectedDoor: Doors
+export var UpdateDoorsTimer: float
+export var DoorTempID: int
 
-class Doors {
+export class Doors {
 	obj: int
     obj2: int
     frameobj: int
@@ -53,13 +53,15 @@ class Doors {
 	DoorHitOBJ: int
 }
 
-var BigDoorOBJ: int[] = new Array(2)
-var HeavyDoorObj: int[] = new Array(2)
-var OBJTunnel: int[] = new Array(7)
+export var BigDoorOBJ: int[] = new Array(2)
+export var HeavyDoorObj: int[] = new Array(2)
+export var OBJTunnel: int[] = new Array(7)
 
-function CreateDoor(lvl, x: float, y: float, z: float, angle: float, room: Rooms, dopen: boolean = false,  big: boolean = false, keycard: boolean = false, code: string = "", useCollisionMesh: boolean = false): Doors {
-	let d: Doors, parent, i: int
-	if (room != Null) {parent = room.obj}
+export function CreateDoor(lvl, x: float, y: float, z: float, angle: float, room: Rooms, dopen: boolean = false,  big: boolean = false, keycard: boolean = false, code: string = "", useCollisionMesh: boolean = false): Doors {
+	let d: Doors
+	let parent
+	let i: int
+	if (room) {parent = room.obj}
 	
 	let d2: Doors
 	
@@ -74,7 +76,7 @@ function CreateDoor(lvl, x: float, y: float, z: float, angle: float, room: Rooms
 		ScaleEntity(d.frameobj, RoomScale, RoomScale, RoomScale)
 		EntityType (d.frameobj, HIT_MAP)
 		EntityAlpha (d.frameobj, 0.0)
-    } else if (big=2) {
+    } else if (big == 2) {
 		d.obj = CopyEntity(HeavyDoorObj(0))
 		ScaleEntity(d.obj, RoomScale, RoomScale, RoomScale)
 		d.obj2 = CopyEntity(HeavyDoorObj(1))

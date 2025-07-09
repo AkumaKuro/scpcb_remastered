@@ -22,3 +22,5 @@ export function FileSize(filename: string): int {return 0}
 export function ReadFloat (filehandle: int) : float {return 0}
 export function ReadInt (filehandle: int) : int {return 0}
 export function ReadString(filehandle: int) : string {return ''}
+
+export function ReadByte ( filehandle: int ) : int {return 0}

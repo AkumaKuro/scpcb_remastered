@@ -1083,20 +1083,6 @@ Function LoadMaterials(file$)
 			
 			mat\name = Lower(TemporaryString)
 			
-;			If BumpEnabled Then
-;				StrTemp = GetINIString(file, TemporaryString, "bump")
-;				If StrTemp <> "" Then 
-;					mat\Bump =  LoadTexture_Strict(StrTemp)
-;					
-;					TextureBlend mat\Bump, 6
-;					TextureBumpEnvMat mat\Bump,0,0,-0.012
-;					TextureBumpEnvMat mat\Bump,0,1,-0.012
-;					TextureBumpEnvMat mat\Bump,1,0,0.012
-;					TextureBumpEnvMat mat\Bump,1,1,0.012
-;					TextureBumpEnvOffset mat\Bump,0.5
-;					TextureBumpEnvScale mat\Bump,1.0				
-;				EndIf
-;			EndIf
 			
 			mat\StepSound = (GetINIInt(file, TemporaryString, "stepsound")+1)
 		EndIf

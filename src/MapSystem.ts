@@ -31,7 +31,7 @@ function LoadMaterials(file: string) {
 				if (StrTemp != "") { 
 					mat.Bump =  LoadTexture_Strict(StrTemp)
 					
-					TextureBlend (mat.Bump, 6)
+					TextureBlend (mat.Bump, TextureBlendMode.NoBlendOrAlpha) //TODO mode 6?
 					TextureBumpEnvMat(mat.Bump,0,0,-0.012)
 					TextureBumpEnvMat(mat.Bump,0,1,-0.012)
 					TextureBumpEnvMat(mat.Bump,1,0,0.012)
@@ -191,10 +191,10 @@ function LoadWorld(file: string, rt: RoomTemplates) {
 				
 			//Camera start position point entity
 			case "playerstart":
-				angles = KeyValue(node,"angles","0 0 0")
-				pitch = Piece(angles,1," ")
-				yaw = Piece(angles,2," ")
-				roll = Piece(angles,3," ")
+				let angles = KeyValue(node,"angles","0 0 0")
+				let pitch = Piece(angles,1," ")
+				let yaw = Piece(angles,2," ")
+				let roll = Piece(angles,3," ")
 				if (cam) {
 					PositionEntity (cam,EntityX(node),EntityY(node),EntityZ(node))
 					RotateEntity (cam,pitch,yaw,roll)
@@ -214,7 +214,7 @@ function LoadWorld(file: string, rt: RoomTemplates) {
 
 //RMESH STUFF////////
 
-function StripFilename(file: string): string {
+export function StripFilename(file: string): string {
 	let mi: string = ""
 	let lastSlash: int=0
 	if (Len(file)>0) {
@@ -229,28 +229,28 @@ function StripFilename(file: string): string {
 	return Left(file,lastSlash)
 }
 
-function GetTextureFromCache(name: string): int {
+export function GetTextureFromCache(name: string): int {
 	for (let tc of Materials.each) {
 		if (tc.name == name) {return tc.Diff}
 	}
 	return 0
 }
 
-function GetBumpFromCache(name: string): int {
+export function GetBumpFromCache(name: string): int {
 	for (let tc of Materials.each) {
 		if (tc.name == name) {return tc.Bump}
 	}
 	return 0
 }
 
-function GetCache(name: string): Materials | null {
+export function GetCache(name: string): Materials | null {
 	for (let tc of Materials.each) {
 		if (tc.name == name) {return tc}
 }
 	return null
 }
 
-function AddTextureToCache(texture: int) {
+export function AddTextureToCache(texture: int) {
 	let tc: Materials = GetCache(StripPath(TextureName(texture)))
 	if (!tc) {
 		tc = new Materials()
@@ -277,7 +277,7 @@ function AddTextureToCache(texture: int) {
 	}
 }
 
-function ClearTextureCache() {
+export function ClearTextureCache() {
 	for (let tc of Materials.each) {
 		if (tc.Diff != 0) {
 			FreeTexture(tc.Diff)
@@ -289,7 +289,7 @@ function ClearTextureCache() {
 	}
 }
 
-function FreeTextureCache() {
+export function FreeTextureCache() {
 	for (let tc of Materials.each) {
 		if (tc.Diff != 0) {
 			FreeTexture (tc.Diff)
@@ -302,18 +302,18 @@ function FreeTextureCache() {
 	}
 }
 
-function LoadRMesh(file: string,rt: RoomTemplates) {
+export function LoadRMesh(file: string,rt: RoomTemplates) {
 	CatchErrors("Uncaught (LoadRMesh)")
 	//generate a texture made of white
 	let blankTexture: int
-	blankTexture=CreateTexture(4,4,1,1)
+	blankTexture=CreateTexture(4,4,TextureFlags.Color,1)
 	ClsColor (255,255,255)
 	SetBuffer (TextureBuffer(blankTexture))
 	Cls()
 	SetBuffer (BackBuffer())
 	
 	let pinkTexture: int
-	pinkTexture=CreateTexture(4,4,1,1)
+	pinkTexture=CreateTexture(4,4,TextureFlags.Color,1)
 	ClsColor (255,255,255)
 	SetBuffer (TextureBuffer(pinkTexture))
 	Cls()
@@ -439,9 +439,9 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 			}
 		} else {
 			if (tex[0] != 0 && tex[1] != 0) {
-				bumptex = GetBumpFromCache(StripPath(TextureName(tex[1])))
+				let bumptex = GetBumpFromCache(StripPath(TextureName(tex[1])))
 				for (j of range(2)) {
-					BrushTexture (brush,tex[j],0,j+1+(bumptex != 0))
+					BrushTexture (brush,tex[j],0,j+1+Int(bumptex != 0))
 				}
 				
 				BrushTexture (brush,AmbientLightRoomTex,0)
@@ -473,7 +473,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 			x=ReadFloat(f)
 			y=ReadFloat(f)
 			z=ReadFloat(f)
-			vertex=AddVertex(surf,x,y,z)
+			let vertex=AddVertex(surf,x,y,z)
 			
 			//texture coords
 			for (k of range(2)) {
@@ -483,9 +483,9 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 			}
 			
 			//colors
-			temp1i=ReadByte(f)
-			temp2i=ReadByte(f)
-			temp3i=ReadByte(f)
+			let temp1i=ReadByte(f)
+			let temp2i=ReadByte(f)
+			let temp3i=ReadByte(f)
 			VertexColor (surf,vertex,temp1i,temp2i,temp3i,1.0)
 		}
 		
@@ -527,7 +527,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 			x=ReadFloat(f)
 			y=ReadFloat(f)
 			z=ReadFloat(f)
-			vertex=AddVertex(surf,x,y,z)
+			let vertex=AddVertex(surf,x,y,z)
 		}
 		
 		count2=ReadInt(f) //polys
@@ -554,7 +554,7 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 					x=ReadFloat(f)
 					y=ReadFloat(f)
 					z=ReadFloat(f)
-					vertex=AddVertex(surf,x,y,z)
+					let vertex = AddVertex(surf,x,y,z)
 				}
 				count2=ReadInt(f)
 				for (j of range(1, count2 + 1)) {
@@ -609,14 +609,14 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 				temp3=ReadFloat(f)*RoomScale
 				
 				if (temp1 != 0 || temp2 != 0 || temp3 != 0) {
-					range = ReadFloat(f)/2000.0
-					lcolor = ReadString(f)
-					intensity = Min(ReadFloat(f)*0.8,1.0)
-					r = Int(Piece(lcolor,1," "))*intensity
-					g = Int(Piece(lcolor,2," "))*intensity
-					b = Int(Piece(lcolor,3," "))*intensity
+					let trange = ReadFloat(f)/2000.0
+					let lcolor = ReadString(f)
+					let intensity = Min(ReadFloat(f)*0.8,1.0)
+					let r = Int(Piece(lcolor,1," "))*intensity
+					let g = Int(Piece(lcolor,2," "))*intensity
+					let b = Int(Piece(lcolor,3," "))*intensity
 					
-					AddTempLight(rt, temp1,temp2,temp3, 2, range, r,g,b)
+					AddTempLight(rt, temp1,temp2,temp3, 2, trange, r,g,b)
 				} else {
 					ReadFloat(f)
 					ReadString(f)
@@ -630,17 +630,17 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 				temp3=ReadFloat(f)*RoomScale
 				
 				if (temp1 != 0 || temp2 != 0 || temp3 != 0) {
-					range = ReadFloat(f)/2000.0
-					lcolor = ReadString(f)
-					intensity = Min(ReadFloat(f)*0.8,1.0)
-					r = Int(Piece(lcolor,1," "))*intensity
-					g = Int(Piece(lcolor,2," "))*intensity
-					b = Int(Piece(lcolor,3," "))*intensity
+					let trange = ReadFloat(f)/2000.0
+					let lcolor = ReadString(f)
+					let intensity = Min(ReadFloat(f)*0.8,1.0)
+					let r = Int(Piece(lcolor,1," "))*intensity
+					let g = Int(Piece(lcolor,2," "))*intensity
+					let b = Int(Piece(lcolor,3," "))*intensity
 					
-					let lt: LightTemplates = AddTempLight(rt, temp1,temp2,temp3, 2, range, r,g,b)
-					angles = ReadString(f)
-					pitch = Piece(angles,1," ")
-					yaw = Piece(angles,2," ")
+					let lt: LightTemplates = AddTempLight(rt, temp1,temp2,temp3, 2, trange, r,g,b)
+					let angles = ReadString(f)
+					let pitch = Piece(angles,1," ")
+					let yaw = Piece(angles,2," ")
 					lt.pitch = pitch
 					lt.yaw = yaw
 					
@@ -686,10 +686,10 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 				temp2=ReadFloat(f)
 				temp3=ReadFloat(f)
 				
-				angles = ReadString(f)
-				pitch = Piece(angles,1," ")
-				yaw = Piece(angles,2," ")
-				roll = Piece(angles,3," ")
+				let angles = ReadString(f)
+				let pitch = Float(Piece(angles,1," "))
+				let yaw = Float(Piece(angles,2," "))
+				let roll = Float(Piece(angles,3," "))
 				if (cam) {
 					PositionEntity (cam,temp1,temp2,temp3)
 					RotateEntity (cam,pitch,yaw,roll)
@@ -772,12 +772,12 @@ function LoadRMesh(file: string,rt: RoomTemplates) {
 
 //-----------////////
 
-function StripPath(file: string): string {
+export function StripPath(file: string): string {
 	let name: string = ""
 	if (Len(file) > 0) {
-		for (i of range(Len(file) + 1, 1, -1)) {
+		for (let i of range(Len(file) + 1, 1, -1)) {
 			
-			mi=Mid(file,i,1) 
+			let mi=Mid(file,i,1) 
 			if (mi == "\\" || mi == "/") {return name}
 			
 			name=mi+name 
@@ -788,7 +788,7 @@ function StripPath(file: string): string {
 	return name
 }
 
-function Piece(s: string,entry,char: string=" "): string {
+export function Piece(s: string,entry,char: string=" "): string {
 	let p
 	let a
 	while (Instr(s,char+char)) {
@@ -807,23 +807,24 @@ function Piece(s: string,entry,char: string=" "): string {
 	return a
 }
 
-function KeyValue(entity,key: string,defaultvalue: string=""): string {
-	properties=EntityName(entity)
+export function KeyValue(entity,key: string,defaultvalue: string=""): string {
+	let properties=EntityName(entity)
+	let test
 	properties=Replace(properties,Chr(13),"")
 	key=Lower(key)
 	while (true) {
-		p=Instr(properties,Chr(10))
+		let p=Instr(properties,Chr(10))
 		if (p) {
 			test=(Left(properties,p-1))
 		} else {
 			test=properties
 		}
-		testkey=Piece(test,1,"=")
+		let testkey=Piece(test,1,"=")
 		testkey=Trim(testkey)
 		testkey=Replace(testkey,Chr(34),"")
 		testkey=Lower(testkey)
 		if (testkey == key) {
-			value=Piece(test,2,"=")
+			let value=Piece(test,2,"=")
 			value=Trim(value)
 			value=Replace(value,Chr(34),"")
 			return value
@@ -850,7 +851,7 @@ export const center = 5 //(gridsize-1) / 2
 import "Drawportals.bb"
 import { ChannelPlaying, Chr, CopyEntity, CountChildren, DebugLog, EntityFX, EntityName, EntityTexture, Exit, Float, float, GetChild, ImageWidth, Int, int, PositionEntity, range, RuntimeError, ScaleEntity, SeedRnd } from "./Helper/bbhelper.ts"
 
-class Forest {
+export class Forest {
 	TileMesh: int[] = new Array(6)
 	DetailMesh: int[] = new Array(6)
 	TileTexture: int[] = new Array(10)
@@ -864,7 +865,7 @@ class Forest {
 	ID: int
 }
 
-function move_forward(dir: int,pathx: int,pathy: int,retval: int=0) : int {
+export function move_forward(dir: int,pathx: int,pathy: int,retval: int=0) : int {
 	//move 1 unit along the grid in the designated direction
 	if (dir == 1) {
 		if (retval == 0) {
@@ -880,18 +881,18 @@ function move_forward(dir: int,pathx: int,pathy: int,retval: int=0) : int {
 	}
 }
 
-function chance(chanc: int) : boolean {
+export function chance(chanc: int) : boolean {
 	//perform a chance given a probability
 	return (Rand(0,100)<=chanc)
 }
 
-function turn_if_deviating(max_deviation_distance_: int,pathx: int,center_: int,dir: int,retval: int=0) : boolean {
+export function turn_if_deviating(max_deviation_distance_: int,pathx: int,center_: int,dir: int,retval: int=0) : int {
 	//check if deviating and return the answer. if deviating, turn around
 	let current_deviation: int = center_ - pathx
-	let deviated: boolean = false
+	let deviated: int = 0
 	if ((dir == 0 && current_deviation >= max_deviation_distance_) || (dir == 2 && current_deviation <= -max_deviation_distance_)) {
 		dir = (dir + 2) % 4
-		deviated = true
+		deviated = 1
 	}
 	if (retval == 0) {
 		return dir
@@ -989,8 +990,11 @@ function GenForestGrid(fr: Forest) {
 	}
 	
 	//attempt to create new branches
-	let new_y: int,temp_y: int,new_x: int
-	let branch_type: int,branch_pos: int
+	let new_y: int
+	let temp_y: int
+	let new_x: int
+	let branch_type: int
+	let branch_pos: int
 	new_y=-3 //used for counting off// branches will only be considered once every 4 units so as to avoid potentially too many branches
 	while (new_y<gridsize-5) {
 		new_y=new_y+4
@@ -1005,8 +1009,8 @@ function GenForestGrid(fr: Forest) {
 			//determine if on left or on right
 			branch_pos=2*Rand(0,1)
 			//get leftmost or rightmost path in this row
-			leftmost=gridsize
-			rightmost=0
+			let leftmost=gridsize
+			let rightmost=0
 			for (i of range(gridsize + 1)) {
 				if (fr.grid[((gridsize-1-new_y)*gridsize)+i]=1) {
 					if (i<leftmost) {
@@ -1050,7 +1054,7 @@ function GenForestGrid(fr: Forest) {
 				}
 				
 				//before creating a branch make sure there are no 1's above or below
-				n=((gridsize - 1 - temp_y + 1)*gridsize)+new_x
+				let n=((gridsize - 1 - temp_y + 1)*gridsize)+new_x
 				if (n < gridsize-1) { 
 					if (temp_y != 0 && fr.grid[n] == 1) {break}
 				}
@@ -1118,8 +1122,8 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 	
 	//load assets
 	
-	let hmap: Array = new Array(ROOM4)
-	let mask: Array = new Array(ROOM4)
+	let hmap: any[] = new Array(ROOM4)
+	let mask: any[] = new Array(ROOM4)
 	let GroundTexture = LoadTexture_Strict("GFX/map/forest/forestfloor.jpg")
 	let PathTexture = LoadTexture_Strict("GFX/map/forest/forestpath.jpg")
 	
@@ -1236,7 +1240,7 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 					
 					let itemPlaced: Array = new Array(4)
 					//2, 5, 8
-					let it: Items = Null
+					let it: Items = null
 					if ((ty % 3) == 2 && itemPlaced[Floor(ty/3)] == False) {
 						itemPlaced[Floor(ty/3)]=true
 						it.Items = CreateItem("Log #"+Int(Floor(ty/3)+1), "paper", 0,0.5,0)
@@ -1307,7 +1311,7 @@ function PlaceForest(fr: Forest,x: float,y: float,z: float,r: Rooms) {
 					EntityParent(tile_entity,fr.Forest_Pivot)
 					EntityPickMode(tile_entity,2)
 					
-					if (it != Null) {
+					if (it != null) {
 						EntityParent (it.collider,0)
 					}
 					
@@ -1456,7 +1460,7 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 					
 					let itemPlaced: Array = new Array(4)
 					//2, 5, 8
-					let it: Items = Null
+					let it: Items = null
 					if ((ty % 3) == 2 && itemPlaced[Floor(ty/3)] == False) {
 						itemPlaced[Floor(ty/3)]=true
 						it.Items = CreateItem("Log : float"+Int(Floor(ty/3)+1), "paper", 0,0.5,0)
@@ -1531,7 +1535,7 @@ function PlaceForest_MapCreator(fr: Forest,x: float,y: float,z: float,r: Rooms) 
 					EntityParent(tile_entity,fr.Forest_Pivot)
 					EntityPickMode(tile_entity,2)
 					
-					if (it != Null) {
+					if (it != null) {
 						EntityParent(it.collider,0)
 					}
 					
@@ -1614,19 +1618,19 @@ function DestroyForest(fr: Forest) {
 		FreeEntity(fr.Forest_Pivot)
 		fr.Forest_Pivot=0
 	}
-	for (i of range(4)) {
+	for (let i of range(4)) {
 		if (fr.TileMesh[i] != 0) {
 			FreeEntity(fr.TileMesh[i])
 			fr.TileMesh[i]=0
 		}
 	}
-	for (i of range(5)) {
+	for (let i of range(5)) {
 		if (fr.DetailMesh[i] != 0) {
 			FreeEntity(fr.DetailMesh[i])
 			fr.DetailMesh[i]=0
 		}
 	}
-	for (i of range(10)) {
+	for (let i of range(10)) {
 		if (fr.TileTexture[i] != 0) {
 			FreeEntity(fr.TileTexture[i])
 			fr.TileTexture[i]=0
@@ -1673,8 +1677,9 @@ export const ROOM2C: int = 3
 export const ROOM3: int = 4
 export const ROOM4: int = 5
 
-var RoomTempID: int
-class RoomTemplates {
+export var RoomTempID: int
+export class RoomTemplates {
+	static each: RoomTemplates[] = []
 	obj: int
 	id: int
 	objPath: string
@@ -1688,18 +1693,18 @@ class RoomTemplates {
 	TempSoundEmitterRange: float[] = new Array(MaxRoomEmitters)
 	
 	Shape: int
-	Name$
+	Name: string
 	Commonness: int
 	Large: int
 	DisableDecals: int
 	
 	TempTriggerboxAmount
-	TempTriggerbox: Array = new Array(128)
+	TempTriggerbox: any[] = new Array(128)
 	TempTriggerboxName: string[] = new Array(128)
 	
 	UseLightCones: int
 	
-	DisableOverlapCheck: int = true
+	DisableOverlapCheck: boolean = true
 	
 	MinX: float
 	MinY: float
@@ -1724,7 +1729,7 @@ function LoadRoomTemplates(file: string) {
 	CatchErrors("Uncaught (LoadRoomTemplates)")
 	let TemporaryString: string
 	let i: int
-	let rt: RoomTemplates = Null
+	let rt: RoomTemplates
 	let StrTemp: string = ""
 	
 	let f = OpenFile(file)
@@ -1806,12 +1811,12 @@ function LoadRoomMesh(rt: RoomTemplates) {
 
 function LoadRoomMeshes() {
 	let temp: int = 0
-	for (rt of RoomTemplates.each) {
+	for (let rt of RoomTemplates.each) {
 		temp=temp+1
 	}
 	
 	let i = 0
-	for (rt of RoomTemplates.each) {
+	for (let rt of RoomTemplates.each) {
 		if (Instr(rt.objpath,".rmesh") != 0) { //file is roommesh
 			rt.obj = LoadRMesh(rt.objPath, rt)
 		} else { //file is b3d
@@ -1847,12 +1852,13 @@ export var Sky
 
 export var HideDistance: float = 15.0
 
-export var SecondaryLightOn: float = true
-export var PrevSecondaryLightOn: float = true
-export var RemoteDoorOn = true
-export var Contained106 = False
+export var SecondaryLightOn: boolean = true
+export var PrevSecondaryLightOn: boolean = true
+export var RemoteDoorOn: boolean = true
+export var Contained106: boolean = false
 
 export class Rooms {
+	static each: Rooms[] = []
 	zone: int
 	found: int
 	obj: int
@@ -1874,12 +1880,12 @@ export class Rooms {
 	SoundEmitterRange: float[] = new Array(MaxRoomEmitters)
 	SoundEmitterCHN: int[] = new Array(MaxRoomEmitters)
 	
-	Lights: int[MaxRoomLights]
-	LightIntensity: float[MaxRoomLights]
+	Lights: int[] = new Array(MaxRoomLights)
+	LightIntensity: float[] = new Array(MaxRoomLights)
 	
-	LightSprites: int[MaxRoomLights]	
+	LightSprites: int[] = new Array(MaxRoomLights)	
 	
-	Objects: int[MaxRoomObjects]
+	Objects: int[] = new Array(MaxRoomObjects)
 	Levers: int[] = new Array(11)
 	RoomDoors: Doors[] = new Array(7)
 	NPC: NPCs[] = new Array(12)
@@ -1900,15 +1906,15 @@ export class Rooms {
 	AlarmRotor: int[] = new Array(1)
 	AlarmRotorLight: int[] = new Array(1)
 	TriggerboxAmount
-	Triggerbox: Array = new Array(128)
+	Triggerbox: any[] = new Array(128)
 	TriggerboxName: string[] = new Array(128)
 	MaxWayPointY: float
-	LightR: float[MaxRoomLights]
-	LightG: float[MaxRoomLights]
-	LightB: float[MaxRoomLights]
-	LightCone: int[MaxRoomLights]
-	LightConeSpark: int[MaxRoomLights]
-	LightConeSparkTimer: float[MaxRoomLights]
+	LightR: float[] = new Array(MaxRoomLights)
+	LightG: float[] = new Array(MaxRoomLights)
+	LightB: float[] = new Array(MaxRoomLights)
+	LightCone: int[] = new Array(MaxRoomLights)
+	LightConeSpark: int[] = new Array(MaxRoomLights)
+	LightConeSparkTimer: float[] = new Array(MaxRoomLights)
 	
 	MinX: float
 	MinY: float
@@ -1950,7 +1956,7 @@ function UpdateGrid(grid: Grids) {
 
 function PlaceGrid_MapCreator(r: Rooms) {
 	let x,y,i
-	let Meshes: Array = new Array(6)
+	let Meshes: any[] = new Array(6)
 	let dr: Doors
 	let it: Items
 	
@@ -1976,35 +1982,35 @@ function PlaceGrid_MapCreator(r: Rooms) {
 				
 				switch (r.grid.grid[x+(y*gridsz)]) {
 					case ROOM1:
-						AddLight(Null, r.x+x*2.0, 8.0+(368.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight(null, r.x+x*2.0, 8.0+(368.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					case ROOM2,ROOM2C:
-						AddLight(Null, r.x+x*2.0, 8.0+(368.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight(null, r.x+x*2.0, 8.0+(368.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					case ROOM2C:
-						AddLight(Null, r.x+x*2.0, 8.0+(412.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight(null, r.x+x*2.0, 8.0+(412.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					case ROOM3,ROOM4:
-						AddLight(Null,r.x+x*2.0, 8.0+(412.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
+						AddLight(null,r.x+x*2.0, 8.0+(412.0*RoomScale), r.z+y*2.0, 2, 500.0 * RoomScale, 255, 255, 255)
 					case ROOM4+1:
-						dr=CreateDoor(r.zone,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,true))*240.0*RoomScale),8.0,r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,true))*240.0*RoomScale),EntityYaw(tile_entity,true)+90.0,Null,False,3,False,"")
+						dr=CreateDoor(r.zone,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,true))*240.0*RoomScale),8.0,r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,true))*240.0*RoomScale),EntityYaw(tile_entity,true)+90.0,null,False,3,False,"")
 						PositionEntity(dr.buttons[0],EntityX(dr.buttons[0],true)+(Cos(EntityYaw(tile_entity,true))*0.05),EntityY(dr.buttons[0],true)+0.0,EntityZ(dr.buttons[0],true)+(Sin(EntityYaw(tile_entity,true))*0.05),true)
 						
-						AddLight(Null, r.x+x*2.0+(Cos(EntityYaw(tile_entity,true))*555.0*RoomScale), 8.0+(469.0*RoomScale), r.z+y*2.0+(Sin(EntityYaw(tile_entity,true))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
+						AddLight(null, r.x+x*2.0+(Cos(EntityYaw(tile_entity,true))*555.0*RoomScale), 8.0+(469.0*RoomScale), r.z+y*2.0+(Sin(EntityYaw(tile_entity,true))*555.0*RoomScale), 2, 600.0 * RoomScale, 255, 255, 255)
 						
 						let tempInt2=CreatePivot()
 						RotateEntity (tempInt2,0,EntityYaw(tile_entity,true)+180.0,0,true)
 						PositionEntity (tempInt2,r.x+(x*2.0)+(Cos(EntityYaw(tile_entity,true))*552.0*RoomScale),8.0+(240.0*RoomScale),r.z+(y*2.0)+(Sin(EntityYaw(tile_entity,true))*552.0*RoomScale))
-						if (r.RoomDoors[1] == Null) {
+						if (r.RoomDoors[1] == null) {
 							r.RoomDoors[1]=dr
 							r.Objects[3]=tempInt2
 							PositionEntity (r.Objects[0],r.x+x*2.0,8.0,r.z+y*2.0,true)
 							DebugLog ("Created door 1 successfully!")
-						} else if (r.RoomDoors[1] != Null && r.RoomDoors[3] == Null) {
+						} else if (r.RoomDoors[1] != null && r.RoomDoors[3] == null) {
 							r.RoomDoors[3]=dr
 							r.Objects[5]=tempInt2
 							PositionEntity (r.Objects[1],r.x+x*2.0,8.0,r.z+y*2.0,true)
 							DebugLog ("Created door 2 successfully!")
 						}
 					case ROOM4+2:
-						AddLight(Null, r.x+x*2.0-(Sin(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,true))*16.0*RoomScale), 8.0+(396.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,true))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
+						AddLight(null, r.x+x*2.0-(Sin(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Cos(EntityYaw(tile_entity,true))*16.0*RoomScale), 8.0+(396.0*RoomScale), r.z+y*2.0+(Cos(EntityYaw(tile_entity,true))*504.0*RoomScale)+(Sin(EntityYaw(tile_entity,true))*16.0*RoomScale), 2, 500.0 * RoomScale, 255, 200, 200)
 						it = CreateItem("SCP-500-01","scp500",r.x+x*2.0+(Cos(EntityYaw(tile_entity,true))*(-208.0)*RoomScale)-(Sin(EntityYaw(tile_entity,true))*1226.0*RoomScale),8.0+(80.0*RoomScale),r.z+y*2.0+(Sin(EntityYaw(tile_entity,true))*(-208.0)*RoomScale)+(Cos(EntityYaw(tile_entity,true))*1226.0*RoomScale))
 						EntityType (it.collider, HIT_ITEM)
 						
@@ -2013,16 +2019,16 @@ function PlaceGrid_MapCreator(r: Rooms) {
 				}
 				
 				r.grid.Entities[x+(y*gridsz)]=tile_entity
-				wayp.WayPoints = CreateWaypoint(r.x+(x*2.0),8.2,r.z+(y*2.0),Null,r)
+				wayp.WayPoints = CreateWaypoint(r.x+(x*2.0),8.2,r.z+(y*2.0),null,r)
 				r.grid.waypoints[x+(y*gridsz)]=wayp
 				
 				if (y<gridsz-1) {
-					if (r.grid.waypoints[x+((y+1)*gridsz)] != Null) {
+					if (r.grid.waypoints[x+((y+1)*gridsz)] != null) {
 						dist=EntityDistance(r.grid.waypoints[x+(y*gridsz)].obj,r.grid.waypoints[x+((y+1)*gridsz)].obj)
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+((y+1)*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+((y+1)*gridsz)]
 								r.grid.waypoints[x+(y*gridsz)].dist[i]=dist
 								break
@@ -2031,7 +2037,7 @@ function PlaceGrid_MapCreator(r: Rooms) {
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+((y+1)*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+((y+1)*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+((y+1)*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+((y+1)*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]
 								r.grid.waypoints[x+((y+1)*gridsz)].dist[i]=dist
 								break
@@ -2040,12 +2046,12 @@ function PlaceGrid_MapCreator(r: Rooms) {
 					}
 				}
 				if (y>0) {
-					if (r.grid.waypoints[x+((y-1)*gridsz)] != Null) {
+					if (r.grid.waypoints[x+((y-1)*gridsz)] != null) {
 						dist=EntityDistance(r.grid.waypoints[x+(y*gridsz)].obj,r.grid.waypoints[x+((y-1)*gridsz)].obj)
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+((y-1)*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+((y-1)*gridsz)]
 								r.grid.waypoints[x+(y*gridsz)].dist[i]=dist
 								break
@@ -2054,7 +2060,7 @@ function PlaceGrid_MapCreator(r: Rooms) {
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+((y-1)*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+((y-1)*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]
 								r.grid.waypoints[x+((y-1)*gridsz)].dist[i]=dist
 								break
@@ -2063,12 +2069,12 @@ function PlaceGrid_MapCreator(r: Rooms) {
 					}
 				}
 				if (x>0) {
-					if (r.grid.waypoints[x-1+(y*gridsz)] != Null) {
+					if (r.grid.waypoints[x-1+(y*gridsz)] != null) {
 						dist=EntityDistance(r.grid.waypoints[x+(y*gridsz)].obj,r.grid.waypoints[x-1+(y*gridsz)].obj)
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x-1+(y*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x-1+(y*gridsz)]
 								r.grid.waypoints[x+(y*gridsz)].dist[i]=dist
 								break
@@ -2077,7 +2083,7 @@ function PlaceGrid_MapCreator(r: Rooms) {
 						for (i of range(4)) {
 							if (r.grid.waypoints[x-1+(y*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x-1+(y*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]
 								r.grid.waypoints[x-1+(y*gridsz)].dist[i]=dist
 								break
@@ -2086,12 +2092,12 @@ function PlaceGrid_MapCreator(r: Rooms) {
 					}
 				}
 				if (x<gridsz-1) {
-					if (r.grid.waypoints[x+1+(y*gridsz)] != Null) {
+					if (r.grid.waypoints[x+1+(y*gridsz)] != null) {
 						dist=EntityDistance(r.grid.waypoints[x+(y*gridsz)].obj,r.grid.waypoints[x+1+(y*gridsz)].obj)
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+1+(y*gridsz)]) {
 								break
-							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+							} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+(y*gridsz)].connected[i]=r.grid.waypoints[x+1+(y*gridsz)]
 								r.grid.waypoints[x+(y*gridsz)].dist[i]=dist
 								break
@@ -2100,7 +2106,7 @@ function PlaceGrid_MapCreator(r: Rooms) {
 						for (i of range(4)) {
 							if (r.grid.waypoints[x+1+(y*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]) {
 								break
-						 	} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=Null) {
+						 	} else if (r.grid.waypoints[x+(y*gridsz)].connected[i]=null) {
 								r.grid.waypoints[x+1+(y*gridsz)].connected[i]=r.grid.waypoints[x+(y*gridsz)]
 								r.grid.waypoints[x+1+(y*gridsz)].dist[i]=dist
 								break
@@ -4017,8 +4023,8 @@ function FillRoom(r: Rooms) {
 			it = CreateItem("Notification", "paper", r.x -137.0 * RoomScale, r.y + 153.0 * RoomScale, r.z + 464.0 * RoomScale)
 			EntityParent(it.collider, r.obj)
 			
-			w.waypoints = CreateWaypoint(r.x - 32.0 * RoomScale, r.y + 66.0 * RoomScale, r.z + 288.0 * RoomScale, Null, r)
-			w2.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z - 448.0 * RoomScale, Null, r)
+			w.waypoints = CreateWaypoint(r.x - 32.0 * RoomScale, r.y + 66.0 * RoomScale, r.z + 288.0 * RoomScale, null, r)
+			w2.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z - 448.0 * RoomScale, null, r)
 			w.connected[0] = w2
 			w.dist[0] = EntityDistance(w.obj, w2.obj)
 			w2.connected[0] = w
@@ -4458,8 +4464,8 @@ function FillRoom(r: Rooms) {
 			HideEntity(r.Objects[3])
 			EntityParent(r.Objects[3], r.obj)
 			
-			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z + 292.0 * RoomScale, Null, r)
-			w2.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z - 284.0 * RoomScale, Null, r)
+			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z + 292.0 * RoomScale, null, r)
+			w2.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z - 284.0 * RoomScale, null, r)
 			w.connected[0] = w2
 			w.dist[0] = EntityDistance(w.obj, w2.obj)
 			w2.connected[0] = w
@@ -5187,7 +5193,7 @@ function FillRoom(r: Rooms) {
 			
 		case "room2_3","room3_3":
 			//[Block]
-			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z, Null, r)
+			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z, null, r)
 			
 		//New rooms (in SCP:CB 1.3) - ENDSHN
 		case "room1lifts":
@@ -5204,7 +5210,7 @@ function FillRoom(r: Rooms) {
 			TurnEntity(sc.CameraObj, 20, 0, 0)
 			EntityParent(sc.obj, r.obj)
 			
-			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z, Null, r)
+			w.waypoints = CreateWaypoint(r.x, r.y + 66.0 * RoomScale, r.z, null, r)
 			//[End Block]
 		case "room2servers2":
 			//[Block]
@@ -5711,7 +5717,7 @@ function FillRoom(r: Rooms) {
 	
 	for (tw of TempWayPoints.each) {
 		if (tw.roomtemplate == r.RoomTemplate) {
-			CreateWaypoint(r.x+tw.x, r.y+tw.y, r.z+tw.z, Null, r)
+			CreateWaypoint(r.x+tw.x, r.y+tw.y, r.z+tw.z, null, r)
 		}
 	}
 	
@@ -5764,7 +5770,7 @@ function UpdateRooms() {
 	
 	TempLightVolume=0
 	let foundNewPlayerRoom: int = False
-	if (PlayerRoom != Null) {
+	if (PlayerRoom != null) {
 		if (Abs(EntityY(Collider) - EntityY(PlayerRoom.obj)) < 1.5) {
 			x = Abs(PlayerRoom.x-EntityX(Collider,True))
 			if (x < 4.0) {
@@ -5776,7 +5782,7 @@ function UpdateRooms() {
 			
 			if (!foundNewPlayerRoom) { //it's likely that an adjacent room is the new player room, check for that
 				for (i of range(4)) {
-					if (PlayerRoom.Adjacent[i] != Null) {
+					if (PlayerRoom.Adjacent[i] != null) {
 						x = Abs(PlayerRoom.Adjacent[i].x-EntityX(Collider,True))
 						if (x < 4.0) {
 							z = Abs(PlayerRoom.Adjacent[i].z-EntityZ(Collider,True))
@@ -5875,11 +5881,11 @@ function UpdateRooms() {
 	
 	TempLightVolume = Max(TempLightVolume / 4.5, 1.0)
 	
-	if (PlayerRoom != Null) {
+	if (PlayerRoom != null) {
 		EntityAlpha(GetChild(PlayerRoom.obj,2),1)
 		for (i of range(4)) {
-			if (PlayerRoom.Adjacent[i] != Null) {
-				if (PlayerRoom.AdjDoor[i] != Null) {
+			if (PlayerRoom.Adjacent[i] != null) {
+				if (PlayerRoom.AdjDoor[i] != null) {
 					x = Abs(EntityX(Collider,True)-EntityX(PlayerRoom.AdjDoor[i].frameobj,True))
 					z = Abs(EntityZ(Collider,True)-EntityZ(PlayerRoom.AdjDoor[i].frameobj,True))
 					if (PlayerRoom.AdjDoor[i].openstate == 0) {
@@ -5892,7 +5898,7 @@ function UpdateRooms() {
 				}
 				
 				for (j of range(4)) {
-					if (PlayerRoom.Adjacent[i].Adjacent[j] != Null) {
+					if (PlayerRoom.Adjacent[i].Adjacent[j] != null) {
 						if (PlayerRoom.Adjacent[i].Adjacent[j] != PlayerRoom) {
 							EntityAlpha(GetChild(PlayerRoom.Adjacent[i].Adjacent[j].obj,2),0)
 						}
@@ -5906,7 +5912,7 @@ function UpdateRooms() {
 }
 
 function IsRoomAdjacent(this: Rooms,that: Rooms) {
-	if (this == Null) {return False}
+	if (this == null) {return False}
 	if (this == that) {return True}
 	for (i of range(4)) {
 		if (that == this.Adjacent[i]) {
@@ -5920,7 +5926,7 @@ function IsRoomAdjacent(this: Rooms,that: Rooms) {
 
 var LightVolume: float
 var TempLightVolume: float
-function AddLight(room: Rooms, x: float, y: float, z: float, ltype: int, range: float, r: int, g: int, b: int) : int {
+function AddLight(room: Rooms | null, x: float, y: float, z: float, ltype: int, range: float, r: int, g: int, b: int) : int {
 	let i
 	
 	if (room) {
@@ -6006,7 +6012,7 @@ class LightTemplates {
 	outerconeangle: float
 } 
 
-function AddTempLight(rt: RoomTemplates, x: float, y: float, z: float, ltype: int, range: float, r: int, g: int, b: int) : LightTemplates {
+export function AddTempLight(rt: RoomTemplates, x: float, y: float, z: float, ltype: int, range: float, r: int, g: int, b: int) : LightTemplates {
 	let lt: Lighttemplates = new LightTemplates()
 	lt.roomtemplate = rt
 	lt.x = x
@@ -6023,14 +6029,14 @@ function AddTempLight(rt: RoomTemplates, x: float, y: float, z: float, ltype: in
 
 //-------------------------------------------------------------------------------------------------------
 
-class TempWayPoints {
+export class TempWayPoints {
 	x: float
 	y: float
 	z: float
 	roomtemplate: RoomTemplates
 } 
 
-class WayPoints {
+export class WayPoints {
 	obj: int
 	door: Doors
 	room: Rooms
@@ -6045,7 +6051,7 @@ class WayPoints {
 	parent: WayPoints
 }
 
-function CreateWaypoint(x: float, y: float, z: float, door: Doors, room: Rooms) : WayPoints {
+export function CreateWaypoint(x: float, y: float, z: float, door: Doors, room: Rooms) : WayPoints {
 	
 	let w: WayPoints = new WayPoints()
 	
@@ -6068,7 +6074,7 @@ function CreateWaypoint(x: float, y: float, z: float, door: Doors, room: Rooms) 
 	return w
 }
 
-function InitWayPoints(loadingstart=45) {
+export function InitWayPoints(loadingstart=45) {
 	
 	let d: Doors
 	let w: WayPoints
@@ -6090,8 +6096,8 @@ function InitWayPoints(loadingstart=45) {
 		if (d.obj2 != 0) {HideEntity(d.obj2)}
 		if (d.frameobj != 0) {HideEntity(d.frameobj)}
 		
-		if (d.room == Null) { 
-			ClosestRoom.Rooms = Null
+		if (d.room == null) { 
+			ClosestRoom.Rooms = null
 			dist = 30
 			for (r of Rooms.each) {
 				x = Abs(EntityX(r.obj,True)-EntityX(d.frameobj,True))
@@ -6137,9 +6143,9 @@ function InitWayPoints(loadingstart=45) {
 		
 		let canCreateWayPoint: int = False
 		
-		while (w2 != Null) {
+		while (w2 != null) {
 			
-			if (w.room == w2.room || w.door != Null || w2.door != Null) {
+			if (w.room == w2.room || w.door != null || w2.door != null) {
 				
 				dist = EntityDistance(w.obj, w2.obj)
 				
@@ -6155,7 +6161,7 @@ function InitWayPoints(loadingstart=45) {
 					if (canCreateWayPoint) {
 						if (EntityVisible(w.obj, w2.obj)) {
 							for (i of range(5)) {
-								if (w.connected[i] == Null) {
+								if (w.connected[i] == null) {
 									w.connected[i] = w2.WayPoints 
 									w.dist[i] = dist
 									break
@@ -6163,7 +6169,7 @@ function InitWayPoints(loadingstart=45) {
 							}
 							
 							for (n of range(5)) {
-								if (w2.connected[n] == Null) { 
+								if (w2.connected[n] == null) { 
 									w2.connected[n] = w.WayPoints 
 									w2.dist[n] = dist
 									break
@@ -6248,7 +6254,7 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 	n.PathStatus = 0
 	n.PathLocation = 0
 	for (i of range(20)) {
-		n.Path[i] = Null
+		n.Path[i] = null
 	}
 	
 	let pvt = CreatePivot()
@@ -6281,10 +6287,10 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 	
 	FreeEntity(temp)
 	
-	if (StartPoint == Null) {return 2}
+	if (StartPoint == null) {return 2}
 	StartPoint.state = 1      
 	
-	EndPoint = Null
+	EndPoint = null
 	dist = 400.0
 	for (w of WayPoints.each) {
 		xtemp = EntityX(pvt,True)-EntityX(w.obj,True)
@@ -6309,12 +6315,12 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 			return 1               
 		}
 	}
-	if (EndPoint == Null) {return 2}
+	if (EndPoint == null) {return 2}
 	
 	do {
 		
 		temp = False
-		smallest.WayPoints = Null
+		smallest.WayPoints = null
 		dist = 10000.0
 		for (w of WayPoints.each) {
 			if (w.state == 1) {
@@ -6326,19 +6332,19 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 			}
 		}
 		
-		if (smallest != Null) {
+		if (smallest != null) {
 			
 			w = smallest
 			w.state = 2
 			
 			for (i of range(5)) {
-                if (w.connected[i] != Null) {
+                if (w.connected[i] != null) {
 					if (w.connected[i].state < 2) {
 						
 						if (w.connected[i].state == 1) { //open list
 							gtemp = w.Gcost+w.dist[i]
 							if (n.NPCtype == NPCtypeMTF) {
-								if (w.connected[i].door == Null) {
+								if (w.connected[i].door == null) {
 									gtemp = gtemp + 0.5
 								}
 							}
@@ -6351,7 +6357,7 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 							w.connected[i].Hcost = Abs(EntityX(w.connected[i].obj,True)-EntityX(EndPoint.obj,True))+Abs(EntityZ(w.connected[i].obj,True)-EntityZ(EndPoint.obj,True))
 							gtemp = w.Gcost+w.dist[i]
 							if (n.NPCtype == NPCtypeMTF) {
-								if (w.connected[i].door == Null) {
+								if (w.connected[i].door == null) {
 									gtemp = gtemp + 0.5
 								}
 							}
@@ -6366,14 +6372,14 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 			}
 		} else {
 			if (EndPoint.state > 0) {
-                StartPoint.parent = Null
+                StartPoint.parent = null
                 EndPoint.state = 2
                 break
 			}
 		}
 		
 		if (EndPoint.state > 0) {
-			StartPoint.parent = Null
+			StartPoint.parent = null
 			EndPoint.state = 2
 			break
 		}
@@ -6392,10 +6398,10 @@ function FindPath(n: NPCs, x: float, y: float, z: float) {
 			if (length>20) {
                 twentiethpoint = twentiethpoint.parent
 			}
-		} while (currpoint != Null)
+		} while (currpoint != null)
 		
 		currpoint.WayPoints = EndPoint
-		while (twentiethpoint != Null) {
+		while (twentiethpoint != null) {
 			length=Min(length-1,19)
 			twentiethpoint = twentiethpoint.parent
 			n.Path[length] = twentiethpoint
@@ -6467,8 +6473,8 @@ function CreateScreen(x: float, y: float, z: float, imgpath: string, r: Rooms) :
 }
 
 function UpdateScreens() {
-	if (SelectedScreen != Null) {return}
-	if (SelectedDoor != Null) {return}
+	if (SelectedScreen != null) {return}
+	if (SelectedDoor != null) {return}
 	
 	for (s of Screens.each) {
 		if (s.room == PlayerRoom) {
@@ -6588,7 +6594,7 @@ function CreateSecurityCam(x: float, y: float, z: float, r: Rooms, screen: boole
 	
 	PositionEntity(sc.obj, x, y, z)
 	
-	if (r != Null) {
+	if (r != null) {
 		EntityParent(sc.obj, r.obj)
 	}
 	
@@ -6608,7 +6614,7 @@ function UpdateSecurityCams() {
 
 	for (sc of SecurityCams.each) {
 		let close = False
-		if (sc.room == Null) {
+		if (sc.room == null) {
 			HideEntity(sc.Cam)
 		} else {
 			if (sc.room.dist < 6.0 || PlayerRoom == sc.room) {
@@ -6617,7 +6623,7 @@ function UpdateSecurityCams() {
 				HideEntity(sc.Cam)
 			}
 			
-			if (sc.room != Null) {
+			if (sc.room != null) {
 				if (sc.room.RoomTemplate.Name$ == "room2sl") {
 					sc.CoffinEffect = 0
 				}
@@ -6720,7 +6726,7 @@ function UpdateSecurityCams() {
 						if (BlinkTimer > -5 && EntityInView(sc.ScrObj, Camera)) {
 							if (EntityVisible(Camera,sc.ScrObj)) {
 								
-								if (CoffinCam == Null || Rand(5) == 5 || sc.CoffinEffect != 3) {
+								if (CoffinCam == null || Rand(5) == 5 || sc.CoffinEffect != 3) {
 									HideEntity(Camera)
 									ShowEntity(sc.Cam)
 									Cls()
@@ -6854,8 +6860,8 @@ function UpdateSecurityCams() {
 				}
 			}
 			
-			if (sc != Null) {
-				if (sc.room != Null) {
+			if (sc != null) {
+				if (sc.room != null) {
 					CatchErrors("UpdateSecurityCameras ("+sc.room.RoomTemplate.Name+")")
 				} else {
 					CatchErrors("UpdateSecurityCameras (screen has no room)")
@@ -6888,10 +6894,10 @@ function UpdateMonitorSaving() {
 						DrawHandIcon = True
 						if (MouseHit1) {SelectedMonitor = sc}
 					} else {
-						if (SelectedMonitor = sc) {SelectedMonitor = Null}
+						if (SelectedMonitor = sc) {SelectedMonitor = null}
 					}
 				} else {
-					if (SelectedMonitor = sc) {SelectedMonitor = Null}
+					if (SelectedMonitor = sc) {SelectedMonitor = null}
 				}
 				
 				if (SelectedMonitor == sc) {
@@ -6907,7 +6913,7 @@ function UpdateMonitorSaving() {
 					}
 				}
 			} else {
-				if (SelectedMonitor == sc) {SelectedMonitor = Null}
+				if (SelectedMonitor == sc) {SelectedMonitor = null}
 			}
 		}
 	}
@@ -7975,33 +7981,33 @@ function CreateMap() {
 	
 	for (r of Rooms.each) {
 		r.angle = WrapAngle(r.angle)
-		r.Adjacent[0]=Null
-		r.Adjacent[1]=Null
-		r.Adjacent[2]=Null
-		r.Adjacent[3]=Null
+		r.Adjacent[0]=null
+		r.Adjacent[1]=null
+		r.Adjacent[2]=null
+		r.Adjacent[3]=null
 		for (r2 of Rooms.each) {
 			if (r != r2) {
 				if (r2.z == r.z) {
 					if ((r2.x) == (r.x+8.0)) {
 						r.Adjacent[0]=r2
-						if (r.AdjDoor[0] == Null) {r.AdjDoor[0] = r2.AdjDoor[2]}
+						if (r.AdjDoor[0] == null) {r.AdjDoor[0] = r2.AdjDoor[2]}
 					} else if ((r2.x) == (r.x-8.0)) {
 						r.Adjacent[2]=r2
-						if (r.AdjDoor[2] == Null) {r.AdjDoor[2] = r2.AdjDoor[0]}
+						if (r.AdjDoor[2] == null) {r.AdjDoor[2] = r2.AdjDoor[0]}
 					}
 				} else if (r2.x == r.x) {
 					if ((r2.z) == (r.z-8.0)) {
 						r.Adjacent[1]=r2
-						if (r.AdjDoor[1] == Null) {r.AdjDoor[1] = r2.AdjDoor[3]}
+						if (r.AdjDoor[1] == null) {r.AdjDoor[1] = r2.AdjDoor[3]}
 					} else if ((r2.z) == (r.z+8.0)) {
 						r.Adjacent[3]=r2
-						if (r.AdjDoor[3] == Null) {
+						if (r.AdjDoor[3] == null) {
 							r.AdjDoor[3] = r2.AdjDoor[1]
 						}
 					}
 				}
 			}
-			if ((r.Adjacent[0] != Null) && (r.Adjacent[1] != Null) && (r.Adjacent[2] != Null) && (r.Adjacent[3] != Null)) {break}
+			if ((r.Adjacent[0] != null) && (r.Adjacent[1] != null) && (r.Adjacent[2] != null) && (r.Adjacent[3] != null)) {break}
 		}
 	}
 	
@@ -8145,20 +8151,21 @@ function load_terrain(hmap,yscale: float=0.7,t1: int,t2: int,mask: int) {
 
 import {} from "./Skybox.ts/index.ts"
 import { SetBuffer, TextureBuffer, BackBuffer, ReadPixelFast, Cls, ClsColor, ColorRed, RenderWorld } from "./Helper/graphics.ts"
-import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces, AddMesh, CountVertices, EntityPitch, EntityRoll, EntityX, EntityY, EntityYaw, EntityZ, FlipMesh, FreeBrush, FreeEntity, GetBrushTexture, GetSurfaceBrush, MoveEntity, PositionMesh, RotateEntity, RotateMesh, TFormedX, TFormedY, TFormedZ, VertexX, VertexZ, EntityAlpha, Delete } from "./Helper/Mesh.ts"
+import { CreateMesh, CreateSurface, AddVertex, VertexTexCoords, AddTriangle, GetSurface, CountSurfaces, AddMesh, CountVertices, EntityPitch, EntityRoll, EntityX, EntityY, EntityYaw, EntityZ, FlipMesh, FreeBrush, FreeEntity, GetBrushTexture, GetSurfaceBrush, MoveEntity, PositionMesh, RotateEntity, RotateMesh, TFormedX, TFormedY, TFormedZ, VertexX, VertexZ, EntityAlpha, Delete, EntityOrder, BrushTexture, CopyMesh, CreatePivot, EntityType } from "./Helper/Mesh.ts"
 import { Trim, Left, Instr, Replace, Right, Str, Len, Lower, Mid, Upper } from "./Helper/strings.ts"
 import { TFormVector } from "./Helper/vector.ts"
-import { OldAiPics, AccessCode, PlayerZone, PlayerRoom, DrawHandIcon, MouseUp1, MenuScale, ButtonSFX, FPSfactor, BlinkTimer, Wearing714, WearingHazmat, WearingGasMask, Sanity, RestoreSanity, VomitTimer, user_camera_pitch, GrabbedEntity, MouseHit1, MouseDown1, mouse_y_speed_1, DrawArrowIcon, DropSpeed, EnableRoomLights, Mesh_MinX, Mesh_MinY, Mesh_MinZ, Mesh_MaxX, Mesh_MaxY, Mesh_MaxZ } from "./Main.ts"
-import { NPCtypeMTF, Curr173, NPCtype1499 } from "./NPCs.ts"
+import { OldAiPics, AccessCode, PlayerZone, PlayerRoom, DrawHandIcon, MouseUp1, MenuScale, ButtonSFX, FPSfactor, BlinkTimer, Wearing714, WearingHazmat, WearingGasMask, Sanity, RestoreSanity, VomitTimer, user_camera_pitch, GrabbedEntity, MouseHit1, MouseDown1, mouse_y_speed_1, DrawArrowIcon, DropSpeed, EnableRoomLights, Mesh_MinX, Mesh_MinY, Mesh_MinZ, Mesh_MaxX, Mesh_MaxY, Mesh_MaxZ, Collider, BlurTimer, Brightness, BumpEnabled, CamBaseOBJ, CamOBJ, Camera, CameraSFX, CameraShake, CatchErrors, CreateDecal, CurveAngle, DeathMSG, DebugHUD, Decals, DoorOBJ, ElevatorBeepSFX, ElevatorMoveSFX, GetINISectionLocation, GetINIString2, GetMeshExtents, HIT_ITEM, HIT_MAP, HorrorSFX, IntroSFX, Inverse, LeverBaseOBJ, LeverOBJ, LeverSFX, LightSpriteTex, Max, MilliSecs2, Min, Monitor, MonitorTexture, OpenDoorSFX, ResizeImage2, SelectedEnding, TeleportEntity, TeslaTexture, WrapAngle, angleDist, point_direction } from "./Main.ts"
+import { NPCtypeMTF, Curr173, NPCtype1499, NPCs } from "./NPCs.ts"
 import { LoadAnimMesh_Strict, LoadImage_Strict, LoadSound_Strict } from "./StrictLoads.ts"
 import { GetINIString, GetINIInt } from "./Converter.ts"
-import { SAVEONSCREENS } from "./Difficulty.ts"
-import { Eof, ReadLine, CloseFile, TextureName, ReadFile, ReadFloat, ReadInt, ReadString } from "./Helper/Files.ts"
+import { SAVEONSCREENS, SelectedDifficulty } from "./Difficulty.ts"
+import { Eof, ReadLine, CloseFile, TextureName, ReadFile, ReadFloat, ReadInt, ReadString, ReadByte } from "./Helper/Files.ts"
 import { Rand, Abs, Sin, Sqr } from "./Helper/math.ts"
-import { TextureBlend, FreeTexture, ImageBuffer, ScaleTexture, LockBuffer, TextureWidth, TextureHeight, UnlockBuffer } from "./Helper/textures.ts"
+import { TextureBlend, FreeTexture, ImageBuffer, ScaleTexture, LockBuffer, TextureWidth, TextureHeight, UnlockBuffer, TextureFlags, CreateTexture, TextureBlendMode } from "./Helper/textures.ts"
 import { Items } from "./Items.ts"
 import { CameraZoom, CreateCamera, CameraViewport, CameraRange } from "./Helper/camera.ts"
 import { SetEmitter } from "./lib/DevilParticleSystem.ts"
+import { ClosestButton, CreateDoor, Doors, OBJTunnel, SelectedDoor, UpdateDoorsTimer } from "./Doors.ts"
 
 export var UpdateRoomLightsTimer: float = 0.0
 
@@ -8523,7 +8530,7 @@ function CreateChunkParts(r: Rooms) {
 				HideEntity(chp.obj[j])
 			}
 			chp2 = Before(chp)
-			if (chp2 != Null) {
+			if (chp2 != null) {
 				chp.ID = chp2.ID+1
 			}
 			DebugLog("<<<<<<<<<<<<<<<<")
@@ -8641,7 +8648,7 @@ function UpdateChunks(r: Rooms, ChunkPartAmount: int, spawnNPCs: boolean = True)
 	let e: Events
 	for (e of Events.each) {
 		if (e.room == PlayerRoom) {
-			if (e.room.NPC[0] != Null) {
+			if (e.room.NPC[0] != null) {
 				MaxNPCs = 16
 				break
 			}
@@ -8736,7 +8743,7 @@ function DeleteElevatorObjects() {
 }
 
 function ValidRoom2slCamRoom(r: Rooms) {
-	if (r == Null) {
+	if (r == null) {
 		return False
 	}
 	

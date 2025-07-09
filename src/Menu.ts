@@ -1,9 +1,20 @@
+import { AASetFont, AAText, AATextEnable, AATextEnable_Prev, AATextCam, InitAAFont, AALoadFont, AAStringWidth, AAStringHeight } from "./AAText"
+import { AchvMSGenabled } from "./Achievements"
+import { GetINIInt, PutINIValue, GetINIString } from "./Converter"
+import { SAFE, CUSTOM, SAVEANYWHERE, SAVEONSCREENS, HARD, EASY, NORMAL, difficulties, SelectedDifficulty } from "./Difficulty"
+import { G_viewport_width, G_viewport_height } from "./fullscreen_window_fix"
 import { AppTitle, ChannelPlaying, Chr, Color, DebugLog, EntityFX, Exit, FileType, Float, float, FlushKeys, FreeSound, ImageWidth, Int, int, KeyHit, range, SeedRnd, SetFont } from "./Helper/bbhelper"
-import { CurrentDir, Eof, ReadLine, CloseFile } from "./Helper/Files"
-import { Rect, SetBuffer, BackBuffer, GfxModeWidth, GfxModeHeight, Flip, ClsColor, Cls, TextureBuffer } from "./Helper/graphics"
-import { FreeEntity } from "./Helper/Mesh"
+import { CurrentDir, Eof, ReadLine, CloseFile, ReadByte, ReadInt } from "./Helper/Files"
+import { Rect, SetBuffer, BackBuffer, GfxModeWidth, GfxModeHeight, Flip, ClsColor, Cls, TextureBuffer, BBText } from "./Helper/graphics"
+import { Rand, Abs } from "./Helper/math"
+import { Delete, EntityAlpha, FreeEntity } from "./Helper/Mesh"
 import { LoadSound } from "./Helper/sounds"
 import { Left, Replace, Len, Trim, Mid, Lower, Instr, Right, StringHeight } from "./Helper/strings"
+import { DrawImage, FreeTexture, CreateTexture, TextureBlend } from "./Helper/textures"
+import { KeyName } from "./KeyName"
+import { FSOUND_Stream_Stop } from "./lib/fmod"
+import { MenuWhite, MenuBlack, MenuScale, ArrowIMG, OptionFile, GraphicWidth, GraphicHeight, Font1, FPSfactor, Font2, MouseDown1, MouseHit1, Opt_AntiAlias, ButtonSFX, MainMenuOpen, CompatibleNumber, Vsync, EnableRoomLights, ScreenGamma, TextureDetails, TextureFloat, EnableSFXRelease, EnableSFXRelease_Prev, InvertMouse, MouseSmooth, KEY_UP, KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_SAVE, KEY_BLINK, KEY_SPRINT, KEY_INV, KEY_CROUCH, KEY_CONSOLE, CanOpenConsole, ShowFPS, CurrFrameLimit, Framelimit, Font3, Font4, Font5, ConsoleFont, VersionNumber, Fullscreen, CursorIMG, LauncherWidth, LauncherHeight, RealGraphicWidth, RealGraphicHeight, LauncherIMG, TotalGFXModes, GfxModeWidths, GfxModeHeights, SelectedGFXMode, GFXModes, BlinkMeterIMG, SelectedGFXDriver, BorderlessWindowed, LauncherEnabled, LoadingScreenAmount, LoadingScreenText, SelectedLoadingScreen, LoadingBack, fresize_texture, AspectRatioRatio, fresize_image, fresize_texture2, MouseUp1, BumpEnabled, Create3DIcon, CurrMusicStream, EnableVRam, Graphics3DExt, HUDenabled, Max, MilliSecs2, Min, MouseSens, SaveOptionsINI, ScaledMouseX, ScaledMouseY, ScaleRender } from "./Main"
+import { MusicVolume } from "./MusicPlayer"
 import { LoadImage_Strict, LoadSound_Strict } from "./StrictLoads"
 
 
@@ -77,7 +88,7 @@ function UpdateMainMenu() {
 	let temp: int
 	
 	Color (0,0,0)
-	Rect (0,0,GraphicWidth,GraphicHeight,True)
+	Rect (0,0,GraphicWidth,GraphicHeight,true)
 	
 	ShowPointer()
 	
@@ -97,7 +108,7 @@ function UpdateMainMenu() {
 	MenuBlinkTimer(1)=MenuBlinkTimer(1)-FPSfactor
 	if (MenuBlinkTimer(1) < MenuBlinkDuration(1)) {
 		Color(50, 50, 50)
-		AAText(MenuStrX + Rand(-5, 5), MenuStrY + Rand(-5, 5), MenuStr, True)
+		AAText(MenuStrX + Rand(-5, 5), MenuStrY + Rand(-5, 5), MenuStr, true)
 		if (MenuBlinkTimer(1) < 0) {
 			MenuBlinkTimer(1) = Rand(700, 800)
 			MenuBlinkDuration(1) = Rand(10, 35)
@@ -151,7 +162,7 @@ function UpdateMainMenu() {
 	
 	if (MainMenuTab = 0) {
 		for (i of range(4)) {
-			temp = False
+			temp = false
 			x = 159 * MenuScale
 			y = (286 + 100 * i) * MenuScale
 			
@@ -238,7 +249,7 @@ function UpdateMainMenu() {
 		
 		DrawFrame(x, y, width, height)
 		
-		if (DrawButton(x + width + 20 * MenuScale, y, 580 * MenuScale - width - 20 * MenuScale, height, "BACK", False)) {
+		if (DrawButton(x + width + 20 * MenuScale, y, 580 * MenuScale - width - 20 * MenuScale, height, "BACK", false)) {
 			switch (MainMenuTab) {
 				case 1:
 					PutINIValue(OptionFile, "options", "intro enabled", IntroEnabled)
@@ -257,7 +268,7 @@ function UpdateMainMenu() {
 				case 4: //move back to the "new game" tab:
 					MainMenuTab = 1
 					CurrLoadGamePage = 0
-					MouseHit1 = False
+					MouseHit1 = false
 				default:
 					MainMenuTab = 0
 			}
@@ -275,7 +286,7 @@ function UpdateMainMenu() {
 				
 				Color(255, 255, 255)
 				AASetFont (Font2)
-				AAText(x + width / 2, y + height / 2, "NEW GAME", True, True)
+				AAText(x + width / 2, y + height / 2, "NEW GAME", true, true)
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
@@ -313,12 +324,12 @@ function UpdateMainMenu() {
 					
 					Color (255, 0,0)
 					if (Len(SelectedMap)>15) {
-						AAText(x+150*MenuScale + 100*MenuScale, y+55*MenuScale + 15*MenuScale, Left(SelectedMap,14)+"...", True, True)
+						AAText(x+150*MenuScale + 100*MenuScale, y+55*MenuScale + 15*MenuScale, Left(SelectedMap,14)+"...", true, true)
 					} else {
-						AAText(x+150*MenuScale + 100*MenuScale, y+55*MenuScale + 15*MenuScale, SelectedMap, True, True)
+						AAText(x+150*MenuScale + 100*MenuScale, y+55*MenuScale + 15*MenuScale, SelectedMap, true, true)
 					}
 					
-					if (DrawButton(x+370*MenuScale, y+55*MenuScale, 120*MenuScale, 30*MenuScale, "Deselect", False)) {
+					if (DrawButton(x+370*MenuScale, y+55*MenuScale, 120*MenuScale, 30*MenuScale, "Deselect", false)) {
 						SelectedMap=""
 					}
 				}	
@@ -380,14 +391,14 @@ function UpdateMainMenu() {
 					RowText(SelectedDifficulty.description, x+160*MenuScale, y+160*MenuScale, (410-20)*MenuScale, 200)					
 				}
 				
-				if (DrawButton(x, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Load map", False)) {
+				if (DrawButton(x, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "Load map", false)) {
 					MainMenuTab = 4
 					LoadSavedMaps()
 				}
 				
 				AASetFont (Font2)
 				
-				if (DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", False)) {
+				if (DrawButton(x + 420 * MenuScale, y + height + 20 * MenuScale, 160 * MenuScale, 70 * MenuScale, "START", false)) {
 					if (CurrSave = "") {CurrSave = "untitled"}
 					
 					if (RandomSeed = "") {
@@ -396,7 +407,7 @@ function UpdateMainMenu() {
 					
 					SeedRnd (GenerateSeedNumber(RandomSeed))
 					
-					let SameFound: boolean = False
+					let SameFound: boolean = false
 					
 					for (i of range(1, SaveGameAmount + 1)) {
 						if (SaveGames(i - 1) = CurrSave) {
@@ -411,7 +422,7 @@ function UpdateMainMenu() {
 					LoadEntities()
 					LoadAllSounds()
 					InitNewGame()
-					MainMenuOpen = False
+					MainMenuOpen = false
 					FlushKeys()
 					FlushMouse()
 					
@@ -438,7 +449,7 @@ function UpdateMainMenu() {
 				
 				Color(255, 255, 255)
 				AASetFont (Font2)
-				AAText(x + width / 2, y + height / 2, "LOAD GAME", True, True)
+				AAText(x + width / 2, y + height / 2, "LOAD GAME", true, true)
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
@@ -456,7 +467,7 @@ function UpdateMainMenu() {
 				} else {
 					DrawFrame(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
 					Color(100, 100, 100)
-					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", True, True)
+					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", true, true)
 				}
 				if (CurrLoadGamePage > 0 && SaveMSG == "") {
 					if (DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<")) {
@@ -465,12 +476,12 @@ function UpdateMainMenu() {
 				} else {
 					DrawFrame(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
 					Color(100, 100, 100)
-					AAText(x+25*MenuScale, y + 537.5*MenuScale, "<", True, True)
+					AAText(x+25*MenuScale, y + 537.5*MenuScale, "<", true, true)
 				}
 				
 				DrawFrame(x+50*MenuScale,y+510*MenuScale,width-100*MenuScale,55*MenuScale)
 				
-				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SaveGameAmount)/6.0))),1)),True,True)
+				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SaveGameAmount)/6.0))),1)),true,true)
 				
 				AASetFont (Font1)
 				
@@ -503,19 +514,19 @@ function UpdateMainMenu() {
 								if (SaveGameVersion(i - 1) != CompatibleNumber && SaveGameVersion(i - 1) != CurrentGameVersion) {
 									DrawFrame(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 									Color(255, 0, 0)
-									AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
+									AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", true, true)
 								} else {
-									if (DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False)) {
+									if (DrawButton(x + 280 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", false)) {
 										LoadEntities()
 										LoadAllSounds()
 										LoadGame(SavePath + SaveGames(i - 1) + "/")
 										CurrSave = SaveGames(i - 1)
 										InitLoadGame()
-										MainMenuOpen = False
+										MainMenuOpen = false
 									}
 								}
 								
-								if (DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Delete", False)) {
+								if (DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Delete", false)) {
 									SaveMSG = SaveGames(i - 1)
 									DebugLog (SaveMSG)
 									Exit()
@@ -527,11 +538,11 @@ function UpdateMainMenu() {
 								} else {
 									Color(100, 100, 100)
 								}
-								AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", True, True)
+								AAText(x + 330 * MenuScale, y + 34 * MenuScale, "Load", true, true)
 								
 								DrawFrame(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale)
 								Color(100, 100, 100)
-								AAText(x + 450 * MenuScale, y + 34 * MenuScale, "Delete", True, True)
+								AAText(x + 450 * MenuScale, y + 34 * MenuScale, "Delete", true, true)
 							}
 							
 							y = y + 80 * MenuScale
@@ -546,13 +557,13 @@ function UpdateMainMenu() {
 						DrawFrame(x, y, 420 * MenuScale, 200 * MenuScale)
 						RowText("Are you sure you want to delete this save?", x + 20 * MenuScale, y + 15 * MenuScale, 400 * MenuScale, 200 * MenuScale)
 						//AAText(x + 20 * MenuScale, y + 15 * MenuScale, "Are you sure you want to delete this save?")
-						if (DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", False)) {
+						if (DrawButton(x + 50 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Yes", false)) {
 							DeleteFile(CurrentDir() + SavePath + SaveMSG + "\save.txt")
 							DeleteDir(CurrentDir() + SavePath + SaveMSG)
 							SaveMSG = ""
 							LoadSaveGames()
 						}
-						if (DrawButton(x + 250 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "No", False)) {
+						if (DrawButton(x + 250 * MenuScale, y + 150 * MenuScale, 100 * MenuScale, 30 * MenuScale, "No", false)) {
 							SaveMSG = ""
 						}
 					}
@@ -570,7 +581,7 @@ function UpdateMainMenu() {
 				
 				Color(255, 255, 255)
 				AASetFont (Font2)
-				AAText(x + width / 2, y + height / 2, "OPTIONS", True, True)
+				AAText(x + width / 2, y + height / 2, "OPTIONS", true, true)
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
@@ -580,26 +591,26 @@ function UpdateMainMenu() {
 				
 				Color (0,255,0)
 				if (MainMenuTab = 3) {
-					Rect(x+15*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+15*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,true)
 				} else if (MainMenuTab = 5) {
-					Rect(x+155*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+155*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,true)
 				} else if (MainMenuTab = 6) {
-					Rect(x+295*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+295*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,true)
 				} else if (MainMenuTab = 7) {
-					Rect(x+435*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,True)
+					Rect(x+435*MenuScale,y+10*MenuScale,(width/5)+10*MenuScale,(height/2)+10*MenuScale,true)
 				}
 				
 				Color (255,255,255)
-				if (DrawButton(x+20*MenuScale,y+15*MenuScale,width/5,height/2, "GRAPHICS", False)) {
+				if (DrawButton(x+20*MenuScale,y+15*MenuScale,width/5,height/2, "GRAPHICS", false)) {
 					MainMenuTab = 3
 				}
-				if (DrawButton(x+160*MenuScale,y+15*MenuScale,width/5,height/2, "AUDIO", False)) {
+				if (DrawButton(x+160*MenuScale,y+15*MenuScale,width/5,height/2, "AUDIO", false)) {
 					MainMenuTab = 5
 				}
-				if (DrawButton(x+300*MenuScale,y+15*MenuScale,width/5,height/2, "CONTROLS", False)) {
+				if (DrawButton(x+300*MenuScale,y+15*MenuScale,width/5,height/2, "CONTROLS", false)) {
 					MainMenuTab = 6
 				}
-				if (DrawButton(x+440*MenuScale,y+15*MenuScale,width/5,height/2, "ADVANCED", False)) {
+				if (DrawButton(x+440*MenuScale,y+15*MenuScale,width/5,height/2, "ADVANCED", false)) {
 					MainMenuTab = 7
 				}
 				
@@ -789,7 +800,7 @@ function UpdateMainMenu() {
 						if (MouseOn(x+310*MenuScale,y+MenuScale,20*MenuScale,20*MenuScale)) {
 							DrawOptionsTooltip(tx,ty,tw,th,"usertrackmode")
 						}
-						if (DrawButton(x + 20 * MenuScale, y + 30 * MenuScale, 190 * MenuScale, 25 * MenuScale, "Scan for User Tracks",False)) {
+						if (DrawButton(x + 20 * MenuScale, y + 30 * MenuScale, 190 * MenuScale, 25 * MenuScale, "Scan for User Tracks",false)) {
 							DebugLog ("User Tracks Check Started")
 							
 							UserTrackCheck = 0
@@ -861,32 +872,32 @@ function UpdateMainMenu() {
 					y = y + 10*MenuScale
 					
 					AAText(x + 20 * MenuScale, y + 20 * MenuScale, "Move Forward")
-					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_UP,210)),5)		
+					InputBox(x + 160 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_UP,210)],5)		
 					AAText(x + 20 * MenuScale, y + 40 * MenuScale, "Strafe Left")
-					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_LEFT,210)),3)	
+					InputBox(x + 160 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_LEFT,210)],3)	
 					AAText(x + 20 * MenuScale, y + 60 * MenuScale, "Move Backward")
-					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_DOWN,210)),6)				
+					InputBox(x + 160 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_DOWN,210)],6)				
 					AAText(x + 20 * MenuScale, y + 80 * MenuScale, "Strafe Right")
-					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_RIGHT,210)),4)	
+					InputBox(x + 160 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_RIGHT,210)],4)	
 					AAText(x + 20 * MenuScale, y + 100 * MenuScale, "Quick Save")
-					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SAVE,210)),11)
+					InputBox(x + 160 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SAVE,210)],11)
 					
 					AAText(x + 280 * MenuScale, y + 20 * MenuScale, "Manual Blink")
-					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_BLINK,210)),7)				
+					InputBox(x + 470 * MenuScale, y + 20 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_BLINK,210)],7)				
 					AAText(x + 280 * MenuScale, y + 40 * MenuScale, "Sprint")
-					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_SPRINT,210)),8)
+					InputBox(x + 470 * MenuScale, y + 40 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_SPRINT,210)],8)
 					AAText(x + 280 * MenuScale, y + 60 * MenuScale, "Open/Close Inventory")
-					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_INV,210)),9)
+					InputBox(x + 470 * MenuScale, y + 60 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_INV,210)],9)
 					AAText(x + 280 * MenuScale, y + 80 * MenuScale, "Crouch")
-					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CROUCH,210)),10)	
+					InputBox(x + 470 * MenuScale, y + 80 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CROUCH,210)],10)	
 					AAText(x + 280 * MenuScale, y + 100 * MenuScale, "Open/Close Console")
-					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName(Min(KEY_CONSOLE,210)),12)
+					InputBox(x + 470 * MenuScale, y + 100 * MenuScale,100*MenuScale,20*MenuScale,KeyName[Min(KEY_CONSOLE,210)],12)
 					
 					if (MouseOn(x+20*MenuScale,y,width-40*MenuScale,120*MenuScale)) {
 						DrawOptionsTooltip(tx,ty,tw,th,"controls")
 					}
-					
-					for (i of range(228)) {
+					let key
+					for (let i of range(228)) {
 						if (KeyHit(i)) {
 							key = i
 							Exit()
@@ -1038,7 +1049,7 @@ function UpdateMainMenu() {
 				
 				Color(255, 255, 255)
 				AASetFont (Font2)
-				AAText(x + width / 2, y + height / 2, "LOAD MAP", True, True)
+				AAText(x + width / 2, y + height / 2, "LOAD MAP", true, true)
 				
 				x = 160 * MenuScale
 				y = y + height + 20 * MenuScale
@@ -1052,28 +1063,28 @@ function UpdateMainMenu() {
 				tw = 400*MenuScale
 				th = 150*MenuScale
 				
-				If CurrLoadGamePage < Ceil(Float(SavedMapsAmount)/6.0)-1 Then 
-					If DrawButton(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, ">") Then
+				if (CurrLoadGamePage < Ceil(Float(SavedMapsAmount)/6.0)-1) {
+					if (DrawButton(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, ">")) {
 						CurrLoadGamePage = CurrLoadGamePage+1
-					EndIf
-				Else
+					}
+				} else {
 					DrawFrame(x+530*MenuScale, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
 					Color(100, 100, 100)
-					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", True, True)
-				EndIf
-				If CurrLoadGamePage > 0 Then
-					If DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<") Then
+					AAText(x+555*MenuScale, y + 537.5*MenuScale, ">", true, true)
+				}
+				if (CurrLoadGamePage > 0) {
+					if (DrawButton(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale, "<")) {
 						CurrLoadGamePage = CurrLoadGamePage-1
-					EndIf
-				Else
+					}
+				} else {
 					DrawFrame(x, y + 510*MenuScale, 50*MenuScale, 55*MenuScale)
 					Color(100, 100, 100)
-					AAText(x+25*MenuScale, y + 537.5*MenuScale, "<", True, True)
-				EndIf
+					AAText(x+25*MenuScale, y + 537.5*MenuScale, "<", true, true)
+				}
 				
 				DrawFrame(x+50*MenuScale,y+510*MenuScale,width-100*MenuScale,55*MenuScale)
 				
-				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SavedMapsAmount)/6.0))),1)),True,True)
+				AAText(x+(width/2.0),y+536*MenuScale,"Page "+Int(Max((CurrLoadGamePage+1),1))+"/"+Int(Max((Int(Ceil(Float(SavedMapsAmount)/6.0))),1)),true,true)
 				
 				AASetFont(Font1)
 				
@@ -1095,7 +1106,7 @@ function UpdateMainMenu() {
 							AAText(x + 20 * MenuScale, y + 10 * MenuScale, SavedMaps(i - 1))
 							AAText(x + 20 * MenuScale, y + (10+27) * MenuScale, SavedMapsAuthor(i - 1))
 							
-							if (DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", False)) {
+							if (DrawButton(x + 400 * MenuScale, y + 20 * MenuScale, 100 * MenuScale, 30 * MenuScale, "Load", false)) {
 								SelectedMap=SavedMaps(i - 1)
 								MainMenuTab = 1
 							}
@@ -1110,9 +1121,9 @@ function UpdateMainMenu() {
 					}
 				}
 				//[End Block]
-		End Select
+		}
 		
-	End If
+	}
 	
 	Color(255,255,255)
 	AASetFont(ConsoleFont)
@@ -1120,12 +1131,14 @@ function UpdateMainMenu() {
 	
 	//DrawTiledImageRect(MenuBack, 985 * MenuScale, 860 * MenuScale, 200 * MenuScale, 20 * MenuScale, 1200 * MenuScale, 866 * MenuScale, 300, 20 * MenuScale)
 	
-	If Fullscreen Then DrawImage CursorIMG, ScaledMouseX(),ScaledMouseY()
+	if (Fullscreen) {
+		DrawImage(CursorIMG, ScaledMouseX(),ScaledMouseY())
+	}
 	
-	AASetFont Font1
-End Function
+	AASetFont(Font1)
+}
 
-Function UpdateLauncher()
+function UpdateLauncher() {
 	MenuScale = 1
 	
 	Graphics3DExt(LauncherWidth, LauncherHeight, 0, 2)
@@ -1156,11 +1169,11 @@ Function UpdateLauncher()
 		let samefound: boolean = false
 		for (n of range(TotalGFXModes)) {
 			if (GfxModeWidths(n) == GfxModeWidth(i) && GfxModeHeights(n) == GfxModeHeight(i)) {
-				samefound = True
+				samefound = true
 				Exit
 			}
 		}
-		if (samefound = False) {
+		if (samefound = false) {
 			if (GraphicWidth == GfxModeWidth(i) && GraphicHeight == GfxModeHeight(i)) {
 				SelectedGFXMode = GFXModes
 			}
@@ -1175,154 +1188,160 @@ Function UpdateLauncher()
 	
 	AppTitle ("SCP - Containment Breach Launcher")
 	
-	Repeat
+	while (true) {
 		
 		//Cls
-		Color 0,0,0
-		Rect 0,0,LauncherWidth,LauncherHeight,True
+		Color(0,0,0)
+		Rect(0,0,LauncherWidth,LauncherHeight,true)
 		
 		MouseHit1 = MouseHit(1)
 		
-		Color 255, 255, 255
+		Color(255, 255, 255)
 		DrawImage(LauncherIMG, 0, 0)
 		
-		Text(20, 240 - 65, "Resolution: ")
+		BBText(20, 240 - 65, "Resolution: ")
 		
-		Local x% = 40
-		Local y% = 270 - 65
-		For i = 0 To (GFXModes - 1)
-			Color 0, 0, 0
-			If SelectedGFXMode = i Then Rect(x - 1, y - 1, 100, 20, False)
+		let x: int = 40
+		let y: int = 270 - 65
+		for (i of range(GFXModes)) {
+			Color(0, 0, 0)
+			if (SelectedGFXMode = i) {Rect(x - 1, y - 1, 100, 20, false)}
 			
-			Text(x, y, (GfxModeWidths(i) + "x" + GfxModeHeights(i)))
-			If MouseOn(x - 1, y - 1, 100, 20) Then
-				Color 100, 100, 100
-				Rect(x - 1, y - 1, 100, 20, False)
-				If MouseHit1 Then SelectedGFXMode = i
-			EndIf
+			BBText(x, y, (GfxModeWidths(i) + "x" + GfxModeHeights(i)))
+			if (MouseOn(x - 1, y - 1, 100, 20)) {
+				Color(100, 100, 100)
+				Rect(x - 1, y - 1, 100, 20, false)
+				if (MouseHit1) {SelectedGFXMode = i}
+			}
 			
 			y=y+20
-			If y >= 250 - 65 + (LauncherHeight - 80 - 260) Then y = 270 - 65 : x=x+100
-		Next
+			if (y >= 250 - 65 + (LauncherHeight - 80 - 260)) {
+				y = 270 - 65
+				x=x+100
+			}
+		}
 		
 		//-----------------------------------------------------------------
-		Color 255, 255, 255
+		Color(255, 255, 255)
 		x = 30
 		y = 369
 		Rect(x - 10, y, 340, 95)
-		Text(x - 10, y - 25, "Graphics:")
+		BBText(x - 10, y - 25, "Graphics:")
 		
 		y=y+10
-		For i = 1 To CountGfxDrivers()
-			Color 0, 0, 0
-			If SelectedGFXDriver = i Then Rect(x - 1, y - 1, 290, 20, False)
-			//text(x, y, bbGfxDriverName(i))
-			LimitText(GfxDriverName(i), x, y, 290, False)
-			If MouseOn(x - 1, y - 1, 290, 20) Then
-				Color 100, 100, 100
-				Rect(x - 1, y - 1, 290, 20, False)
-				If MouseHit1 Then SelectedGFXDriver = i
-			EndIf
+		for (i of range(1, CountGfxDrivers() + 1)) {
+			Color(0, 0, 0)
+			if (SelectedGFXDriver = i) {Rect(x - 1, y - 1, 290, 20, false)}
+			LimitText(GfxDriverName(i), x, y, 290, false)
+			if (MouseOn(x - 1, y - 1, 290, 20)) {
+				Color(100, 100, 100)
+				Rect(x - 1, y - 1, 290, 20, false)
+				if (MouseHit1) {
+					SelectedGFXDriver = i
+				}
+			}
 			
 			y=y+20
-		Next
+		}
 		
 		Fullscreen = DrawTick(40 + 430 - 15, 260 - 55 + 5 - 8, Fullscreen, BorderlessWindowed)
 		BorderlessWindowed = DrawTick(40 + 430 - 15, 260 - 55 + 35, BorderlessWindowed)
-		lock% = False
+		lock = false
 
-		If BorderlessWindowed Or (Not Fullscreen) Then lock% = True
-		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock%)
+		if (BorderlessWindowed || (!Fullscreen)) {
+			lock = true
+		}
+		Bit16Mode = DrawTick(40 + 430 - 15, 260 - 55 + 65 + 8, Bit16Mode,lock)
 		LauncherEnabled = DrawTick(40 + 430 - 15, 260 - 55 + 95 + 8, LauncherEnabled)
 
-		If BorderlessWindowed
- 		   Color 255, 0, 0
- 		   Fullscreen = False
-		Else
-  		  Color 255, 255, 255
-		EndIf
+		if (BorderlessWindowed) {
+ 		   Color(255, 0, 0)
+ 		   Fullscreen = false
+		} else {
+  		  Color(255, 255, 255)
+		}
 
-		Text(40 + 430 + 15, 262 - 55 + 5 - 8, "Fullscreen")
-		Color 255, 255, 255
-		Text(40 + 430 + 15, 262 - 55 + 35 - 8, "Borderless",False,False)
-		Text(40 + 430 + 15, 262 - 55 + 35 + 12, "windowed mode",False,False)
+		BBText(40 + 430 + 15, 262 - 55 + 5 - 8, "Fullscreen")
+		Color(255, 255, 255)
+		BBText(40 + 430 + 15, 262 - 55 + 35 - 8, "Borderless",false,false)
+		BBText(40 + 430 + 15, 262 - 55 + 35 + 12, "windowed mode",false,false)
 
-		If BorderlessWindowed Or (Not Fullscreen)
- 		   Color 255, 0, 0
- 		   Bit16Mode = False
-		Else
-		    Color 255, 255, 255
-		EndIf
+		if (BorderlessWindowed || (!Fullscreen)) {
+ 		   Color(255, 0, 0)
+ 		   Bit16Mode = false
+		} else {
+		    Color(255, 255, 255)
+		}
 
-		Text(40 + 430 + 15, 262 - 55 + 65 + 8, "16 Bit")
-		Color 255, 255, 255
-		Text(40 + 430 + 15, 262 - 55 + 95 + 8, "Use launcher")
+		BBText(40 + 430 + 15, 262 - 55 + 65 + 8, "16 Bit")
+		Color(255, 255, 255)
+		BBText(40 + 430 + 15, 262 - 55 + 95 + 8, "Use launcher")
 		
-		If (Not BorderlessWindowed)
-			If Fullscreen
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + "," + (16+(16*(Not Bit16Mode)))))
-			Else
-				Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32"))
-			EndIf
-		Else
-			Text(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+GfxModeWidths(SelectedGFXMode) + "x" + GfxModeHeights(SelectedGFXMode) + ",32")
-			If GfxModeWidths(SelectedGFXMode)<G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(upscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			ElseIf GfxModeWidths(SelectedGFXMode)>G_viewport_width Then
-				Text(40+ 260 + 65, 262 - 55 + 160, "(downscaled to")
-				Text(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
-			EndIf
-		EndIf
+		if (!BorderlessWindowed) {
+			if (Fullscreen) {
+				BBText(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths[SelectedGFXMode] + "x" + GfxModeHeights[SelectedGFXMode] + "," + (16+(16*(!Bit16Mode)))))
+			} else {
+				BBText(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+(GfxModeWidths[SelectedGFXMode] + "x" + GfxModeHeights[SelectedGFXMode] + ",32"))
+			}
+		} else {
+			BBText(40+ 260 + 15, 262 - 55 + 140, "Current Resolution: "+GfxModeWidths[SelectedGFXMode] + "x" + GfxModeHeights[SelectedGFXMode] + ",32")
+			if (GfxModeWidths[SelectedGFXMode]<G_viewport_width) {
+				BBText(40+ 260 + 65, 262 - 55 + 160, "(upscaled to")
+				BBText(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
+		 	} else if (GfxModeWidths[SelectedGFXMode]>G_viewport_width) {
+				BBText(40+ 260 + 65, 262 - 55 + 160, "(downscaled to")
+				BBText(40+ 260 + 65, 262 - 55 + 180, G_viewport_width + "x" + G_viewport_height + ",32)")
+			}
+		}
 		
 		UpdateCheckEnabled = DrawTick(LauncherWidth - 275, LauncherHeight - 50, UpdateCheckEnabled)
-		Color 255,255,255
-		Text(LauncherWidth-250,LauncherHeight-70,"Check for")
-		Text(LauncherWidth-250,LauncherHeight-50,"updates on")
-		Text(LauncherWidth-250,LauncherHeight-30,"launch")
+		Color(255,255,255)
+		BBText(LauncherWidth-250,LauncherHeight-70,"Check for")
+		BBText(LauncherWidth-250,LauncherHeight-50,"updates on")
+		BBText(LauncherWidth-250,LauncherHeight-30,"launch")
 		
-		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", False, False, False) Then
+		if (DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50 - 55, 100, 30, "LAUNCH", false, false, false)) {
 			GraphicWidth = GfxModeWidths(SelectedGFXMode)
 			GraphicHeight = GfxModeHeights(SelectedGFXMode)
 			RealGraphicWidth = GraphicWidth
 			RealGraphicHeight = GraphicHeight
-			Exit
-		EndIf
+			break
+		}
 		
-		If DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50, 100, 30, "EXIT", False, False, False) Then End
-		Flip
-	Forever
+		if (DrawButton(LauncherWidth - 30 - 90, LauncherHeight - 50, 100, 30, "EXIT", false, false, false)) {End()}
+		Flip()
+	}
 	
 	PutINIValue(OptionFile, "options", "width", GfxModeWidths(SelectedGFXMode))
 	PutINIValue(OptionFile, "options", "height", GfxModeHeights(SelectedGFXMode))
-	If Fullscreen Then
+	if (Fullscreen) {
 		PutINIValue(OptionFile, "options", "fullscreen", "true")
-	Else
+	} else {
 		PutINIValue(OptionFile, "options", "fullscreen", "false")
-	EndIf
-	If LauncherEnabled Then
+	}
+	if (LauncherEnabled) {
 		PutINIValue(OptionFile, "launcher", "launcher enabled", "true")
-	Else
+	} else {
 		PutINIValue(OptionFile, "launcher", "launcher enabled", "false")
-	EndIf
-	If BorderlessWindowed Then
+	}
+	if (BorderlessWindowed) {
 		PutINIValue(OptionFile, "options", "borderless windowed", "true")
-	Else
+	} else {
 		PutINIValue(OptionFile, "options", "borderless windowed", "false")
-	EndIf
-	If Bit16Mode Then
+	}
+	if (Bit16Mode) {
 		PutINIValue(OptionFile, "options", "16bit", "true")
-	Else
+	} else {
 		PutINIValue(OptionFile, "options", "16bit", "false")
-	EndIf
+	}
 	PutINIValue(OptionFile, "options", "gfx driver", SelectedGFXDriver)
-	If UpdateCheckEnabled Then
+	if (UpdateCheckEnabled) {
 		PutINIValue(OptionFile, "options", "check for updates", "true")
-	Else
+	} else {
 		PutINIValue(OptionFile, "options", "check for updates", "false")
-	EndIf
+	}
 	
-End Function
+}
 
 
 function DrawTiledImageRect(img: int, srcX: int, srcY: int, srcwidth: float, srcheight: float, x: int, y: int, width: int, height: int) {
@@ -1406,7 +1425,7 @@ function InitLoadingScreens(file: string) {
 	CloseFile (f)
 }
 
-function DrawLoading(percent: int, shortloading: boolean = False) {
+function DrawLoading(percent: int, shortloading: boolean = false) {
 	
 	let x: int
 	let y: int
@@ -1426,7 +1445,7 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 		}
 	}	
 	
-	firstloop = True
+	firstloop = true
 	do { 
 		
 		ClsColor (0,0,0)
@@ -1436,7 +1455,7 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 			UpdateMusic()
 		}
 		
-		if (shortloading = False) {
+		if (shortloading = false) {
 			if (percent > (100.0 / SelectedLoadingScreen.txtamount)*(LoadingScreenText+1)) {
 				LoadingScreenText=LoadingScreenText+1
 			}
@@ -1468,7 +1487,7 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 		x = GraphicWidth / 2 - width / 2
 		y = GraphicHeight / 2 + 30 - 100
 		
-		Rect(x, y, width+4, height, False)
+		Rect(x, y, width+4, height, false)
 		for (i of range(1, Int((width - 2) * (percent / 100.0) / 10) + 1)) {
 			DrawImage(BlinkMeterIMG, x + 3 + 10 * (i - 1), y + 3)
 		}
@@ -1491,7 +1510,7 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 			for (i of range(temp + 1)) {
 				strtemp$ = STRTEMP + Chr(Rand(48,122))
 			}
-			AAText(GraphicWidth / 2, GraphicHeight / 2 + 80, strtemp, True, True)
+			AAText(GraphicWidth / 2, GraphicHeight / 2 + 80, strtemp, true, true)
 			
 			if (percent = 0) {
 				if (Rand(5)=1) {
@@ -1537,33 +1556,33 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 				strtemp$ = Replace(SelectedLoadingScreen.txt[0],Mid(SelectedLoadingScreen.txt[0],Rand(1,Len(strtemp)-1),1),Chr(Rand(130,250)))
 			}		
 			AASetFont (Font1)
-			RowText(strtemp, GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,True)		
+			RowText(strtemp, GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,true)		
 		} else {
 			
 			Color (0,0,0)
 			AASetFont (Font2)
-			AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 + 80 + 1, SelectedLoadingScreen.title, True, True)
+			AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 + 80 + 1, SelectedLoadingScreen.title, true, true)
 			AASetFont (Font1)
-			RowText(SelectedLoadingScreen.txt[LoadingScreenText], GraphicWidth / 2-200+1, GraphicHeight / 2 +120+1,400,300,True)
+			RowText(SelectedLoadingScreen.txt[LoadingScreenText], GraphicWidth / 2-200+1, GraphicHeight / 2 +120+1,400,300,true)
 			
 			Color (255,255,255)
 			AASetFont (Font2)
-			AAText(GraphicWidth / 2, GraphicHeight / 2 +80, SelectedLoadingScreen.title, True, True)
+			AAText(GraphicWidth / 2, GraphicHeight / 2 +80, SelectedLoadingScreen.title, true, true)
 			AASetFont (Font1)
-			RowText(SelectedLoadingScreen.txt[LoadingScreenText], GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,True)
+			RowText(SelectedLoadingScreen.txt[LoadingScreenText], GraphicWidth / 2-200, GraphicHeight / 2 +120,400,300,true)
 			
 		}
 		
 		Color (0,0,0)
-		AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 - 100 + 1, "LOADING - " + percent + " %", True, True)
+		AAText(GraphicWidth / 2 + 1, GraphicHeight / 2 - 100 + 1, "LOADING - " + percent + " %", true, true)
 		Color (255,255,255)
-		AAText(GraphicWidth / 2, GraphicHeight / 2 - 100, "LOADING - " + percent + " %", True, True)
+		AAText(GraphicWidth / 2, GraphicHeight / 2 - 100, "LOADING - " + percent + " %", true, true)
 		
 		if (percent = 100) {
 			if (firstloop && SelectedLoadingScreen.title != "CWM") {
 				PlaySound_Strict (LoadTempSound(("SFX/Horror/Horror8.ogg")))
 			}
-			AAText(GraphicWidth / 2, GraphicHeight - 50, "PRESS ANY KEY TO CONTINUE", True, True)
+			AAText(GraphicWidth / 2, GraphicHeight - 50, "PRESS ANY KEY TO CONTINUE", true, true)
 		} else {
 			FlushKeys()
 			FlushMouse()
@@ -1619,9 +1638,9 @@ function DrawLoading(percent: int, shortloading: boolean = False) {
 		EntityBlend (fresize_image,1)
 		EntityAlpha (fresize_image,1.0)
 		
-		Flip (False)
+		Flip (false)
 		
-		firstloop = False
+		firstloop = false
 		if (percent != 100) {
 			Exit()
 		}
@@ -1652,24 +1671,29 @@ function rInput(aString: string): string {
 	}
 }
 
-Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
+function InputBox(x: int, y: int, width: int, height: int, Txt: string, ID: int = 0) : string {
 	//TextBox(x,y,width,height,Txt$)
 	Color (255, 255, 255)
-	DrawTiledImageRect(MenuWhite, (x Mod 256), (y Mod 256), 512, 512, x, y, width, height)
+	DrawTiledImageRect(MenuWhite, (x % 256), (y % 256), 512, 512, x, y, width, height)
 	//Rect(x, y, width, height)
 	Color (0, 0, 0)
 	
-	Local MouseOnBox% = False
-	If MouseOn(x, y, width, height) Then
+	let MouseOnBox: boolean = false
+	if (MouseOn(x, y, width, height)) {
 		Color(50, 50, 50)
-		MouseOnBox = True
-		If MouseHit1 Then SelectedInputBox = ID : FlushKeys
-	EndIf
+		MouseOnBox = true
+		if (MouseHit1) {
+			SelectedInputBox = ID
+			FlushKeys()
+		}
+	}
 	
 	Rect(x + 2, y + 2, width - 4, height - 4)
 	Color (255, 255, 255)	
 	
-	If (Not MouseOnBox) And MouseHit1 And SelectedInputBox = ID Then SelectedInputBox = 0
+	if ((!MouseOnBox) && MouseHit1 && SelectedInputBox == ID) {
+		SelectedInputBox = 0
+	}
 	
 	if (SelectedInputBox = ID) {
 		Txt = rInput(Txt)
@@ -1678,66 +1702,81 @@ Function InputBox$(x%, y%, width%, height%, Txt$, ID% = 0)
 		}
 	}	
 	
-	AAText(x + width / 2, y + height / 2, Txt, True, True)
+	AAText(x + width / 2, y + height / 2, Txt, true, true)
 	
-	Return Txt
-End Function
+	return Txt
+}
 
 function DrawFrame(x: int, y: int, width: int, height: int, xoffset: int=0, yoffset: int=0) {
 	Color (255, 255, 255)
-	DrawTiledImageRect(MenuWhite, xoffset, (y Mod 256), 512, 512, x, y, width, height)
+	DrawTiledImageRect(MenuWhite, xoffset, (y % 256), 512, 512, x, y, width, height)
 	
-	DrawTiledImageRect(MenuBlack, yoffset, (y Mod 256), 512, 512, x+3*MenuScale, y+3*MenuScale, width-6*MenuScale, height-6*MenuScale)	
+	DrawTiledImageRect(MenuBlack, yoffset, (y % 256), 512, 512, x+3*MenuScale, y+3*MenuScale, width-6*MenuScale, height-6*MenuScale)	
 }
 
-Function DrawButton%(x%, y%, width%, height%, txt$, bigfont% = True, waitForMouseUp%=False, usingAA%=True)
-	Local clicked% = False
+function DrawButton(x: int, y: int, width: int, height: int, txt$, bigfont: boolean = true, waitForMouseUp: boolean=false, usingAA: boolean=true) : int {
+	let clicked: boolean = false
 	
 	DrawFrame (x, y, width, height)
-	If MouseOn(x, y, width, height) Then
+	if (MouseOn(x, y, width, height)) {
 		Color(30, 30, 30)
-		If (MouseHit1 And (Not waitForMouseUp)) Or (MouseUp1 And waitForMouseUp) Then 
-			clicked = True
+		if ((MouseHit1 && (!waitForMouseUp)) || (MouseUp1 && waitForMouseUp)) {
+			clicked = true
 			PlaySound_Strict(ButtonSFX)
-		EndIf
+		}
 		Rect(x + 4, y + 4, width - 8, height - 8)	
-	Else
+	} else {
 		Color(0, 0, 0)
-	EndIf
+	}
 	
 	Color (255, 255, 255)
-	If usingAA Then
-		If bigfont Then AASetFont Font2 Else AASetFont Font1
-		AAText(x + width / 2, y + height / 2, txt, True, True)
-	Else
-		If bigfont Then SetFont Font2 Else SetFont Font1
-		Text(x + width / 2, y + height / 2, txt, True, True)
-	EndIf
+	if (usingAA) {
+		if (bigfont) {
+			AASetFont(Font2)
+		} else {
+			AASetFont(Font1)
+		}
+		AAText(x + width / 2, y + height / 2, txt, true, true)
+	} else {
+		if (bigfont) {
+			SetFont(Font2)
+		} else {
+			SetFont(Font1)
+		}
+		BBText(x + width / 2, y + height / 2, txt, true, true)
+	}
 	
-	Return clicked
-End Function
+	return clicked
+}
 
-Function DrawButton2%(x%, y%, width%, height%, txt$, bigfont% = True)
-	Local clicked% = False
+function DrawButton2(x: int, y: int, width: int, height: int, txt$, bigfont: boolean = true) : int {
+	let clicked: boolean = false
 	
 	DrawFrame (x, y, width, height)
-	Local hit% = MouseHit(1)
-	If MouseOn(x, y, width, height) Then
+	let hit: int = MouseHit(1)
+	if (MouseOn(x, y, width, height)) {
 		Color(30, 30, 30)
-		If hit Then clicked = True : PlaySound_Strict(ButtonSFX)
+		if (hit) {
+			clicked = true
+			PlaySound_Strict(ButtonSFX)
+		}
 		Rect(x + 4, y + 4, width - 8, height - 8)	
-	Else
+	} else {
 		Color(0, 0, 0)
-	EndIf
+	}
 	
 	Color (255, 255, 255)
-	If bigfont Then SetFont Font2 Else SetFont Font1
-	Text(x + width / 2, y + height / 2, txt, True, True)
+	if (bigfont) {
+		SetFont(Font2)
+	} else {
+		SetFont(Font1)
+	}
+	BBText(x + width / 2, y + height / 2, txt, true, true)
 	
-	Return clicked
-End Function
+	return clicked
+}
 
-function DrawTick(x: int, y: int, selected: int, locked: boolean = False): int {
+function DrawTick(x: int, y: int, selected: int, locked: boolean = false): int {
 	let width: int = 20 * MenuScale
 	let height: int = 20 * MenuScale
 	
@@ -1781,7 +1820,7 @@ function SlideBar(x: int, y: int, width: int, value: float): float {
 	}
 	
 	Color (255,255,255)
-	Rect(x, y, width + 14, 20,False)
+	Rect(x, y, width + 14, 20,false)
 	
 	DrawImage(BlinkMeterIMG, x + width * value / 100.0 +3, y+3)
 	
@@ -1809,10 +1848,10 @@ function RowText(A: string, X, Y, W, H, align: int = 0, Leading: float = 1) {
 		let trimmed$ = Trim(temp) //we might ignore a final space 
 		let extra = 0 //we haven't ignored it yet
 		//ignore final space If doing so would make a word fit at End of Line:
-		If (AAStringWidth (b$ + temp$) > W) && (AAStringWidth (b$ + trimmed$) <= W) Then
+		if ((AAStringWidth (b$ + temp$) > W) && (AAStringWidth (b$ + trimmed$) <= W)) {
 			temp = trimmed
 			extra = 1
-		EndIf
+		}
 		
 		if (AAStringWidth (b$ + temp$) > W) { //too big, so Print what will fit
 			if (align) {
@@ -1823,33 +1862,32 @@ function RowText(A: string, X, Y, W, H, align: int = 0, Leading: float = 1) {
 			
 			LinesShown = LinesShown + 1
 			b$=""
-		Else //append it To b$ (which will eventually be printed) And remove it from A$
+		} else { //append it To b$ (which will eventually be printed) And remove it from A$
 			b$ = b$ + temp$
 			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
-		EndIf
+		}
 		
-		If ((LinesShown + 1) * Height) > H Then Exit //the Next Line would be too tall, so leave
-	Wend
+		if (((LinesShown + 1) * Height) > H) {break} //the Next Line would be too tall, so leave
+	}
 	
-	If (b$ <> "") And((LinesShown + 1) <= H) Then
-		If align Then
+	if ((b$ != "") && ((LinesShown + 1) <= H)) {
+		if (align) {
 			AAText(X + W / 2 - (AAStringWidth(b) / 2), LinesShown * Height + Y, b) //Print any remaining Text If it'll fit vertically
-		Else
+		} else {
 			AAText(X, LinesShown * Height + Y, b) //Print any remaining Text If it'll fit vertically
-		EndIf
-	EndIf
-	
-End Function
+		}
+	}
+}
 
-Function RowText2(A$, X, Y, W, H, align% = 0, Leading#=1)
+function RowText2(A$, X, Y, W, H, align: int = 0, Leading: float = 1) {
 	//Display A$ starting at X,Y - no wider than W And no taller than H (all in pixels).
 	//Leading is optional extra vertical spacing in pixels
 	
-	If H<1 Then H=2048
+	if (H<1) {H=2048}
 	
 	let LinesShown = 0
 	let Height = StringHeight(A$) + Leading
-	let b$
+	let b: string
 	
 	while (Len(A) > 0) {
 		let space = Instr(A$, " ")
@@ -1863,38 +1901,40 @@ Function RowText2(A$, X, Y, W, H, align% = 0, Leading#=1)
 			extra = 1
 		}
 		
-		If StringWidth (b$ + temp$) > W Then //too big, so Print what will fit
-			If align Then
-				Text(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b)
-			Else
-				Text(X, LinesShown * Height + Y, b)
-			EndIf
+		if (StringWidth (b$ + temp$) > W) { //too big, so Print what will fit
+			if (align) {
+				BBText(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b)
+			} else {
+				BBText(X, LinesShown * Height + Y, b)
+			}
 			
 			LinesShown = LinesShown + 1
 			b$=""
-		Else //append it To b$ (which will eventually be printed) And remove it from A$
+		} else { //append it To b$ (which will eventually be printed) And remove it from A$
 			b$ = b$ + temp$
 			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
-		EndIf
+		}
 		
-		If ((LinesShown + 1) * Height) > H Then Exit //the Next Line would be too tall, so leave
-	Wend
+		if (((LinesShown + 1) * Height) > H) {break} //the Next Line would be too tall, so leave
+	}
 	
-	If (b$ <> "") And((LinesShown + 1) <= H) Then
-		If align Then
-			Text(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b) //Print any remaining Text If it'll fit vertically
-		Else
-			Text(X, LinesShown * Height + Y, b) //Print any remaining Text If it'll fit vertically
-		EndIf
-	EndIf
+	if ((b != "") && (LinesShown + 1 <= H)) {
+		if (align) {
+			BBText(X + W / 2 - (StringWidth(b) / 2), LinesShown * Height + Y, b) //Print any remaining BBText If it'll fit vertically
+		} else {
+			BBText(X, LinesShown * Height + Y, b) //Print any remaining Text If it'll fit vertically
+		}
+	}
 	
-End Function
+}
 
-Function GetLineAmount(A$, W, H, Leading#=1)
+function GetLineAmount(A$, W, H, Leading: float = 1) {
 	//Display A$ starting at X,Y - no wider than W And no taller than H (all in pixels).
 	//Leading is optional extra vertical spacing in pixels
 	
-	If H<1 Then H=2048
+	if (H<1) {
+		H=2048
+	}
 	
 	let LinesShown = 0
 	let Height = AAStringHeight(A$) + Leading
@@ -1907,10 +1947,10 @@ Function GetLineAmount(A$, W, H, Leading#=1)
 		let trimmed: string = Trim(temp) //we might ignore a final space 
 		let extra = 0 //we haven't ignored it yet
 		//ignore final space If doing so would make a word fit at End of Line:
-		If (AAStringWidth (b$ + temp$) > W) And (AAStringWidth (b$ + trimmed$) <= W) Then
+		if ((AAStringWidth (b$ + temp$) > W) && (AAStringWidth (b$ + trimmed$) <= W)) {
 			temp = trimmed
 			extra = 1
-		EndIf
+		}
 		
 		if (AAStringWidth (b$ + temp$) > W) { //too big, so Print what will fit
 			
@@ -1921,7 +1961,7 @@ Function GetLineAmount(A$, W, H, Leading#=1)
 			A$ = Right(A$, Len(A$) - (Len(temp$) + extra))
 		}
 		
-		If ((LinesShown + 1) * Height) > H Then Exit //the Next Line would be too tall, so leave
+		if (((LinesShown + 1) * Height) > H) {break} //the Next Line would be too tall, so leave
 	}
 	
 	return LinesShown+1
@@ -1969,29 +2009,29 @@ function LimitText(txt: string, x: int, y: int, width: int, usingAA: boolean = t
 	let UnFitting: int
 	let LetterWidth: int
 	if (usingAA) {
-		If txt = "" Or width = 0 Then Return 0
+		if (txt == "" || width == 0) {return 0}
 		TextLength = AAStringWidth(txt)
 		UnFitting = TextLength - width
-		If UnFitting <= 0 Then //mahtuu
+		if (UnFitting <= 0) {
 			AAText(x, y, txt)
-		Else //ei mahdu
+		} else { //ei mahdu
 			LetterWidth = TextLength / Len(txt)
 			
 			AAText(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
-	Else
-		If txt = "" Or width = 0 Then Return 0
+		}
+	} else {
+		if (txt == "" || width == 0) {return 0}
 		TextLength = StringWidth(txt)
 		UnFitting = TextLength - width
-		If UnFitting <= 0 Then //mahtuu
-			Text(x, y, txt)
-		Else //ei mahdu
+		if (UnFitting <= 0) {
+			BBText(x, y, txt)
+		} else { //ei mahdu
 			LetterWidth = TextLength / Len(txt)
 			
-			Text(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
-		End If
-	EndIf
-End Function
+			BBText(x, y, Left(txt, Max(Len(txt) - UnFitting / LetterWidth - 4, 1)) + "...")
+		}
+	}
+}
 
 function DrawTooltip(message: string) {
 	let scale: float = GraphicHeight/768.0
@@ -1999,11 +2039,11 @@ function DrawTooltip(message: string) {
 	let width = (AAStringWidth(message$))+20*MenuScale
 	
 	Color (25,25,25)
-	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,True)
+	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,true)
 	Color (150,150,150)
-	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,False)
+	Rect(ScaledMouseX()+20,ScaledMouseY(),width,19*scale,false)
 	AASetFont (Font1)
-	AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(12*MenuScale), message$, True, True)
+	AAText(ScaledMouseX()+(20*MenuScale)+(width/2),ScaledMouseY()+(12*MenuScale), message$, true, true)
 }
 
 var QuickLoadPercent: int = -1
@@ -2033,7 +2073,7 @@ function DrawQuickLoading() {
 	}	
 }
 
-function DrawOptionsTooltip(x: int,y: int,width: int,height: int,option: string,value: float = 0,ingame: boolean = False) {
+function DrawOptionsTooltip(x: int,y: int,width: int,height: int,option: string,value: float = 0,ingame: boolean = false) {
 	let fx: float = x+6*MenuScale
 	let fy: float = y+6*MenuScale
 	let fw: float = width-12*MenuScale
@@ -2045,7 +2085,7 @@ function DrawOptionsTooltip(x: int,y: int,width: int,height: int,option: string,
 	let R: int = 0
 	let G: int = 0
 	let B: int = 0
-	let usetestimg: int = False
+	let usetestimg: int = false
 	let extraspace: int = 0
 	
 	AASetFont (Font1)
@@ -2112,7 +2152,7 @@ function DrawOptionsTooltip(x: int,y: int,width: int,height: int,option: string,
 			R = 255
 			txt2 = "This option cannot be changed in-game."
 		case "usertrack":
-			txt = "Toggles the ability to play custom tracks over channel 1 of the radio. These tracks are loaded from the " + Chr(34) + "SFX\Radio\UserTracks\" + Chr(34)
+			txt = "Toggles the ability to play custom tracks over channel 1 of the radio. These tracks are loaded from the " + Chr(34) + "SFX/Radio/UserTracks/" + Chr(34)
 			txt = txt + " directory. Press " + Chr(34) + "1" + Chr(34) + " when the radio is selected to change track."
 			R = 255
 			txt2 = "This option cannot be changed in-game."
@@ -2214,14 +2254,14 @@ function DrawMapCreatorTooltip(x: int,y: int,width: int,height: int,mapname: str
 		ReadByte(f)
 		let ramount: int = ReadInt(f)
 		if (ReadInt(f) > 0) {
-			let hasForest: boolean = True
+			let hasForest: boolean = true
 		} else {
-			hasForest = False
+			hasForest = false
 		}
 		if (ReadInt(f) > 0) {
-			let hasMT: boolean = True
+			let hasMT: boolean = true
 		} else {
-			hasMT = False
+			hasMT = false
 		}
 		
 		CloseFile (f)
@@ -2230,8 +2270,8 @@ function DrawMapCreatorTooltip(x: int,y: int,width: int,height: int,mapname: str
 		author = "[Unknown]"
 		descr = "[No description]"
 		ramount = 0
-		hasForest = False
-		hasMT = False
+		hasForest = false
+		hasMT = false
 	}
 	txt[1] = "Made by: " + author
 	txt[2] = "Description: "+descr$
@@ -2272,7 +2312,7 @@ function ChangeMenu_TestIMG(change: string) {
 	ClsColor (0,0,0)
 	Cls()
 	SetBuffer (BackBuffer())
-	Menu_TestIMG = Create3DIcon(200,200,"GFX/map/room3z3_opt.rmesh",0,-0.75,1,0,0,0,menuroomscale,menuroomscale,menuroomscale,True)
+	Menu_TestIMG = Create3DIcon(200,200,"GFX/map/room3z3_opt.rmesh",0,-0.75,1,0,0,0,menuroomscale,menuroomscale,menuroomscale,true)
 	ScaleImage (Menu_TestIMG,MenuScale,MenuScale)
 	MaskImage(Menu_TestIMG,255,0,255)
 	FreeTexture (AmbientLightRoomTex)
@@ -2292,10 +2332,10 @@ function Slider3(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 	}
 	
 	Color (200,200,200)
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True)
-	Rect(x+(width/2)+5,y-8,4,14,True)
-	Rect(x+width+10,y-8,4,14,True)
+	Rect(x,y,width+14,10,true)
+	Rect(x,y-8,4,14,true)
+	Rect(x+(width/2)+5,y-8,4,14,true)
+	Rect(x+width+10,y-8,4,14,true)
 	
 	if (ID = OnSliderID) {
 		if (ScaledMouseX() <= x+8) {
@@ -2306,93 +2346,92 @@ function Slider3(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 			value = 2
 		}
 		Color (0,255,0)
-		Rect(x,y,width+14,10,True)
+		Rect(x,y,width+14,10,true)
 	} else {
 		if ((ScaledMouseX() >= x) && (ScaledMouseX() <= x+width+14) && (ScaledMouseY() >= y-8) && (ScaledMouseY() <= y+10)) {
 			Color (0,200,0)
-			Rect(x,y,width+14,10,False)
+			Rect(x,y,width+14,10,false)
 		}
 	}
 	
-	If value = 0
+	if (value == 0) {
 		DrawImage(BlinkMeterIMG,x,y-8)
-	ElseIf value = 1
+ 	} else if (value == 1) {
 		DrawImage(BlinkMeterIMG,x+(width/2)+3,y-8)
-	Else
+	} else {
 		DrawImage(BlinkMeterIMG,x+width+6,y-8)
-	EndIf
+	}
 	
-	Color 170,170,170
-	If value = 0
-		AAText(x+2,y+10+MenuScale,val1,True)
-	ElseIf value = 1
-		AAText(x+(width/2)+7,y+10+MenuScale,val2,True)
-	Else
-		AAText(x+width+12,y+10+MenuScale,val3,True)
-	EndIf
+	Color(170,170,170)
+	if (value == 0) {
+		AAText(x+2,y+10+MenuScale,val1,true)
+ 	} else if (value == 1) {
+		AAText(x+(width/2)+7,y+10+MenuScale,val2,true)
+	} else {
+		AAText(x+width+12,y+10+MenuScale,val3,true)
+	}
 	
-	Return value
+	return value
 	
-End Function
+}
 
-Function Slider4(x%,y%,width%,value%,ID%,val1$,val2$,val3$,val4$)
+function Slider4(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: string,val3: string,val4: string) {
 	
-	If MouseDown1 Then
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
+	if (MouseDown1) {
+		if ((ScaledMouseX() >= x) && (ScaledMouseX() <= x+width+14) && (ScaledMouseY() >= y-8) && (ScaledMouseY() <= y+10)) {
 			OnSliderID = ID
-		EndIf
-	EndIf
+		}
+	}
 	
-	Color 200,200,200
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) //1
-	Rect(x+(width*(1.0/3.0))+(10.0/3.0),y-8,4,14,True) //2
-	Rect(x+(width*(2.0/3.0))+(20.0/3.0),y-8,4,14,True) //3
-	Rect(x+width+10,y-8,4,14,True) //4
+	Color(200,200,200)
+	Rect(x,y,width+14,10,true)
+	Rect(x,y-8,4,14,true) //1
+	Rect(x+(width*(1.0/3.0))+(10.0/3.0),y-8,4,14,true) //2
+	Rect(x+(width*(2.0/3.0))+(20.0/3.0),y-8,4,14,true) //3
+	Rect(x+width+10,y-8,4,14,true) //4
 	
-	If ID = OnSliderID
-		If (ScaledMouseX() <= x+8)
+	if (ID == OnSliderID) {
+		if (ScaledMouseX() <= x+8) {
 			value = 0
-		ElseIf (ScaledMouseX() >= x+width*(1.0/3.0)) And (ScaledMouseX() <= x+width*(1.0/3.0)+8)
+		} else if ((ScaledMouseX() >= x+width*(1.0/3.0)) && (ScaledMouseX() <= x+width*(1.0/3.0)+8)) {
 			value = 1
-		ElseIf (ScaledMouseX() >= x+width*(2.0/3.0)) And (ScaledMouseX() <= x+width*(2.0/3.0)+8)
+		} else if ((ScaledMouseX() >= x+width*(2.0/3.0)) && (ScaledMouseX() <= x+width*(2.0/3.0)+8)) {
 			value = 2
-		ElseIf (ScaledMouseX() >= x+width)
+		} else if ((ScaledMouseX() >= x+width)) {
 			value = 3
-		EndIf
-		Color 0,255,0
-		Rect(x,y,width+14,10,True)
-	Else
-		If (ScaledMouseX() >= x) And (ScaledMouseX() <= x+width+14) And (ScaledMouseY() >= y-8) And (ScaledMouseY() <= y+10)
-			Color 0,200,0
-			Rect(x,y,width+14,10,False)
-		EndIf
-	EndIf
+		}
+		Color(0,255,0)
+		Rect(x,y,width+14,10,true)
+	} else {
+		if ((ScaledMouseX() >= x) && (ScaledMouseX() <= x+width+14) && (ScaledMouseY() >= y-8) && (ScaledMouseY() <= y+10)) {
+			Color(0,200,0)
+			Rect(x,y,width+14,10,false)
+		}
+	}
 	
-	If value = 0
+	if (value == 0) {
 		DrawImage(BlinkMeterIMG,x,y-8)
-	ElseIf value = 1
+ 	} else if (value == 1) {
 		DrawImage(BlinkMeterIMG,x+width*(1.0/3.0)+2,y-8)
-	ElseIf value = 2
+ 	} else if (value == 2) {
 		DrawImage(BlinkMeterIMG,x+width*(2.0/3.0)+4,y-8)
-	Else
+	} else {
 		DrawImage(BlinkMeterIMG,x+width+6,y-8)
-	EndIf
+	}
 	
-	Color 170,170,170
-	If value = 0
-		AAText(x+2,y+10+MenuScale,val1,True)
-	ElseIf value = 1
-		AAText(x+width*(1.0/3.0)+2+(10.0/3.0),y+10+MenuScale,val2,True)
-	ElseIf value = 2
-		AAText(x+width*(2.0/3.0)+2+((10.0/3.0)*2),y+10+MenuScale,val3,True)
-	Else
-		AAText(x+width+12,y+10+MenuScale,val4,True)
-	EndIf
+	Color(170,170,170)
+	if (value == 0) {
+		AAText(x+2,y+10+MenuScale,val1,true)
+ 	} else if (value == 1) {
+		AAText(x+width*(1.0/3.0)+2+(10.0/3.0),y+10+MenuScale,val2,true)
+ 	} else if (value == 2) {
+		AAText(x+width*(2.0/3.0)+2+((10.0/3.0)*2),y+10+MenuScale,val3,true)
+	} else {
+		AAText(x+width+12,y+10+MenuScale,val4,true)
+	}
 	
-	Return value
-	
-End Function
+	return value
+}
 
 function Slider5(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: string,val3: string,val4: string,val5: string) {
 	
@@ -2403,12 +2442,12 @@ function Slider5(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 	}
 	
 	Color (200,200,200)
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) //1
-	Rect(x+(width/4)+2.5,y-8,4,14,True) //2
-	Rect(x+(width/2)+5,y-8,4,14,True) //3
-	Rect(x+(width*0.75)+7.5,y-8,4,14,True) //4
-	Rect(x+width+10,y-8,4,14,True) //5
+	Rect(x,y,width+14,10,true)
+	Rect(x,y-8,4,14,true) //1
+	Rect(x+(width/4)+2.5,y-8,4,14,true) //2
+	Rect(x+(width/2)+5,y-8,4,14,true) //3
+	Rect(x+(width*0.75)+7.5,y-8,4,14,true) //4
+	Rect(x+width+10,y-8,4,14,true) //5
 	
 	if (ID = OnSliderID) {
 		if (ScaledMouseX() <= x+8) {
@@ -2423,11 +2462,11 @@ function Slider5(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 			value = 4
 		}
 		Color (0,255,0)
-		Rect(x,y,width+14,10,True)
+		Rect(x,y,width+14,10,true)
 	} else {
 		if ((ScaledMouseX() >= x) && (ScaledMouseX() <= x+width+14) && (ScaledMouseY() >= y-8) && (ScaledMouseY() <= y+10)) {
 			Color (0,200,0)
-			Rect(x,y,width+14,10,False)
+			Rect(x,y,width+14,10,false)
 		}
 	}
 	
@@ -2445,15 +2484,15 @@ function Slider5(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 	
 	Color (170,170,170)
 	if (value = 0) {
-		AAText(x+2,y+10+MenuScale,val1,True)
+		AAText(x+2,y+10+MenuScale,val1,true)
  	} else if (value = 1) {
-		AAText(x+(width/4)+4.5,y+10+MenuScale,val2,True)
+		AAText(x+(width/4)+4.5,y+10+MenuScale,val2,true)
  	} else if (value = 2) {
-		AAText(x+(width/2)+7,y+10+MenuScale,val3,True)
+		AAText(x+(width/2)+7,y+10+MenuScale,val3,true)
  	} else if (value = 3) {
-		AAText(x+(width*0.75)+9.5,y+10+MenuScale,val4,True)
+		AAText(x+(width*0.75)+9.5,y+10+MenuScale,val4,true)
 	} else {
-		AAText(x+width+12,y+10+MenuScale,val5,True)
+		AAText(x+width+12,y+10+MenuScale,val5,true)
 	}
 	
 	return value
@@ -2468,14 +2507,14 @@ function Slider7(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 	}
 	
 	Color (200,200,200)
-	Rect(x,y,width+14,10,True)
-	Rect(x,y-8,4,14,True) //1
-	Rect(x+(width*(1.0/6.0))+(10.0/6.0),y-8,4,14,True) //2
-	Rect(x+(width*(2.0/6.0))+(20.0/6.0),y-8,4,14,True) //3
-	Rect(x+(width*(3.0/6.0))+(30.0/6.0),y-8,4,14,True) //4
-	Rect(x+(width*(4.0/6.0))+(40.0/6.0),y-8,4,14,True) //5
-	Rect(x+(width*(5.0/6.0))+(50.0/6.0),y-8,4,14,True) //6
-	Rect(x+width+10,y-8,4,14,True) //7
+	Rect(x,y,width+14,10,true)
+	Rect(x,y-8,4,14,true) //1
+	Rect(x+(width*(1.0/6.0))+(10.0/6.0),y-8,4,14,true) //2
+	Rect(x+(width*(2.0/6.0))+(20.0/6.0),y-8,4,14,true) //3
+	Rect(x+(width*(3.0/6.0))+(30.0/6.0),y-8,4,14,true) //4
+	Rect(x+(width*(4.0/6.0))+(40.0/6.0),y-8,4,14,true) //5
+	Rect(x+(width*(5.0/6.0))+(50.0/6.0),y-8,4,14,true) //6
+	Rect(x+width+10,y-8,4,14,true) //7
 	
 	if (ID = OnSliderID) {
 		if (ScaledMouseX() <= x+8) {
@@ -2494,11 +2533,11 @@ function Slider7(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 			value = 6
 		}
 		Color (0,255,0)
-		Rect(x,y,width+14,10,True)
+		Rect(x,y,width+14,10,true)
 	} else {
 		if ((ScaledMouseX() >= x) && (ScaledMouseX() <= x+width+14) && (ScaledMouseY() >= y-8) && (ScaledMouseY() <= y+10)) {
 			Color (0,200,0)
-			Rect(x,y,width+14,10,False)
+			Rect(x,y,width+14,10,false)
 		}
 	}
 	
@@ -2520,27 +2559,27 @@ function Slider7(x: int,y: int,width: int,value: int,ID: int,val1: string,val2: 
 	
 	Color (170,170,170)
 	if (value = 0) {
-		AAText(x+2,y+10+MenuScale,val1,True)
+		AAText(x+2,y+10+MenuScale,val1,true)
 	} else if (value = 1) {
-		AAText(x+(width*(1.0/6.0))+2+(10.0/6.0),y+10+MenuScale,val2,True)
+		AAText(x+(width*(1.0/6.0))+2+(10.0/6.0),y+10+MenuScale,val2,true)
 	} else if (value = 2) {
-		AAText(x+(width*(2.0/6.0))+2+((10.0/6.0)*2),y+10+MenuScale,val3,True)
+		AAText(x+(width*(2.0/6.0))+2+((10.0/6.0)*2),y+10+MenuScale,val3,true)
 	} else if (value = 3) {
-		AAText(x+(width*(3.0/6.0))+2+((10.0/6.0)*3),y+10+MenuScale,val4,True)
+		AAText(x+(width*(3.0/6.0))+2+((10.0/6.0)*3),y+10+MenuScale,val4,true)
 	} else if (value = 4) {
-		AAText(x+(width*(4.0/6.0))+2+((10.0/6.0)*4),y+10+MenuScale,val5,True)
+		AAText(x+(width*(4.0/6.0))+2+((10.0/6.0)*4),y+10+MenuScale,val5,true)
 	} else if (value = 5) {
-		AAText(x+(width*(5.0/6.0))+2+((10.0/6.0)*5),y+10+MenuScale,val6,True)
+		AAText(x+(width*(5.0/6.0))+2+((10.0/6.0)*5),y+10+MenuScale,val6,true)
 	} else {
-		AAText(x+width+12,y+10+MenuScale,val7,True)
+		AAText(x+width+12,y+10+MenuScale,val7,true)
 	}
 	
 	return value
 }
 
-Global OnBar%
-Global ScrollBarY# = 0.0
-Global ScrollMenuHeight# = 0.0
+export var OnBar: int
+export var ScrollBarY: float = 0.0
+export var ScrollMenuHeight: float = 0.0
 
 function DrawScrollBar(x, y, width, height, barx, bary, barwidth, barheight, bar: float, dir = 0): float {
 	//0 = vaakasuuntainen, 1 = pystysuuntainen
@@ -2570,44 +2609,43 @@ function DrawScrollBar(x, y, width, height, barx, bary, barwidth, barheight, bar
 	
 	if (MouseX()>barx && MouseX()<barx+barwidth) {
 		if (MouseY()>bary && MouseY()<bary+barheight) {
-			OnBar = True
+			OnBar = true
 		} else {
 			if (!MouseDown1) {
-				OnBar = False
+				OnBar = false
 			}
 		}
 	} else {
 		if (!MouseDown1) {
-			OnBar = False
+			OnBar = false
 		}
 	}
 	
-	If MouseDown1
-		If OnBar
-			If dir = 0
-				Return Min(Max(bar + MouseSpeedX / Float(width - barwidth), 0), 1)
-			Else
-				Return Min(Max(bar + MouseSpeedY / Float(height - barheight), 0), 1)
-			EndIf
-		EndIf
-	EndIf
+	if (MouseDown1) {
+		if (OnBar) {
+			if (dir = 0) {
+				return Min(Max(bar + MouseSpeedX / Float(width - barwidth), 0), 1)
+			} else {
+				return Min(Max(bar + MouseSpeedY / Float(height - barheight), 0), 1)
+			}
+		}
+	}
 	
-	Return bar
-	
-End Function
+	return bar
+}
 
-function Button(x,y,width,height,txt: string, disabled: boolean = False): int {
-	let Pushed = False
+function Button(x,y,width,height,txt: string, disabled: boolean = false): int {
+	let Pushed = false
 	
 	Color (50, 50, 50)
-	if (Not disabled) { 
-		if (MouseX() > x And MouseX() < x+width) {
-			if (MouseY() > y And MouseY() < y+height) {
+	if (!disabled) { 
+		if (MouseX() > x && MouseX() < x+width) {
+			if (MouseY() > y && MouseY() < y+height) {
 				if (MouseDown1) {
-					Pushed = True
-					Color 50*0.6, 50*0.6, 50*0.6
+					Pushed = true
+					Color(50*0.6, 50*0.6, 50*0.6)
 				} else {
-					Color Min(50*1.2,255),Min(50*1.2,255),Min(50*1.2,255)
+					Color(Min(50*1.2,255),Min(50*1.2,255),Min(50*1.2,255))
 				}
 			}
 		}
@@ -2616,31 +2654,31 @@ function Button(x,y,width,height,txt: string, disabled: boolean = False): int {
 	if (Pushed) {
 		Rect (x,y,width,height)
 		Color (133,130,125)
-		Rect (x+1*MenuScale,y+1*MenuScale,width-1*MenuScale,height-1*MenuScale,False	)
+		Rect (x+1*MenuScale,y+1*MenuScale,width-1*MenuScale,height-1*MenuScale,false)
 		Color (10,10,10)
-		Rect (x,y,width,height,False)
+		Rect (x,y,width,height,false)
 		Color (250,250,250)
 		Line (x,y+height-1*MenuScale,x+width-1*MenuScale,y+height-1*MenuScale)
 		Line (x+width-1*MenuScale,y,x+width-1*MenuScale,y+height-1*MenuScale)
 	} else {
 		Rect (x,y,width,height)
 		Color (133,130,125)
-		Rect (x,y,width-1*MenuScale,height-1*MenuScale,False	)
+		Rect (x,y,width-1*MenuScale,height-1*MenuScale,false)
 		Color (250,250,250)
-		Rect (x,y,width,height,False)
+		Rect (x,y,width,height,false)
 		Color (10,10,10)
 		Line (x,y+height-1,x+width-1,y+height-1)
-		Line (x+width-1,y,x+width-1,y+height-1		)
+		Line (x+width-1,y,x+width-1,y+height-1)
 	}
 	
 	Color (255,255,255)
-	if (disabled) {Color 70,70,70}
-	Text (x+width/2, y+height/2-1*MenuScale, txt, True, True)
+	if (disabled) {Color(70,70,70)}
+	BBText(x+width/2, y+height/2-1*MenuScale, txt, true, true)
 	
 	Color (0,0,0)
 	
-	if (Pushed And MouseHit1) {
+	if (Pushed && MouseHit1) {
 		PlaySound_Strict (ButtonSFX)
-		return True
+		return true
 	}
 }
