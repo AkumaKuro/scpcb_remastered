@@ -41,17 +41,17 @@ export const FIF_PICT = 33
 export const FIF_RAW = 34
 
 //INI-funktiot:
-Function GetINIString$(file$, section$, parameter$)
-	Local TemporaryString$ = ""
-	Local f = ReadFile(file)
+function GetINIString(file: string, section: string, parameter: string) : string {
+	let TemporaryString: string = ""
+	let f = ReadFile(file)
 	
-	While Not Eof(f)
+	while (!Eof(f)) {
 		If ReadLine(f) = "["+section+"]" Then
 			Repeat 
 				TemporaryString = ReadLine(f)
 				If Trim( Left(TemporaryString, Max(Instr(TemporaryString,"=")-1,0)) ) = parameter Then
 					CloseFile f
-					Return Trim( Right(TemporaryString,Len(TemporaryString)-Instr(TemporaryString,"=")) )
+					return Trim( Right(TemporaryString,Len(TemporaryString)-Instr(TemporaryString,"=")) )
 				EndIf
 			Until Left(TemporaryString,1) = "[" Or Eof(f)
 			CloseFile f
@@ -60,7 +60,7 @@ Function GetINIString$(file$, section$, parameter$)
 	Wend
 	
 	CloseFile f
-End Function
+}
 
 Function GetINIInt%(file$, section$, parameter$)
 	Local strtemp$ = Lower(GetINIString(file$, section$, parameter$))
@@ -74,11 +74,11 @@ Function GetINIInt%(file$, section$, parameter$)
 			Return Int(strtemp)
 	End Select
 	Return 
-End Function
+}
 
 Function GetINIFloat#(file$, section$, parameter$)
 	Return GetINIString(file$, section$, parameter$)
-End Function
+}
 
 Function PutINIValue%(INI_sAppName$, INI_sSection$, INI_sKey$, INI_sValue$)
 	
@@ -158,7 +158,7 @@ Function PutINIValue%(INI_sAppName$, INI_sSection$, INI_sKey$, INI_sValue$)
 	
 	Return True // Success
 	
-End Function
+}
 
 
 Function INI_FileToString$(INI_sFilename$)
@@ -173,7 +173,7 @@ Function INI_FileToString$(INI_sFilename$)
 	End If
 	Return INI_sString
 	
-End Function
+}
 
 Function INI_CreateSection$(INI_lFileHandle%, INI_sNewSection$)
 	
@@ -181,23 +181,23 @@ Function INI_CreateSection$(INI_lFileHandle%, INI_sNewSection$)
 	WriteLine INI_lFileHandle, INI_sNewSection
 	Return INI_sNewSection
 	
-End Function
+}
 
 Function INI_CreateKey%(INI_lFileHandle%, INI_sKey$, INI_sValue$)
 	
 	WriteLine INI_lFileHandle, INI_sKey + "=" + INI_sValue
 	Return True
 	
-End Function
+}
 
 // matemaattiset funktiot:
 Function Min#(a#,b#)
 	If a < b Then Return a Else Return b
-End Function
+}
 
 Function Max#(a#,b#)
 	If a > b Then Return a Else Return b
-End Function
+}
 
 Function StripPath$(file$) 
 	
@@ -214,7 +214,7 @@ Function StripPath$(file$)
 	
 	Return name$ 
 	
-End Function 
+} 
 
 Function StripFilename$(file$)
 	//Local name$=""
@@ -230,22 +230,22 @@ Function StripFilename$(file$)
 	EndIf
 	
 	Return Left(file,lastSlash)
-End Function
+}
 
 Function EntityScaleX#(entity, globl=False) 
 	If globl Then TFormVector 1,0,0,entity,0 Else TFormVector 1,0,0,entity,GetParent(entity) 
 	Return Sqr(TFormedX()*TFormedX()+TFormedY()*TFormedY()+TFormedZ()*TFormedZ()) 
-End Function 
+} 
 
 Function EntityScaleY#(entity, globl=False)
 	If globl Then TFormVector 0,1,0,entity,0 Else TFormVector 0,1,0,entity,GetParent(entity)  
 	Return Sqr(TFormedX()*TFormedX()+TFormedY()*TFormedY()+TFormedZ()*TFormedZ()) 
-End Function 
+} 
 
 Function EntityScaleZ#(entity, globl=False)
 	If globl Then TFormVector 0,0,1,entity,0 Else TFormVector 0,0,1,entity,GetParent(entity)  
 	Return Sqr(TFormedX()*TFormedX()+TFormedY()*TFormedY()+TFormedZ()*TFormedZ()) 
-End Function
+}
 
 Function Piece$(s$,entry,char$=" ")
 	While Instr(s,char+char)
@@ -262,7 +262,7 @@ Function Piece$(s$,entry,char$=" ")
 		a=Left(s,p-1)
 	EndIf
 	Return a
-End Function
+}
 
 Function KeyValue$(entity,key$,defaultvalue$="")
 	properties$=EntityName(entity)
@@ -284,7 +284,7 @@ Function KeyValue$(entity,key$,defaultvalue$="")
 		If Not p Then Return defaultvalue$
 		properties=Right(properties,Len(properties)-p)
 	Forever 
-End Function
+}
 
 Type Converted
 	Field name$
@@ -392,7 +392,7 @@ Function LoadRMesh(file$)
 		WriteByte fw,temp1i
 	Wend
 	
-End Function
+				}
 
 
 Global state%=0
