@@ -7,15 +7,15 @@ SetBuffer(BackBuffer())
 
 alInitialise()
 
-export var CurrMusicWindow: int = 0
-export var MusicVolume: float = 1.0
-export var MusicCHN = 0
-export var CurrMusic = -1
-export var MusicPlaying = -1
-export var Music: string [] = new Array(256)
-export var MusicAmount: int = 0
-export var MusicAmount2: int = 0
-export var IsMusicPlaying: int = 0
+var CurrMusicWindow: int = 0
+var MusicVolume: float = 1.0
+var MusicCHN = 0
+var CurrMusic = -1
+var MusicPlaying = -1
+var Music: string [] = new Array(256)
+var MusicAmount: int = 0
+var MusicAmount2: int = 0
+var IsMusicPlaying: int = 0
 
 Local dirPath$ = "SFX/Radio/UserTracks/"
 If FileType(dirPath)<>2 Then
